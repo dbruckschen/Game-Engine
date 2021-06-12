@@ -74,9 +74,9 @@ void DrawBMP32bbp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos,
 void Flip_Vertices(float *v, int c);
 
 // Converts coordinates from range [-1,1] to range [0, window_width/window_height]
-void NDC_TO_DC(v2 *v, v2 width_height);
+void NDC_TO_DC(float *v, int width_height);
 // Converts coordinates from range [0, window_width/window_height] to range [-1,1]
-void DC_TO_NDC(v2 *v, v2 width_height);
+void DC_TO_NDC(float *v, int width_height);
 
 // Bounding Box Axis Align Collsion Detection
 //--------------------------------------------

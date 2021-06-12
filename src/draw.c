@@ -106,12 +106,7 @@ void DrawRectangle(Framebuffer *framebuffer, u32 x0, u32 y0, u32 width, u32 heig
 // copied from: https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
 void DrawLine(Framebuffer *framebuffer, int x0, int y0, int x1, int y1, u32 color)
 {
-    assert(x0 > 0);
-    assert(x0 < framebuffer->width);
-    assert(y0 > 0);
-    assert(y0 < framebuffer->height);
-    
-    int dx = abs(x1-x0);
+	int dx = abs(x1-x0);
     int dy = -abs(y1-y0);
     int sx = x0<x1 ? 1 : -1;
     int sy = y0<y1 ? 1 : -1;
@@ -264,29 +259,20 @@ void DrawBMP32bbp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos,
 
 // converts device coordinates to normalized device coordinates
 // ([window_width, window_height] to [-1. 1]
-void DC_TO_NDC(v2 *v, v2 width_height)
+void DC_TO_NDC(float *v, int width_height)
 {
     //  2x/w - 1
     // -2y/h + 1 <- check if the sign is needed (bootom up/top down etc...)
     //
 
-    v->x = 2*v->x/width_height.x - 1;
-    v->y = -2*v->y/width_height.y + 1;
-    
+    *v = (*v*2)/width_height - 1;
 }
 
 // converts normalized device coordinates to device coordinates
 // ([-1,1] to [window_width, window_height].
-void NDC_TO_DC(v2 *v, v2 width_height)
+void NDC_TO_DC(float *v, int width_height)
 {
-    v->x = fabs((v->x/2)*width_height.x);
-    v->y = fabs((v->y/2)*width_height.y);
-
-    assert(v->x > 0);
-    assert(v->y > 0);
-    assert(v->x < width_height.x);
-    assert(v->y < width_height.y);
-	
+   *v = fabs((*v/2)*width_height);
 }
 
 bool BBAA(v2 b1, int width1, int height1, v2 b2, int width2, int height2)
