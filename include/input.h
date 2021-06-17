@@ -2,7 +2,7 @@
 #define INPUT_H
 
 #include <windows.h>
-#include "mathlib.h"
+#include "..\include\mathlib.h"
 
 struct Input
 {
@@ -14,6 +14,6 @@ struct Input
     bool right_click;
 };
 
-v2 GetMousePosition(HWND window);
+__declspec(dllexport) v2 GetMousePosition(HWND window);
 
 #endif // INPUT_H

@@ -12,12 +12,10 @@ typedef struct
 	
 } Window;
 
-LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam);
+__declspec(dllexport) LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam);
 
 // Returns false if application should stop running
-bool MessageLoop(void);
-Window OpenWindow(int w, int h, char *title);
-
-
+__declspec(dllexport) bool MessageLoop(void);
+__declspec(dllexport) Window OpenWindow(int w, int h, char *title);
 
 #endif //WINDOW_H

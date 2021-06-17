@@ -17,8 +17,8 @@ typedef signed long long int s64;
 typedef float f32;
 typedef double f64;
 
-int StringLen(char *s);
-bool StringCmp(char *s1, char *s2);
-char *StringConnect(char *s1, char *s2);
+__declspec(dllexport) int StringLen(char *s);
+__declspec(dllexport) bool StringCmp(char *s1, char *s2);
+__declspec(dllexport) char *StringConnect(char *s1, char *s2);
 
 #endif //COMMON_H
