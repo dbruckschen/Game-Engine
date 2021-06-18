@@ -1,5 +1,5 @@
 @echo off
-REM /c -> source code folder
+REM /c -> only compile
 REM *.c -> compile all .c files
 REM /I include header files
 REM /Fo -> obj file folder for tmp used files
