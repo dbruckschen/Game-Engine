@@ -21,7 +21,17 @@ LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 	    PostQuitMessage(0);
 	}break;
-        
+
+	case WM_KEYDOWN:
+	{
+	    
+	}break;
+
+	case WM_KEYUP:
+	{
+
+	}break;
+	
 	default:
 	{
 	    result = DefWindowProc(window, msg, wparam, lparam);
@@ -84,11 +94,32 @@ bool MessageLoop(void)
 	
     if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) 
     {
-        if (msg.message == WM_QUIT) 
-        {
-            running = false;
-        }
-        
+	switch(msg.message)
+	{
+	    case WM_QUIT:
+	    {
+		running = false;
+	    }break;
+
+	    case WM_KEYDOWN:
+	    {
+		if(msg.wParam == VK_UP)
+		{
+		    printf("UP Key is down\n");
+		}
+		
+	    }break;
+
+	    case WM_KEYUP:
+	    {
+		if(msg.wParam == VK_UP)
+		{
+		    printf("UP Key is up\n");
+		}
+		
+	    }break;
+	}
+	
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
