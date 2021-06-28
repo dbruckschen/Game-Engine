@@ -21,16 +21,6 @@ LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 	    PostQuitMessage(0);
 	}break;
-
-	case WM_KEYDOWN:
-	{
-	    
-	}break;
-
-	case WM_KEYUP:
-	{
-
-	}break;
 	
 	default:
 	{
@@ -114,7 +104,7 @@ bool MessageLoop(void)
 	    {
 		if(msg.wParam == VK_UP)
 		{
-		    printf("UP Key is up\n");
+		    printf is up\n");
 		}
 		
 	    }break;
