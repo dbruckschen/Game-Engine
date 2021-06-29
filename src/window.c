@@ -77,12 +77,12 @@ Window OpenWindow(int w, int h, char *title)
     return new_window;
 }
 
-bool MessageLoop(void)
+bool MessageLoop(Input *input)
 {
     bool running = true;
     MSG msg;
 	
-    if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) 
+    if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) 
     {
 	switch(msg.message)
 	{
@@ -91,22 +91,42 @@ bool MessageLoop(void)
 		running = false;
 	    }break;
 
+	    case WM_SYSKEYDOWN:
 	    case WM_KEYDOWN:
 	    {
-		if(msg.wParam == VK_UP)
+		input->keyboard[msg.wParam].down = true;
+		//printf("0x%x pressed\n", msg.wParam);
+		
+		bool was_down_last_frame = (msg.lParam >> 30) & 1;
+		if(!was_down_last_frame)
 		{
-		    printf("UP Key is down\n");
+		    input->keyboard[msg.wParam].down_previous_frame = true;
+		    //printf("0x%x pressed this frame\n", msg.wParam);
+		}
+		else
+		{
+		    input->keyboard[msg.wParam].down_previous_frame = false;
+		}
+
+		if(input->keyboard[msg.wParam].toggle == false && was_down_last_frame == false)
+		{
+		    printf("toggle an\n");
+		    input->keyboard[msg.wParam].toggle = true;
+		}
+		else if(input->keyboard[msg.wParam].toggle == true && was_down_last_frame == false)
+		{
+		    printf("toggle aus\n");
+		    input->keyboard[msg.wParam].toggle = false;
 		}
 		
 	    }break;
 
+	    case WM_SYSKEYUP:
 	    case WM_KEYUP:
 	    {
-		if(msg.wParam == VK_UP)
-		{
-		    printf is up\n");
-		}
-		
+		input->keyboard[msg.wParam].down = false;
+		//printf("0x%x released\n", msg.wParam);
+
 	    }break;
 	}
 	
