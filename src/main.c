@@ -5,6 +5,9 @@
 
 int main(int argc, char **argv)
 {
+    // unreferenced arguments
+    argc, argv;
+    
     printf("Hello World\n");
 
     Window window = OpenWindow(800, 600, "Rudimentary Multimedia Library");
@@ -13,7 +16,6 @@ int main(int argc, char **argv)
     Timing t = {0};
 
     InitTiming(&t);
-    
     
     u8 green = 0;
     while(1)

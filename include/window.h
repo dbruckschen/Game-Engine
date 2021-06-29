@@ -3,6 +3,7 @@
 
 #include <windows.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h> // maybe already in <window.h> ?
 #include "input.h"
 

@@ -2,7 +2,7 @@
 
 v2 V2(int x, int y)
 {
-    v2 tmp = {x, y};
+    v2 tmp = {(float)x, (float)y};
     return tmp;
 }
 
@@ -71,7 +71,7 @@ v2 V2Normalize(v2 vector)
 
 void InitRandomNumberGen()
 {
-    srand (time(NULL));
+    srand((unsigned)time(NULL));
 }
 
 float GenRandomFloat(float Min, float Max)
@@ -84,12 +84,12 @@ int GenRandomInt(int lower, int upper)
     return (rand() % (upper + 1 - lower)) + lower;
 }
 
-float DegToRad(float deg)
+double DegToRad(float deg)
 {
-    return deg * (PI / 180);
+    return (double)(deg * (PI / 180));
 }
 
-float RadToDeg(float rad)
+double RadToDeg(float rad)
 {
-    return rad * (180 / PI);
+    return (double)(rad * (180 / PI));
 }

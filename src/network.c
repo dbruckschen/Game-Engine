@@ -40,7 +40,7 @@ void test_network_client(char *address, char *port)
 	printf("socket creation successful!\n");
     }
 
-    if(connect(sockt, result->ai_addr, result->ai_addrlen) == 0)
+    if(connect(sockt, result->ai_addr, (int)result->ai_addrlen) == 0)
     {
 	printf("connect successful!\n");
     }

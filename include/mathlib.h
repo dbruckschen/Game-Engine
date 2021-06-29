@@ -3,6 +3,7 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <time.h>
 #include "..\include\common.h"
 
 #define V2(value1, value2) V2(value1, value2)
@@ -37,8 +38,8 @@ __declspec(dllexport) float GenRandomFloat(float Min, float Max);
 __declspec(dllexport) int GenRandomInt(int lower, int upper);
 
 // degree and radions convertion
-__declspec(dllexport) float DegToRad(float deg);
-__declspec(dllexport) float RadToDeg(float rad);
+__declspec(dllexport) double DegToRad(float deg);
+__declspec(dllexport) double RadToDeg(float rad);
 
 #endif //MATH_H
 

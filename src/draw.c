@@ -148,7 +148,6 @@ void DrawTriangle(Framebuffer *framebuffer, u32 points[6], u32 color)
 void* ReadFileContent(char* filename)
 {
     HANDLE file_handle = CreateFileA(filename, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-    DWORD error = GetLastError();
 
     // TODO: handle errors
     DWORD file_size;
@@ -244,7 +243,8 @@ void DrawBMP32bbp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos,
 			
             if(src_pixel != color_mask)
             {
-                *dst++ = src_pixel;
+		// TODO: this is wrong fix later hehe
+                //*dst++ = src_pixel;
             }
             else
             {
@@ -272,7 +272,7 @@ void DC_TO_NDC(float *v, int width_height)
 // ([-1,1] to [window_width, window_height].
 void NDC_TO_DC(float *v, int width_height)
 {
-   *v = fabs((*v/2)*width_height);
+    *v = (float)fabs((*v/2)*width_height);
 }
 
 bool BBAA(v2 b1, int width1, int height1, v2 b2, int width2, int height2)
@@ -280,7 +280,7 @@ bool BBAA(v2 b1, int width1, int height1, v2 b2, int width2, int height2)
     if(b1.x < b2.x + width2 &&
        b1.x + width1 > b2.x &&
        b1.y < b2.y + height2 &&
-       b1.y + width1 > b2.y)
+       b1.y + height1 > b2.y)
     {
         return true;
     }
@@ -292,9 +292,9 @@ bool BBAA(v2 b1, int width1, int height1, v2 b2, int width2, int height2)
 
 void DrawCircleWithLines(Framebuffer *framebuffer, int x0, int y0, u32 color)
 {
-    v2 center = {x0, y0};
-    int x = 0;
-    int y = 0;
+    v2 center = {(float)x0, (float)y0};
+    double x = 0;
+    double y = 0;
     int radius = 100;
     float angle = 1;
     
@@ -307,6 +307,6 @@ void DrawCircleWithLines(Framebuffer *framebuffer, int x0, int y0, u32 color)
         x += center.x;
         y += center.y;
 	   	
-        DrawLine(framebuffer, center.x, center.y, x, y, color);
+        DrawLine(framebuffer, (int)center.x, (int)center.y, (int)x, (int)y, color);
     }
 }

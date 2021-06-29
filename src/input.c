@@ -8,8 +8,9 @@ v2 GetMousePosition(HWND window)
     GetCursorPos(&mouse_pos);
 
     ScreenToClient(window, &mouse_pos);
-    position.x = mouse_pos.x;
-    position.y = mouse_pos.y;
+    position.x = (float)mouse_pos.x;
+    position.y = (float)mouse_pos.y;
 
     return position;
 }
+
