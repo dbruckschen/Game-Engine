@@ -24,7 +24,7 @@ void EndTiming(Timing *t)
     t->end_time = end_time.QuadPart;
 
     t->elapsed_time = t->end_time - t->start_time;
-
+    t->elapsed_time *= t->perf_freq;
 }
 
 void ElapsedTiming(Timing *t)

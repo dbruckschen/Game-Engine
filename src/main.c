@@ -1,18 +1,25 @@
 #include <stdio.h>
 #include "window.h"
 #include "draw.h"
+#include "timing.h"
 
 int main(int argc, char **argv)
 {
     printf("Hello World\n");
+
     Window window = OpenWindow(800, 600, "Rudimentary Multimedia Library");
     Framebuffer fbuff = CreateFramebuffer(window.wnd_h);
     Input input = {0};
+    Timing t = {0};
 
-    u8 green = 0;
+    InitTiming(&t);
     
+    
+    u8 green = 0;
     while(1)
     {
+	StartTiming(&t);
+	
 	if(!MessageLoop(&input))
 	{
 	    break;
@@ -32,6 +39,9 @@ int main(int argc, char **argv)
 	printf("%d\n", input.keyboard[a_key].toggle);
 
 	OutputFramebuffer(window.wnd_h, fbuff);
+
+	EndTiming(&t);
+	printf("time: %f\n", t.elapsed_time); 
     }
 
     return 0;

@@ -2,7 +2,7 @@
 
 // returns the length of a string s
 // \n is part of the length
-int StringLen(char *s)
+long long StringLen(char *s)
 {
     /*    int len = 0;
     while(*s++ != '\0')

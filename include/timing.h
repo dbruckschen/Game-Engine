@@ -13,10 +13,10 @@ typedef struct
 
 } Timing;
 
-void InitTiming(Timing *t);
-void StartTiming(Timing *t);
-void EndTiming(Timing *t);
-void ElapsedTiming(Timing *t);
+__declspec(dllexport) void InitTiming(Timing *t);
+__declspec(dllexport) void StartTiming(Timing *t);
+__declspec(dllexport) void EndTiming(Timing *t);
+__declspec(dllexport) void ElapsedTiming(Timing *t);
 
 
 #endif
