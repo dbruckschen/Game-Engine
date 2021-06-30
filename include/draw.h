@@ -67,8 +67,8 @@ __declspec(dllexport) void DrawTriangle(Framebuffer *framebuffer, u32 points[6],
 
 __declspec(dllexport) void *ReadFileContent(char *filename);
 __declspec(dllexport) Bitmap LoadBitmapFile(char *filename); // Bitmap return value is a empty Bitmap if loading didn't work
-__declspec(dllexport) void DrawBMP24bbp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask);
-__declspec(dllexport) void DrawBMP32bbp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask);
+__declspec(dllexport) void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask);
+__declspec(dllexport) void DrawBMP32bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask);
 
 // Utility Functions
 __declspec(dllexport) void Flip_Vertices(float *v, int c);

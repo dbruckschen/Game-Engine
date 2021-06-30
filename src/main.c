@@ -13,15 +13,29 @@ int main(int argc, char **argv)
     Window window = OpenWindow(800, 600, "Rudimentary Multimedia Library");
     Framebuffer fbuff = CreateFramebuffer(window.wnd_h);
     Input input = {0};
-    Timing t = {0};
+    Timer t = {0};
+    Bitmap coin1 = LoadBitmapFile("coin1.bmp");
 
-    InitTiming(&t);
-    
+    // TODO: FLIP BITMAP
+    u32 *dst = (u32*)coin1.pixel;
+    u32 *src = ((u32*)coin1.pixel) + (coin1.width * coin1.height)-coin1.width;
+
+    for(u32 y = 0; y < coin1.height; y++)
+    {
+	for(u32 x = 0; x < coin1.width; x++)
+	{
+	    *dst++ = *src++;
+	}
+	src = src - coin1.width;
+    }
+        
+    InitTimer(&t);
     u8 green = 0;
+    
     while(1)
     {
-	StartTiming(&t);
-	
+	StartTimer(&t);
+		
 	if(!MessageLoop(&input))
 	{
 	    break;
@@ -40,9 +54,10 @@ int main(int argc, char **argv)
 	
 	printf("%d\n", input.keyboard[a_key].toggle);
 
+	DrawBMP24bpp(&fbuff, coin1, 50, 50, RGB_Color(255, 255, 255));
 	OutputFramebuffer(window.wnd_h, fbuff);
 
-	EndTiming(&t);
+	EndTimer(&t);
 	printf("time: %f\n", t.elapsed_time); 
     }
 

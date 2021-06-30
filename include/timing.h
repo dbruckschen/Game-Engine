@@ -11,10 +11,10 @@ typedef struct
     double end_time;
     double elapsed_time;
 
-} Timing;
+} Timer;
 
-__declspec(dllexport) void InitTiming(Timing *t);
-__declspec(dllexport) void StartTiming(Timing *t);
-__declspec(dllexport) void EndTiming(Timing *t);
+__declspec(dllexport) void InitTimer(Timer *t);
+__declspec(dllexport) void StartTimer(Timer *t);
+__declspec(dllexport) void EndTimer(Timer *t);
 
 #endif

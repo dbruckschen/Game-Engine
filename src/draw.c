@@ -55,7 +55,7 @@ u32 RGB_Color(u8 red, u8 green, u8 blue)
 {
     // alpha red green bluen
     u32 color = 0;
-    return color = (red << 16) + (green << 8) + blue;
+    return color = ((unsigned int)0 << 24) + (red << 16) + (green << 8) + blue;
 }
 
 void FillScreen(Framebuffer *framebuffer, u32 color)
@@ -191,7 +191,7 @@ Bitmap LoadBitmapFile(char *filename)
     return bitmap;
 }
 
-void DrawBMP24bbp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask)
+void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask)
 {
     u32 *dst = (u32 *)framebuffer->buffer;
     u8 *src = bitmap.pixel;
@@ -218,12 +218,12 @@ void DrawBMP24bbp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos,
             }
             src += bitmap.bbp;
         }
-		
+
         dst += (framebuffer->width - bitmap.width);
     }
 }
 
-void DrawBMP32bbp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask)
+void DrawBMP32bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask)
 {
     u8 *dst = (u8 *)framebuffer->buffer;
     u8 *src = bitmap.pixel;
