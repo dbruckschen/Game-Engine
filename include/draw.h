@@ -39,6 +39,18 @@ typedef struct
 
 typedef struct
 {
+    Bitmap *frames;
+
+    int animation_frame_count;
+    int current_frame;
+    
+    double timer_next_frame;
+    double current_timer;
+
+} Sprite;
+
+typedef struct
+{
     float verts[6];
     v2 world_coords;
     u32 color;
