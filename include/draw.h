@@ -31,7 +31,7 @@ typedef struct
 typedef struct 
 {
     u8 *pixel;
-    u32 bbp;
+    u32 bpp;
     u32 width;
     u32 height;
 	
@@ -67,12 +67,16 @@ __declspec(dllexport) void DrawTriangle(Framebuffer *framebuffer, u32 points[6],
 
 __declspec(dllexport) void *ReadFileContent(char *filename);
 __declspec(dllexport) Bitmap LoadBitmapFile(char *filename); // Bitmap return value is a empty Bitmap if loading didn't work
+__declspec(dllexport) void FlipBMP24bpp(Bitmap *bitmap);
 __declspec(dllexport) void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask);
 __declspec(dllexport) void DrawBMP32bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask);
 
 // Utility Functions
-__declspec(dllexport) void Flip_Vertices(float *v, int c);
+//----------------------------
 
+// Assumes that the Bitmap and the Array have the same size
+__declspec(dllexport) void CopyBitmapIntoArray(Bitmap *from, u8 *to);
+    
 // Converts coordinates from range [-1,1] to range [0, window_width/window_height]
 __declspec(dllexport) void NDC_TO_DC(float *v, int width_height);
 // Converts coordinates from range [0, window_width/window_height] to range [-1,1]

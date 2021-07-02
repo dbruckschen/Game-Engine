@@ -184,11 +184,35 @@ Bitmap LoadBitmapFile(char *filename)
         bitmap.pixel = file_ptr + bmp_file_header->bfOffBits;
         bitmap.width = bmp_info_header->biWidth;
         bitmap.height = bmp_info_header->biHeight;
-        bitmap.bbp = bmp_info_header->biBitCount / 8;
-
-        // TODO: flip the bitmap horizontally
+        bitmap.bpp = bmp_info_header->biBitCount / 8;
+	
+	FlipBMP24bpp(&bitmap);
     }	
     return bitmap;
+}
+
+void FlipBMP24bpp(Bitmap *bitmap)
+{
+    size_t bitmap_size = bitmap->height * bitmap->width * bitmap->bpp;
+    u8 *copy_bmp_pixel = malloc(bitmap_size);
+    CopyBitmapIntoArray(bitmap, copy_bmp_pixel);
+    
+    u8 *dst = bitmap->pixel;
+    u8 *src = copy_bmp_pixel + (bitmap->width * (bitmap->height-1)) * bitmap->bpp;
+	
+    for(u32 y = 0; y < bitmap->height; y++)
+    {
+	for(u32 x = 0; x < bitmap->width; x++)
+	{
+	    *dst++ = *src++;
+	    *dst++ = *src++;
+	    *dst++ = *src++;
+	}
+	src -= 2 * bitmap->width * bitmap->bpp;
+    }
+
+    free(copy_bmp_pixel);
+    copy_bmp_pixel = 0;
 }
 
 void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask)
@@ -216,7 +240,7 @@ void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos,
             {
                 dst++;
             }
-            src += bitmap.bbp;
+            src += bitmap.bpp;
         }
 
         dst += (framebuffer->width - bitmap.width);
@@ -250,10 +274,18 @@ void DrawBMP32bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos,
             {
                 dst++;
             }
-            src += bitmap.bbp;
+            src += bitmap.bpp;
         }
 		
         dst += (framebuffer->width - bitmap.width);
+    }
+}
+
+void CopyBitmapIntoArray(Bitmap *from, u8 *to)
+{
+    for(u32 i = 0; i < from->height * from->width * from->bpp; i++)
+    {
+	*(to+i) = *(from->pixel+i);
     }
 }
 
