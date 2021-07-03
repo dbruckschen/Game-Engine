@@ -74,7 +74,7 @@ __declspec(dllexport) void DrawRectangle(Framebuffer *framebuffer, u32 x0, u32 y
 __declspec(dllexport) void DrawLine(Framebuffer* framebuffer, int x0, int y0, int x1, int y1, u32 color);
 __declspec(dllexport) void DrawTriangle(Framebuffer *framebuffer, u32 points[6], u32 color);
 
-// Bitmap Loading and Drawing
+// Bitmap anad Sprite Loading and Drawing
 //----------------------------
 
 __declspec(dllexport) void *ReadFileContent(char *filename);
@@ -82,7 +82,7 @@ __declspec(dllexport) Bitmap LoadBitmapFile(char *filename); // Bitmap return va
 __declspec(dllexport) void FlipBMP24bpp(Bitmap *bitmap);
 __declspec(dllexport) void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask);
 __declspec(dllexport) void DrawBMP32bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask);
-
+__declspec(dllexport) void InitSprite(Sprite *s, int frame_count, Bitmap *frames, double frame_time);
 // Utility Functions
 //----------------------------
 

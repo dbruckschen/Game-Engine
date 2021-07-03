@@ -289,6 +289,21 @@ void CopyBitmapIntoArray(Bitmap *from, u8 *to)
     }
 }
 
+void InitSprite(Sprite *s, int frame_count, Bitmap *frames, double frame_time)
+{
+    s->animation_frame_count = frame_count;
+    s->frames = malloc(frame_count * sizeof(Bitmap));
+
+    for(int i = 0; i < frame_count; i++)
+    {
+	*(s->frames+i) = *(frames+i);
+    }
+        
+    s->current_frame = 0;
+    s->timer_next_frame = frame_time;
+    s->current_timer = 0.0f;
+}
+
 // converts device coordinates to normalized device coordinates
 // ([window_width, window_height] to [-1. 1]
 void DC_TO_NDC(float *v, int width_height)
