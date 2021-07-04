@@ -14,7 +14,7 @@ int main(int argc, char **argv)
     
     printf("Hello World\n");
 
-    Window window = OpenWindow(800, 600, "Rudimentary Multimedia Library");
+    Window window = OpenWindow(900, 600, "Rudimentary Multimedia Library");
     Framebuffer fbuff = CreateFramebuffer(window.wnd_h);
     Input input = {0};
     Timer t = {0};
@@ -26,9 +26,13 @@ int main(int argc, char **argv)
     coin_animation[3] = LoadBitmapFile("coin4.bmp");
     coin_animation[4] = LoadBitmapFile("coin5.bmp");
     coin_animation[5] = LoadBitmapFile("coin6.bmp");
+
+    Bitmap font = LoadBitmapFile("boxy.bmp");
     
     Sprite coin = {0};
-    InitSprite(&coin, COIN_ANIM_COUNT, coin_animation, COIN_ANIM_FRAME_TIME);
+    Sprite coin2 = {0};
+    InitSprite(&coin, COIN_ANIM_COUNT, coin_animation, 0, COIN_ANIM_FRAME_TIME);
+    InitSprite(&coin2, COIN_ANIM_COUNT, coin_animation, 2, COIN_ANIM_FRAME_TIME);
     
     InitTimer(&t);
     double timer = 0;
@@ -37,7 +41,6 @@ int main(int argc, char **argv)
     while(1)
     {
 	StartTimer(&t);
-
 	FillScreen(&fbuff, RGB_Color(0, 0, 0));
 	
 	if(!MessageLoop(&input))
@@ -57,25 +60,22 @@ int main(int argc, char **argv)
 	    if(green > 0)
 		FillScreen(&fbuff, RGB(0, green--,  0));
 	}
-  
-	if(coin.current_timer >= .2f)
-	{
-	    coin.current_frame++;
-	    coin.current_timer = 0.0;
-	}
-	   
-	if(coin.current_frame == coin.animation_frame_count)
-	    coin.current_frame = 0;
+
+	UpdateSpriteAnimation(&coin);
+	UpdateSpriteAnimation(&coin2);
 	
 	DrawBMP24bpp(&fbuff, coin.frames[coin.current_frame], 100, 100, RGB_Color(255, 0, 255));
-	
+	DrawBMP24bpp(&fbuff, coin2.frames[coin2.current_frame], 200, 200, RGB_Color(255, 0, 255));
+	DrawBMP24bpp(&fbuff, font, 0, 0, RGB_Color(255, 0, 255));
 	OutputFramebuffer(window.wnd_h, fbuff);
 
 	EndTimer(&t);
 	timer += t.elapsed_time;
-	coin.current_timer += t.elapsed_time;
 	
-	//printf("%f ms/frame\n", t.elapsed_time);
+	coin.current_timer += t.elapsed_time;
+	coin2.current_timer += t.elapsed_time;
+	
+	printf("%f ms/frame\n", t.elapsed_time);
     }
 
     return 0;

@@ -82,7 +82,8 @@ __declspec(dllexport) Bitmap LoadBitmapFile(char *filename); // Bitmap return va
 __declspec(dllexport) void FlipBMP24bpp(Bitmap *bitmap);
 __declspec(dllexport) void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask);
 __declspec(dllexport) void DrawBMP32bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask);
-__declspec(dllexport) void InitSprite(Sprite *s, int frame_count, Bitmap *frames, double frame_time);
+__declspec(dllexport) void InitSprite(Sprite *s, int frame_count, Bitmap *frames, int start_frame, double frame_time);
+__declspec(dllexport) void UpdateSpriteAnimation(Sprite *s);
 // Utility Functions
 //----------------------------
 

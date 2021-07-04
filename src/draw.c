@@ -289,7 +289,7 @@ void CopyBitmapIntoArray(Bitmap *from, u8 *to)
     }
 }
 
-void InitSprite(Sprite *s, int frame_count, Bitmap *frames, double frame_time)
+void InitSprite(Sprite *s, int frame_count, Bitmap *frames, int start_frame, double frame_time)
 {
     s->animation_frame_count = frame_count;
     s->frames = malloc(frame_count * sizeof(Bitmap));
@@ -299,9 +299,21 @@ void InitSprite(Sprite *s, int frame_count, Bitmap *frames, double frame_time)
 	*(s->frames+i) = *(frames+i);
     }
         
-    s->current_frame = 0;
+    s->current_frame = start_frame;
     s->timer_next_frame = frame_time;
     s->current_timer = 0.0f;
+}
+
+void UpdateSpriteAnimation(Sprite *s)
+{
+    if(s->current_timer >= s->timer_next_frame)
+    {
+	s->current_frame++;
+	s->current_timer = 0.0;
+	    
+	if(s->current_frame == s->animation_frame_count)
+	    s->current_frame = 0;
+    }
 }
 
 // converts device coordinates to normalized device coordinates
