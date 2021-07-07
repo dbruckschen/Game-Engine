@@ -1,4 +1,7 @@
 *.exe
 *.bmp
+*.lib
+*.exp
+*.pdb
 
 obj
