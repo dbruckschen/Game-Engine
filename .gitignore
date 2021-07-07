@@ -1,6 +1,6 @@
 *.exe
 *.bmp
-*.lib
+*.obj
 *.exp
 *.pdb
 
