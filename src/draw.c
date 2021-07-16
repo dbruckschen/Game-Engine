@@ -247,6 +247,40 @@ void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos,
     }
 }
 
+void DrawBMPSub24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask,
+		     u32 rec_x, u32 rec_y, u32 rec_w, u32 rec_h)
+{
+    u32 *dst = (u32 *)framebuffer->buffer;
+    u8 *src = bitmap.pixel;
+	
+    dst += x_pos + (y_pos * framebuffer->width);
+    src += rec_x + (rec_y * bitmap.width);
+	
+    for(u32 y = 0; y < rec_h; ++y) 
+    {
+        for(u32 x = 0; x < rec_w; ++x)
+        {
+            u8 r = *src;
+            u8 g = *(src + 1);
+            u8 b = *(src + 2);
+			
+            u32 src_pixel = (0 << 24) + (b << 16) + (g << 8) + r;
+			
+            if(src_pixel != color_mask)
+            {
+                *dst++ = src_pixel;
+            }
+            else
+            {
+                dst++;
+            }
+            src += bitmap.bpp;
+        }
+
+        dst += (framebuffer->width - bitmap.width);
+    }   
+}
+
 void DrawBMP32bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask)
 {
     u8 *dst = (u8 *)framebuffer->buffer;

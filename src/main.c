@@ -27,7 +27,7 @@ int main(int argc, char **argv)
     coin_animation[4] = LoadBitmapFile("coin5.bmp");
     coin_animation[5] = LoadBitmapFile("coin6.bmp");
 
-    Bitmap font = LoadBitmapFile("boxy.bmp");
+    Bitmap glyphs = LoadBitmapFile("font.bmp");
     
     Sprite coin = {0};
     Sprite coin2 = {0};
@@ -41,7 +41,7 @@ int main(int argc, char **argv)
     while(1)
     {
 	StartTimer(&t);
-	FillScreen(&fbuff, RGB_Color(0, 0, 0));
+	FillScreen(&fbuff, RGB_Color(50, 0, 0));
 	
 	if(!MessageLoop(&input))
 	{
@@ -66,7 +66,8 @@ int main(int argc, char **argv)
 	
 	DrawBMP24bpp(&fbuff, coin.frames[coin.current_frame], 100, 100, RGB_Color(255, 0, 255));
 	DrawBMP24bpp(&fbuff, coin2.frames[coin2.current_frame], 200, 200, RGB_Color(255, 0, 255));
-	DrawBMP24bpp(&fbuff, font, 0, 0, RGB_Color(255, 0, 255));
+	DrawBMP24bpp(&fbuff, glyphs, 0, 0, RGB_Color(0, 0, 0));
+	DrawBMPSub24bpp(&fbuff, glyphs, 0, 0, RGB_Color(0, 0, 0), 18, 128, 16, 16);
 	OutputFramebuffer(window.wnd_h, fbuff);
 
 	EndTimer(&t);
