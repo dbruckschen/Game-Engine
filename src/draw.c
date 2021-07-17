@@ -247,14 +247,16 @@ void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos,
     }
 }
 
-void DrawBMPSub24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask,
+void DrawBMPSubRec24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask,
 		     u32 rec_x, u32 rec_y, u32 rec_w, u32 rec_h)
 {
     u32 *dst = (u32 *)framebuffer->buffer;
     u8 *src = bitmap.pixel;
 	
     dst += x_pos + (y_pos * framebuffer->width);
-    src += rec_x + (rec_y * bitmap.width);
+
+    // move to the row
+    src += rec_x * rec_y * bitmap.bpp;
 	
     for(u32 y = 0; y < rec_h; ++y) 
     {
@@ -276,8 +278,8 @@ void DrawBMPSub24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_p
             }
             src += bitmap.bpp;
         }
-
-        dst += (framebuffer->width - bitmap.width);
+	src += (bitmap.width - rec_w) * bitmap.bpp;
+        dst += (framebuffer->width - rec_w);
     }   
 }
 

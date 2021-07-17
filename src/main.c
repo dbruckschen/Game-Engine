@@ -66,8 +66,8 @@ int main(int argc, char **argv)
 	
 	DrawBMP24bpp(&fbuff, coin.frames[coin.current_frame], 100, 100, RGB_Color(255, 0, 255));
 	DrawBMP24bpp(&fbuff, coin2.frames[coin2.current_frame], 200, 200, RGB_Color(255, 0, 255));
-	DrawBMP24bpp(&fbuff, glyphs, 0, 0, RGB_Color(0, 0, 0));
-	DrawBMPSub24bpp(&fbuff, glyphs, 0, 0, RGB_Color(0, 0, 0), 18, 128, 16, 16);
+	//DrawBMP24bpp(&fbuff, glyphs, 0, 0, RGB_Color(0, 0, 0));
+	DrawBMPSubRec24bpp(&fbuff, glyphs, 0, 0, RGB_Color(0, 0, 0), 128, 9, 7, 9);
 	OutputFramebuffer(window.wnd_h, fbuff);
 
 	EndTimer(&t);
