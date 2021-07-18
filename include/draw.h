@@ -39,6 +39,15 @@ typedef struct
 
 typedef struct
 {
+    u32 x;
+    u32 y;
+    u32 w;
+    u32 h;
+
+} Rec;
+
+typedef struct
+{
     Bitmap *frames;
 
     int animation_frame_count;
@@ -82,10 +91,12 @@ __declspec(dllexport) Bitmap LoadBitmapFile(char *filename); // Bitmap return va
 __declspec(dllexport) void FlipBMP24bpp(Bitmap *bitmap);
 __declspec(dllexport) void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask);
 __declspec(dllexport) void DrawBMPSubRec24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask, u32 rec_x, u32 rec_y, u32 rec_w, u32 rec_h);
-
 __declspec(dllexport) void DrawBMP32bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask);
 __declspec(dllexport) void InitSprite(Sprite *s, int frame_count, Bitmap *frames, int start_frame, double frame_time);
 __declspec(dllexport) void UpdateSpriteAnimation(Sprite *s);
+__declspec(dllexport) Rec GetRec(u32 x, u32 y, u32 w, u32 h);
+__declspec(dllexport) void GetSubRecPixel(Bitmap b, u32 x, u32 y, u32 w, u32 h, u8 *sub_rec);
+
 // Utility Functions
 //----------------------------
 

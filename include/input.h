@@ -49,6 +49,7 @@ enum key_code
     arrow_up,
     arrow_right,
     arrow_down,
+    tilde_key = 0xC0,
 };
 
 typedef struct

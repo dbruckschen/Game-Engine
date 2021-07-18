@@ -201,7 +201,7 @@ void FlipBMP24bpp(Bitmap *bitmap)
     u8 *src = copy_bmp_pixel + (bitmap->width * (bitmap->height-1)) * bitmap->bpp;
 	
     for(u32 y = 0; y < bitmap->height; y++)
-    {
+x    {
 	for(u32 x = 0; x < bitmap->width; x++)
 	{
 	    *dst++ = *src++;
@@ -322,6 +322,28 @@ void CopyBitmapIntoArray(Bitmap *from, u8 *to)
     for(u32 i = 0; i < from->height * from->width * from->bpp; i++)
     {
 	*(to+i) = *(from->pixel+i);
+    }
+}
+
+Rec GetRec(u32 x, u32 y, u32 w, u32 h)
+{
+    Rec r = {x, y, w, h};
+    return r;
+}	       
+
+void GetSubRecPixel(Bitmap b, u32 rec_x, u32 rec_y, u32 rec_w, u32 rec_h, u8 *sub_rec)
+{
+    u8 *p = b.pixel + (rec_x * rec_y * b.bpp);
+
+    for(u32 y = 0; y < rec_h; y++)
+    {
+	for(u32 x = 0; x < rec_w; x++)
+	{
+	    *sub_rec++ = *p++;
+	    *sub_rec++ = *p++;
+	    *sub_rec++ = *p++;
+	}
+	p += (b.width - rec_w) * b.bpp;
     }
 }
 
