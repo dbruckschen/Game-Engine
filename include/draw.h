@@ -90,6 +90,7 @@ __declspec(dllexport) void *ReadFileContent(char *filename);
 __declspec(dllexport) Bitmap LoadBitmapFile(char *filename); // Bitmap return value is a empty Bitmap if loading didn't work
 __declspec(dllexport) void FlipBMP24bpp(Bitmap *bitmap);
 __declspec(dllexport) void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask);
+__declspec(dllexport) void DrawArray24bpp(Framebuffer *framebuffer, u8 *pixel, u32 x_pos, u32 y_pos, u32 w, u32 h, u32 color_mask);
 __declspec(dllexport) void DrawBMPSubRec24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask, u32 rec_x, u32 rec_y, u32 rec_w, u32 rec_h);
 __declspec(dllexport) void DrawBMP32bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask);
 __declspec(dllexport) void InitSprite(Sprite *s, int frame_count, Bitmap *frames, int start_frame, double frame_time);
