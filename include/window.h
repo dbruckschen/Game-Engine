@@ -14,12 +14,6 @@ typedef struct
 	
 } Window;
 
-typedef struct
-{
-    int i;
-
-} Keyboard;
-
 __declspec(dllexport) LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam);
 
 // Returns false if application should stop running.

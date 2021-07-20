@@ -201,7 +201,7 @@ void FlipBMP24bpp(Bitmap *bitmap)
     u8 *src = copy_bmp_pixel + (bitmap->width * (bitmap->height-1)) * bitmap->bpp;
 	
     for(u32 y = 0; y < bitmap->height; y++)
-x    {
+    {
 	for(u32 x = 0; x < bitmap->width; x++)
 	{
 	    *dst++ = *src++;
@@ -247,6 +247,39 @@ void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos,
     }
 }
 
+void DrawArray24bpp(Framebuffer *framebuffer, u8 *pixel, u32 x_pos, u32 y_pos, u32 w, u32 h, u32 color_mask)
+{
+    u32 *dst = (u32 *)framebuffer->buffer;
+    u8 *src = pixel;
+    u32 bytes_per_pixel = 3;
+	
+    dst += x_pos + (y_pos * framebuffer->width);
+	
+    for(u32 y = 0; y < h; ++y) 
+    {
+        for(u32 x = 0; x < w; ++x)
+        {
+            u8 r = *src;
+            u8 g = *(src + 1);
+            u8 b = *(src + 2);
+			
+            u32 src_pixel = (0 << 24) + (b << 16) + (g << 8) + r;
+			
+            if(src_pixel != color_mask)
+            {
+                *dst++ = src_pixel;
+            }
+            else
+            {
+                dst++;
+            }
+            src += bytes_per_pixel;
+        }
+
+        dst += (framebuffer->width - w);
+    }
+}
+
 void DrawBMPSubRec24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask,
 		     u32 rec_x, u32 rec_y, u32 rec_w, u32 rec_h)
 {
@@ -254,8 +287,6 @@ void DrawBMPSubRec24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 
     u8 *src = bitmap.pixel;
 	
     dst += x_pos + (y_pos * framebuffer->width);
-
-    // move to the row
     src += rec_x * rec_y * bitmap.bpp;
 	
     for(u32 y = 0; y < rec_h; ++y) 
