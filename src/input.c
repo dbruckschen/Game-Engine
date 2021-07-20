@@ -13,4 +13,3 @@ v2 GetMousePosition(HWND window)
 
     return position;
 }
-

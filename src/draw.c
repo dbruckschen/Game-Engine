@@ -201,7 +201,7 @@ void FlipBMP24bpp(Bitmap *bitmap)
     u8 *src = copy_bmp_pixel + (bitmap->width * (bitmap->height-1)) * bitmap->bpp;
 	
     for(u32 y = 0; y < bitmap->height; y++)
-    {
+x    {
 	for(u32 x = 0; x < bitmap->width; x++)
 	{
 	    *dst++ = *src++;
@@ -247,6 +247,42 @@ void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos,
     }
 }
 
+void DrawBMPSubRec24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask,
+		     u32 rec_x, u32 rec_y, u32 rec_w, u32 rec_h)
+{
+    u32 *dst = (u32 *)framebuffer->buffer;
+    u8 *src = bitmap.pixel;
+	
+    dst += x_pos + (y_pos * framebuffer->width);
+
+    // move to the row
+    src += rec_x * rec_y * bitmap.bpp;
+	
+    for(u32 y = 0; y < rec_h; ++y) 
+    {
+        for(u32 x = 0; x < rec_w; ++x)
+        {
+            u8 r = *src;
+            u8 g = *(src + 1);
+            u8 b = *(src + 2);
+			
+            u32 src_pixel = (0 << 24) + (b << 16) + (g << 8) + r;
+			
+            if(src_pixel != color_mask)
+            {
+                *dst++ = src_pixel;
+            }
+            else
+            {
+                dst++;
+            }
+            src += bitmap.bpp;
+        }
+	src += (bitmap.width - rec_w) * bitmap.bpp;
+        dst += (framebuffer->width - rec_w);
+    }   
+}
+
 void DrawBMP32bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask)
 {
     u8 *dst = (u8 *)framebuffer->buffer;
@@ -286,6 +322,28 @@ void CopyBitmapIntoArray(Bitmap *from, u8 *to)
     for(u32 i = 0; i < from->height * from->width * from->bpp; i++)
     {
 	*(to+i) = *(from->pixel+i);
+    }
+}
+
+Rec GetRec(u32 x, u32 y, u32 w, u32 h)
+{
+    Rec r = {x, y, w, h};
+    return r;
+}	       
+
+void GetSubRecPixel(Bitmap b, u32 rec_x, u32 rec_y, u32 rec_w, u32 rec_h, u8 *sub_rec)
+{
+    u8 *p = b.pixel + (rec_x * rec_y * b.bpp);
+
+    for(u32 y = 0; y < rec_h; y++)
+    {
+	for(u32 x = 0; x < rec_w; x++)
+	{
+	    *sub_rec++ = *p++;
+	    *sub_rec++ = *p++;
+	    *sub_rec++ = *p++;
+	}
+	p += (b.width - rec_w) * b.bpp;
     }
 }
 
