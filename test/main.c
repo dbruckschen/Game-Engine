@@ -28,33 +28,69 @@ int main(int argc, char **argv)
     Input input = {0};
     Timer t = {0};
 
+    // Example of loading different bitmaps for an animation
     Bitmap coin_animation[COIN_ANIM_COUNT];
-    coin_animation[0] = LoadBitmapFile("coin1.bmp");
-    coin_animation[1] = LoadBitmapFile("coin2.bmp");
-    coin_animation[2] = LoadBitmapFile("coin3.bmp");
-    coin_animation[3] = LoadBitmapFile("coin4.bmp");
-    coin_animation[4] = LoadBitmapFile("coin5.bmp");
-    coin_animation[5] = LoadBitmapFile("coin6.bmp");
-
-    Bitmap glyphs_bmp = LoadBitmapFile("font.bmp");
-    Glyphs glyphs[256] = {0};
-    glyphs[row_2_key].glyph = '2';
-    glyphs[row_2_key].x = 128;
-    glyphs[row_2_key].y = 9;
-    glyphs[row_2_key].w = 7;
-    glyphs[row_2_key].h = 9;
-    glyphs[row_2_key].pixel = malloc(glyphs[row_2_key].w * glyphs[row_2_key].h * glyphs_bmp.bpp);
-    GetSubRecPixel(glyphs_bmp, glyphs[row_2_key].x,
-		   glyphs[row_2_key].y,
-		   glyphs[row_2_key].w,
-		   glyphs[row_2_key].h,
-		   glyphs[row_2_key].pixel);
-
+    coin_animation[0] = LoadBitmapFile("../assets/coin1.bmp");
+    coin_animation[1] = LoadBitmapFile("../assets/coin2.bmp");
+    coin_animation[2] = LoadBitmapFile("../assets/coin3.bmp");
+    coin_animation[3] = LoadBitmapFile("../assets/coin4.bmp");
+    coin_animation[4] = LoadBitmapFile("../assets/coin5.bmp");
+    coin_animation[5] = LoadBitmapFile("../assets/coin6.bmp");
+    // Creating Sprites. The same bitmap can be used for mutliple sprites.
     Sprite coin = {0};
     Sprite coin2 = {0};
     InitSprite(&coin, COIN_ANIM_COUNT, coin_animation, 0, COIN_ANIM_FRAME_TIME);
     InitSprite(&coin2, COIN_ANIM_COUNT, coin_animation, 2, COIN_ANIM_FRAME_TIME);
-    
+
+    // Creating an Array of sub rectangles which represent glyphs.
+    Bitmap glyphs_bmp = LoadBitmapFile("../assets/font.bmp");
+    Glyphs glyphs[256] = {0};
+/*    
+    u32 x = 0;
+    u32 y = 0;
+    for(char i = 32; i <= '~'; i++)
+    {
+	glyphs[i].glyph = i;
+	glyphs[i].x = x;
+	glyphs[i].y = y;
+	glyphs[i].w = glyphs_bmp.width/18;
+	glyphs[i].h = glyphs_bmp.height/7;
+	glyphs[i].pixel = (u8*)malloc(glyphs[i].w * glyphs[i].h * glyphs_bmp.bpp);
+	//GetSubRecPixel(glyphs_bmp, glyphs[i].x, glyphs[i].y, glyphs[i].w, glyphs[i].h, glyphs[i].pixel);
+
+	
+	x += glyphs[i].w;
+
+	if(x > 128)
+	{
+	    x = 0;
+	    y += glyphs[i].h;
+	if(y > 64)
+	{
+	    y = 0;
+	}
+    }
+*/  
+    glyphs['3'].glyph = '3';
+    glyphs['3'].x = 128;
+    glyphs['3'].y = 9;
+    glyphs['3'].w = 7;
+    glyphs['3'].h = 9;
+    glyphs['3'].pixel = malloc(glyphs['3'].w * glyphs['3'].h * glyphs_bmp.bpp);
+    GetSubRecPixel(glyphs_bmp,
+    glyphs['3'].x,
+    glyphs['3'].y,
+    glyphs['3'].w,
+    glyphs['3'].h,
+    glyphs['3'].pixel);
+
+/*    GetSubRecPixel(glyphs_bmp, glyphs['3'].x,
+		   glyphs['3'].y,
+		   glyphs['3'].w,
+		   glyphs['3'].h,
+		   glyphs['3'].pixel);
+*/
+
     InitTimer(&t);
     double timer = 0;
     u8 green = 0;
@@ -94,7 +130,7 @@ int main(int argc, char **argv)
 	DrawBMP24bpp(&fbuff, coin2.frames[coin2.current_frame], 200, 200, RGB_Color(255, 0, 255));
 	//DrawBMP24bpp(&fbuff, glyphs, 0, 0, RGB_Color(0, 0, 0));
 	//DrawBMPSubRec24bpp(&fbuff, glyphs_bmp, 0, 0, RGB_Color(0, 0, 0), 128, 9, 7, 9);
-	DrawArray24bpp(&fbuff, glyphs[row_2_key].pixel, 100, 100, glyphs[row_2_key].w, glyphs[row_2_key].h, RGB_Color(0, 0, 0));
+	DrawArray24bpp(&fbuff, glyphs['3'].pixel, 100, 100, glyphs['3'].w, glyphs['3'].h, RGB_Color(0, 0, 0));
 
 	OutputFramebuffer(window.wnd_h, fbuff);
 

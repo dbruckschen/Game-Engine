@@ -29,7 +29,8 @@ Framebuffer CreateFramebuffer(HWND window)
     framebuffer.info.bmiHeader.biClrImportant = 0;
 	
     framebuffer.bitmap_hdc = CreateCompatibleDC(0);
-    framebuffer.bitmap_handle = CreateDIBSection(framebuffer.bitmap_hdc, &framebuffer.info, DIB_RGB_COLORS, &framebuffer.buffer, 0, 0);
+    framebuffer.bitmap_handle = CreateDIBSection(framebuffer.bitmap_hdc, &framebuffer.info,
+						 DIB_RGB_COLORS, &framebuffer.buffer, 0, 0);
 	
     if (framebuffer.bitmap_handle)
     {
@@ -106,7 +107,7 @@ void DrawRectangle(Framebuffer *framebuffer, u32 x0, u32 y0, u32 width, u32 heig
 // copied from: https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
 void DrawLine(Framebuffer *framebuffer, int x0, int y0, int x1, int y1, u32 color)
 {
-	int dx = abs(x1-x0);
+    int dx = abs(x1-x0);
     int dy = -abs(y1-y0);
     int sx = x0<x1 ? 1 : -1;
     int sy = y0<y1 ? 1 : -1;
@@ -364,7 +365,8 @@ Rec GetRec(u32 x, u32 y, u32 w, u32 h)
 
 void GetSubRecPixel(Bitmap b, u32 rec_x, u32 rec_y, u32 rec_w, u32 rec_h, u8 *sub_rec)
 {
-    u8 *p = b.pixel + (rec_x * rec_y * b.bpp);
+    u8 *p = b.pixel;
+    p += (rec_x * rec_y * b.bpp);
 
     for(u32 y = 0; y < rec_h; y++)
     {
