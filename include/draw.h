@@ -75,7 +75,6 @@ __declspec(dllexport) void OutputFramebuffer(HWND window, Framebuffer fb);
 
 // Drawing Functions	
 //-------------------
-
 __declspec(dllexport) u32 RGB_Color(u8 red, u8 green, u8 blue);
 __declspec(dllexport) void FillScreen(Framebuffer *framebuffer, u32 color);
 __declspec(dllexport) void DrawPixel(Framebuffer *framebuffer, u32 x, u32 y, u32 color);
@@ -103,7 +102,7 @@ __declspec(dllexport) void GetSubRecPixel(Bitmap b, u32 x, u32 y, u32 w, u32 h, 
 
 // Assumes that the Bitmap and the Array have the same size
 __declspec(dllexport) void CopyBitmapIntoArray(Bitmap *from, u8 *to);
-    
+__declspec(dllexport) void LerpRGB(u32 x, u32 y, u32 s);
 // Converts coordinates from range [-1,1] to range [0, window_width/window_height]
 __declspec(dllexport) void NDC_TO_DC(float *v, int width_height);
 // Converts coordinates from range [0, window_width/window_height] to range [-1,1]
