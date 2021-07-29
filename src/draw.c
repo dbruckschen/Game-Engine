@@ -34,7 +34,6 @@ Framebuffer CreateFramebuffer(HWND window)
 	
     if (framebuffer.bitmap_handle)
     {
-        // TODO: error handling
         SelectObject(framebuffer.bitmap_hdc, framebuffer.bitmap_handle);
     }
     return framebuffer;
@@ -54,7 +53,6 @@ void OutputFramebuffer(HWND window, Framebuffer fb)
 
 u32 RGB_Color(u8 red, u8 green, u8 blue)
 {
-    // alpha red green bluen
     u32 color = 0;
     return color = ((unsigned int)0 << 24) + (red << 16) + (green << 8) + blue;
 }
@@ -72,27 +70,14 @@ void DrawPixel(Framebuffer* framebuffer, u32 x, u32 y, u32 color)
 {
     u32* pixel = (u32*)framebuffer->buffer;
 
-    if (x < framebuffer->width && y < framebuffer->height)
-    {
-        pixel += x + (y * framebuffer->width);
-        *pixel = color;
-    }	
+    pixel += x + (y * framebuffer->width);
+    *pixel = color;
 }
 
 void DrawRectangle(Framebuffer *framebuffer, u32 x0, u32 y0, u32 width, u32 height, u32 color)
 {
     u32 *pixel = (u32 *)framebuffer->buffer;
     pixel += x0 + (y0 * framebuffer->width);
-
-    if (width > framebuffer->width)
-    {
-        width = framebuffer->width;
-    }
-		
-    if (height > framebuffer->height)
-    {
-        height = framebuffer->height;
-    }
 	
     for(u32 y = 0; y < height; ++y)
     {
@@ -150,7 +135,6 @@ void* ReadFileContent(char* filename)
 {
     HANDLE file_handle = CreateFileA(filename, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 
-    // TODO: handle errors
     DWORD file_size;
     file_size = GetFileSize(file_handle, 0);
 
@@ -158,11 +142,8 @@ void* ReadFileContent(char* filename)
     file_data = malloc(file_size);
     DWORD bytes_read;
 
-    if (!ReadFile(file_handle, file_data, file_size, &bytes_read, 0))
-    {
-        // TODO: handle error
-    }
-	
+    ReadFile(file_handle, file_data, file_size, &bytes_read, 0);
+    
     CloseHandle(file_handle);
 	
     return file_data;
@@ -187,16 +168,16 @@ Bitmap LoadBitmapFile(char *filename)
         bitmap.height = bmp_info_header->biHeight;
         bitmap.bpp = bmp_info_header->biBitCount / 8;
 	
-	FlipBMP24bpp(&bitmap);
+	HFlipBMP24bpp(&bitmap);
     }	
     return bitmap;
 }
 
-void FlipBMP24bpp(Bitmap *bitmap)
+void HFlipBMP24bpp(Bitmap *bitmap)
 {
     size_t bitmap_size = bitmap->height * bitmap->width * bitmap->bpp;
     u8 *copy_bmp_pixel = malloc(bitmap_size);
-    CopyBitmapIntoArray(bitmap, copy_bmp_pixel);
+    GetPixelFromBMP(bitmap, copy_bmp_pixel);
     
     u8 *dst = bitmap->pixel;
     u8 *src = copy_bmp_pixel + (bitmap->width * (bitmap->height-1)) * bitmap->bpp;
@@ -248,7 +229,7 @@ void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos,
     }
 }
 
-void DrawArray24bpp(Framebuffer *framebuffer, u8 *pixel, u32 x_pos, u32 y_pos, u32 w, u32 h, u32 color_mask)
+void DrawBuffer24bpp(Framebuffer *framebuffer, u8 *pixel, u32 x_pos, u32 y_pos, u32 w, u32 h, u32 color_mask)
 {
     u32 *dst = (u32 *)framebuffer->buffer;
     u8 *src = pixel;
@@ -349,7 +330,7 @@ void DrawBMP32bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos,
     }
 }
 
-void CopyBitmapIntoArray(Bitmap *from, u8 *to)
+void GetPixelFromBMP(Bitmap *from, u8 *to)
 {
     for(u32 i = 0; i < from->height * from->width * from->bpp; i++)
     {
@@ -357,13 +338,7 @@ void CopyBitmapIntoArray(Bitmap *from, u8 *to)
     }
 }
 
-Rec GetRec(u32 x, u32 y, u32 w, u32 h)
-{
-    Rec r = {x, y, w, h};
-    return r;
-}	       
-
-void GetSubRecPixel(Bitmap b, u32 rec_x, u32 rec_y, u32 rec_w, u32 rec_h, u8 *sub_rec)
+void GetSubRecPixel24bpp(Bitmap b, u32 rec_x, u32 rec_y, u32 rec_w, u32 rec_h, u8 *sub_rec)
 {
     u8 *p = b.pixel;
     p += (rec_x * rec_y * b.bpp);
@@ -407,22 +382,16 @@ void UpdateSpriteAnimation(Sprite *s)
     }
 }
 
-// converts device coordinates to normalized device coordinates
-// ([window_width, window_height] to [-1. 1]
-void DC_TO_NDC(float *v, int width_height)
+float DC_TO_NDC(float v, int width_height)
 {
-    //  2x/w - 1
-    // -2y/h + 1 <- check if the sign is needed (bootom up/top down etc...)
-    //
-
-    *v = (*v*2)/width_height - 1;
+    v = (v*2)/width_height - 1;
+    return v;
 }
 
-// converts normalized device coordinates to device coordinates
-// ([-1,1] to [window_width, window_height].
-void NDC_TO_DC(float *v, int width_height)
+float NDC_TO_DC(float v, int width_height)
 {
-    *v = (float)fabs((*v/2)*width_height);
+    v = (float)fabs((v/2)*width_height);
+    return v;
 }
 
 bool BBAA(v2 b1, int width1, int height1, v2 b2, int width2, int height2)
@@ -440,23 +409,3 @@ bool BBAA(v2 b1, int width1, int height1, v2 b2, int width2, int height2)
     }
 }
 
-void DrawCircleWithLines(Framebuffer *framebuffer, int x0, int y0, u32 color)
-{
-    v2 center = {(float)x0, (float)y0};
-    double x = 0;
-    double y = 0;
-    int radius = 100;
-    float angle = 1;
-    
-    for(int i = 0; i < 360; i++)
-    {
-        angle++;
-        x = radius * cos(DegToRad(angle));
-        y = radius * sin(DegToRad(angle));
-
-        x += center.x;
-        y += center.y;
-	   	
-        DrawLine(framebuffer, (int)center.x, (int)center.y, (int)x, (int)y, color);
-    }
-}
