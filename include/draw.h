@@ -15,7 +15,7 @@
 typedef struct
 {
     void *buffer;
-    u32 bbp;
+    u32 bpp;
     u32 width;
     u32 height;
     u32 size;

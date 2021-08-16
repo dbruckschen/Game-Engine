@@ -11,9 +11,9 @@ Framebuffer CreateFramebuffer(HWND window)
 	
     framebuffer.width = window_width;
     framebuffer.height = window_height;
-    framebuffer.bbp = 4;
+    framebuffer.bpp = 4;
 	
-    framebuffer.size = framebuffer.height * framebuffer.width * framebuffer.bbp;
+    framebuffer.size = framebuffer.height * framebuffer.width * framebuffer.bpp;
     framebuffer.buffer = VirtualAlloc(0, framebuffer.size, MEM_COMMIT, PAGE_READWRITE);
 	
     framebuffer.info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -68,10 +68,14 @@ void FillScreen(Framebuffer *framebuffer, u32 color)
 
 void DrawPixel(Framebuffer* framebuffer, u32 x, u32 y, u32 color)
 {
-    u32* pixel = (u32*)framebuffer->buffer;
+    // clipping
+    if(x >= 0 && x <= framebuffer->width && y >= 0 && y <= framebuffer->height)
+    {
+	u32* pixel = (u32*)framebuffer->buffer;
 
-    pixel += x + (y * framebuffer->width);
-    *pixel = color;
+	pixel += x + (y * framebuffer->width);
+	*pixel = color;
+    }
 }
 
 void DrawRectangle(Framebuffer *framebuffer, u32 x0, u32 y0, u32 width, u32 height, u32 color)
@@ -90,6 +94,7 @@ void DrawRectangle(Framebuffer *framebuffer, u32 x0, u32 y0, u32 width, u32 heig
 }
 
 // copied from: https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
+// lines get clipped through the DrawPixel function
 void DrawLine(Framebuffer *framebuffer, int x0, int y0, int x1, int y1, u32 color)
 {
     int dx = abs(x1-x0);
@@ -124,6 +129,7 @@ void DrawLine(Framebuffer *framebuffer, int x0, int y0, int x1, int y1, u32 colo
     }
 }
 
+// Triangles get clipped thorugh the DrawPixel line inside the DrawLine function.
 void DrawTriangle(Framebuffer *framebuffer, u32 points[6], u32 color)
 {
     DrawLine(framebuffer, points[0], points[1], points[2], points[3], color);
@@ -197,17 +203,46 @@ void HFlipBMP24bpp(Bitmap *bitmap)
     copy_bmp_pixel = 0;
 }
 
-void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask)
+void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x, u32 y, u32 color_mask)
 {
     u32 *dst = (u32 *)framebuffer->buffer;
     u8 *src = bitmap.pixel;
-	
-    dst += x_pos + (y_pos * framebuffer->width);
-	
-    for(u32 y = 0; y < bitmap.height; ++y) 
+    // clipping
+    // If the to be drawn bitmap is not on the screen just quit the function.
+    if((x >= framebuffer->width) || (y >= framebuffer->height) ||
+       ((x + bitmap.width) <= 0) || ((y + bitmap.height) <= 0))
     {
-        for(u32 x = 0; x < bitmap.width; ++x)
-        {
+	printf("return\n ");
+	return;
+    }
+    
+    if(x < 0)
+    {
+	x = 0;
+    }
+    
+    if(y < 0)
+    {
+	y = 0;
+    }
+    
+    if((x + bitmap.width) > framebuffer->width)
+    {
+	bitmap.width = (bitmap.width + x) - framebuffer->width;
+    }
+
+    if((y + bitmap.height) > framebuffer->height)
+    {
+	bitmap.height = (bitmap.height + y) - framebuffer->height;
+    }
+   
+    dst += x + y * framebuffer->width;
+    src += x + (y * bitmap.width);
+    
+    for(u32 yidx = 0; yidx < bitmap.height; ++yidx)
+    {
+        for(u32 xidx = 0; xidx < bitmap.width; ++xidx)
+	{
             u8 r = *src;
             u8 g = *(src + 1);
             u8 b = *(src + 2);
@@ -224,8 +259,7 @@ void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos,
             }
             src += bitmap.bpp;
         }
-
-        dst += (framebuffer->width - bitmap.width);
+	dst += (framebuffer->width - bitmap.width);
     }
 }
 
