@@ -115,9 +115,7 @@ int main(int argc, char **argv)
 	{
 	    debug_x += speed * t.elapsed_time;
 	    if(debug_y < 0)
-	    {
 		debug_y = 0;
-	    }
 	}
 	if(input.keyboard[s_key].down)
 	{

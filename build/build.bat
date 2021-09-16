@@ -8,5 +8,5 @@ cl -fsanitize=address /Zi /W4 /c %dllfiles% /I ..\include /Fo"..\obj\\"
 link /DEBUG /DLL /OUT:rml.dll ..\obj\*.obj user32.lib gdi32.lib Ws2_32.lib
 
 REM compile test program  
-cl -fsanitize=address /Zi /W4 ..\test\main.c /I ..\include ..\build\rml.lib 
+cl -fsanitize=address /Zi /W4 /Fe:test.exe ..\test\main.c /I ..\include ..\build\rml.lib 
 

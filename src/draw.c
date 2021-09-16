@@ -68,7 +68,6 @@ void FillScreen(Framebuffer *framebuffer, u32 color)
 
 void DrawPixel(Framebuffer* framebuffer, u32 x, u32 y, u32 color)
 {
-    // clipping
     if(x >= 0 && x <= framebuffer->width && y >= 0 && y <= framebuffer->height)
     {
 	u32* pixel = (u32*)framebuffer->buffer;
