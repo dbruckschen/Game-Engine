@@ -7,8 +7,7 @@
 #define COIN_ANIM_COUNT 6
 #define COIN_ANIM_FRAME_TIME 0.2
 
-typedef struct
-{
+typedef struct {
     char glyph;
     u8 *pixel;
     u32 x;
@@ -18,13 +17,12 @@ typedef struct
 
 } Glyphs;
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     // unreferenced arguments
     argc, argv;
 
     Window window = OpenWindow(840, 650, "Rudimentary Multimedia Library demo");
-    Fraebuffer fbuff = CreateFramebuffer(window.wnd_h);
+    Framebuffer fbuff = CreateFramebuffer(window.wnd_h);
     Input input = {0};
     Timer t = {0};
 
@@ -75,56 +73,40 @@ int main(int argc, char **argv)
     int debug_y = 0;
     float speed = 500.0f;
     
-    while(1)
-    {
+    while(1) {
 	StartTimer(&t);
 	FillScreen(&fbuff, RGB_Color(50, 0, 0));
 	
 	if(!MessageLoop(&input))
-	{
 	    break;
-	}
 	
-	if(input.keyboard[a_key].toggle)
-	{
+	
+	if(input.keyboard[a_key].toggle) {
 	    FillScreen(&fbuff, RGB(0, green, 0));
-		       
 	    if(green < 255)
 		green++;
-	}
-	else
-	{
-	    if(green > 0)
-	    {
+	} else {
+	    if(green > 0) {
 		FillScreen(&fbuff, RGB(0, green--,  0));
 	    }
 	}
 
-	if(input.keyboard[w_key].down)
-	{
+	if(input.keyboard[w_key].down) {
 	    debug_y -= speed * t.elapsed_time;
 	    if(debug_y < 0)
 		debug_y = 0;
 	}
-	if(input.keyboard[a_key].down)
-	{
+	if(input.keyboard[a_key].down) 
 	    debug_x -= speed * t.elapsed_time;
-	    
-	}
-	if(input.keyboard[d_key].down)
-	{
+	    	
+	if(input.keyboard[d_key].down) {
 	    debug_x += speed * t.elapsed_time;
 	    if(debug_y < 0)
-	    {
 		debug_y = 0;
-	    }
 	}
 	if(input.keyboard[s_key].down)
-	{
 	    debug_y += speed * t.elapsed_time;
 	    
-	}
-	
 	UpdateSpriteAnimation(&coin);
 	UpdateSpriteAnimation(&coin2);
 
@@ -139,9 +121,8 @@ int main(int argc, char **argv)
 	DrawBMP24bpp(&fbuff, debug_bmp, debug_x, debug_y, RGB_Color(0, 0, 0));
 
 	if(input.keyboard[tilde_key].toggle)
-	{
 	    DrawRectangle(&fbuff, 0, 0, fbuff.width, 100, RGB_Color(0, 255, 0));
-	}
+	
 
 	Triangle tr = {0};
 	tr.verts[0] = NDC_TO_DC(-0.5f, fbuff.width);

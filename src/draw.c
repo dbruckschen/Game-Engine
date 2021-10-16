@@ -202,46 +202,19 @@ void HFlipBMP24bpp(Bitmap *bitmap)
     copy_bmp_pixel = 0;
 }
 
-void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x, u32 y, u32 color_mask)
-{
+void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x, u32 y, u32 color_mask) {
     u32 *dst = (u32 *)framebuffer->buffer;
     u8 *src = bitmap.pixel;
-    // clipping
-    // If the to be drawn bitmap is not on the screen just quit the function.
-    if((x >= framebuffer->width) || (y >= framebuffer->height) ||
-       ((x + bitmap.width) <= 0) || ((y + bitmap.height) <= 0))
-    {
-	printf("return\n ");
-	return;
-    }
-    
-    if(x < 0)
-    {
-	x = 0;
-    }
-    
-    if(y < 0)
-    {
-	y = 0;
-    }
-    
-    if((x + bitmap.width) > framebuffer->width)
-    {
-	bitmap.width = (bitmap.width + x) - framebuffer->width;
-    }
 
-    if((y + bitmap.height) > framebuffer->height)
-    {
-	bitmap.height = (bitmap.height + y) - framebuffer->height;
-    }
-   
+    // Clipping
+    
+        
+    
     dst += x + y * framebuffer->width;
     src += x + (y * bitmap.width);
     
-    for(u32 yidx = 0; yidx < bitmap.height; ++yidx)
-    {
-        for(u32 xidx = 0; xidx < bitmap.width; ++xidx)
-	{
+    for(u32 yidx = 0; yidx < bitmap.height; ++yidx) {
+        for(u32 xidx = 0; xidx < bitmap.width; ++xidx) {
             u8 r = *src;
             u8 g = *(src + 1);
             u8 b = *(src + 2);
@@ -249,13 +222,10 @@ void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x, u32 y, u32 col
             u32 src_pixel = (0 << 24) + (b << 16) + (g << 8) + r;
 			
             if(src_pixel != color_mask)
-            {
-                *dst++ = src_pixel;
-            }
-            else
-            {
-                dst++;
-            }
+		*dst++ = src_pixel;
+	    else
+		dst++;
+            
             src += bitmap.bpp;
         }
 	dst += (framebuffer->width - bitmap.width);

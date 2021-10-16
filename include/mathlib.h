@@ -9,15 +9,13 @@
 #define V2(value1, value2) V2(value1, value2)
 #define PI 3.14159265359L
 
-typedef struct 
-{
+typedef struct {
     float x;
     float y;
-
 } v2;
 
 // returns a v2 struct with x and y values
-__declspec(dllexport) v2 V2(int x, int y);
+__declspec(dllexport) v2 V2(float x, float y);
 // returns true if v1 == v2
 __declspec(dllexport) bool V2Compare(v2 v1, v2 v2);
 // rounds f to the lower value
