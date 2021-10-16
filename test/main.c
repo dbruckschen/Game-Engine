@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
     Glyphs glyphs[256] = {0};
 
     Bitmap debug_bmp = LoadBitmapFile("../assets/test.bmp");
-
+/*
     glyphs['3'].glyph = '3';
     glyphs['3'].x = 0;
     glyphs['3'].y = 0;
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
     glyphs['3'].w,
     glyphs['3'].h,
     glyphs['3'].pixel);
-
+*/
     InitTimer(&t);
     double timer = 0;
     u8 green = 0;
@@ -79,7 +79,6 @@ int main(int argc, char **argv) {
 	
 	if(!MessageLoop(&input))
 	    break;
-	
 	
 	if(input.keyboard[a_key].toggle) {
 	    FillScreen(&fbuff, RGB(0, green, 0));
@@ -112,10 +111,10 @@ int main(int argc, char **argv) {
 
 	//DrawBMP24bpp(&fbuff, background2, 0, 0, RGB_Color(0, 0, 0));
 	DrawBMP24bpp(&fbuff, background, 0, 0, RGB_Color(0, 0, 0));
-	
+
 	DrawBMP24bpp(&fbuff, coin.frames[coin.current_frame], 100, 100, RGB_Color(255, 0, 255));
 	DrawBMP24bpp(&fbuff, coin2.frames[coin2.current_frame], 200, 200, RGB_Color(255, 0, 255));
-	DrawBMPSubRec24bpp(&fbuff, glyphs_bmp, 0, 0, RGB_Color(0, 0, 0), 128, 9, 7, 9);
+	//DrawBMPSubRec24bpp(&fbuff, glyphs_bmp, 0, 0, RGB_Color(0, 0, 0), 128, 9, 7, 9);
 	DrawBuffer24bpp(&fbuff, glyphs['3'].pixel, 400, 200, glyphs['3'].w, glyphs['3'].h, RGB_Color(0, 0, 0));
 	DrawRectangle(&fbuff, 350, 100, 50, 50, RGB_Color(100, 12, 253));
 	DrawBMP24bpp(&fbuff, debug_bmp, debug_x, debug_y, RGB_Color(0, 0, 0));
@@ -123,7 +122,6 @@ int main(int argc, char **argv) {
 	if(input.keyboard[tilde_key].toggle)
 	    DrawRectangle(&fbuff, 0, 0, fbuff.width, 100, RGB_Color(0, 255, 0));
 	
-
 	Triangle tr = {0};
 	tr.verts[0] = NDC_TO_DC(-0.5f, fbuff.width);
 	tr.verts[1] = NDC_TO_DC(-0.5f, fbuff.height);
