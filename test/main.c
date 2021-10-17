@@ -39,6 +39,8 @@ int main(int argc, char **argv) {
     InitSprite(&coin, COIN_ANIM_COUNT, coin_animation, 0, COIN_ANIM_FRAME_TIME);
     InitSprite(&coin2, COIN_ANIM_COUNT, coin_animation, 2, COIN_ANIM_FRAME_TIME);
 
+    Bitmap test = LoadBitmapFile("../assets/test.bmp");
+        
     Bitmap background = LoadBitmapFile("../assets/background.bmp");
     Bitmap background2 = {0};
     background2.pixel = malloc(background.height * background.width * background.bpp);
@@ -75,7 +77,7 @@ int main(int argc, char **argv) {
     
     while(1) {
 	StartTimer(&t);
-	FillScreen(&fbuff, RGB_Color(50, 0, 0));
+	FillScreen(&fbuff, RGB_Color(0, 0, 0));
 	
 	if(!MessageLoop(&input))
 	    break;
@@ -110,28 +112,19 @@ int main(int argc, char **argv) {
 	UpdateSpriteAnimation(&coin2);
 
 	//DrawBMP24bpp(&fbuff, background2, 0, 0, RGB_Color(0, 0, 0));
-	DrawBMP24bpp(&fbuff, background, 0, 0, RGB_Color(0, 0, 0));
+	//DrawBMP24bpp(&fbuff, background, 0, 0, RGB_Color(0, 0, 0));
+	DrawBMP24bpp(&fbuff, test, 100, 100, RGB_Color(255, 0, 30));
 
-	DrawBMP24bpp(&fbuff, coin.frames[coin.current_frame], 100, 100, RGB_Color(255, 0, 255));
-	DrawBMP24bpp(&fbuff, coin2.frames[coin2.current_frame], 200, 200, RGB_Color(255, 0, 255));
+	//DrawBMP24bpp(&fbuff, coin.frames[coin.current_frame], 100, 100, RGB_Color(255, 0, 255));
+	//DrawBMP24bpp(&fbuff, coin2.frames[coin2.current_frame], 200, 200, RGB_Color(255, 0, 255));
 	//DrawBMPSubRec24bpp(&fbuff, glyphs_bmp, 0, 0, RGB_Color(0, 0, 0), 128, 9, 7, 9);
-	DrawBuffer24bpp(&fbuff, glyphs['3'].pixel, 400, 200, glyphs['3'].w, glyphs['3'].h, RGB_Color(0, 0, 0));
-	DrawRectangle(&fbuff, 350, 100, 50, 50, RGB_Color(100, 12, 253));
-	DrawBMP24bpp(&fbuff, debug_bmp, debug_x, debug_y, RGB_Color(0, 0, 0));
+	//DrawBuffer24bpp(&fbuff, glyphs['3'].pixel, 400, 200, glyphs['3'].w, glyphs['3'].h, RGB_Color(0, 0, 0));
+	//DrawRectangle(&fbuff, 350, 100, 50, 50, RGB_Color(100, 12, 253));
+	//DrawBMP24bpp(&fbuff, debug_bmp, debug_x, debug_y, RGB_Color(0, 0, 0));
 
 	if(input.keyboard[tilde_key].toggle)
 	    DrawRectangle(&fbuff, 0, 0, fbuff.width, 100, RGB_Color(0, 255, 0));
-	
-	Triangle tr = {0};
-	tr.verts[0] = NDC_TO_DC(-0.5f, fbuff.width);
-	tr.verts[1] = NDC_TO_DC(-0.5f, fbuff.height);
-	tr.verts[2] = NDC_TO_DC(0.5f, fbuff.width); 
-	tr.verts[3] = NDC_TO_DC(-0.5f, fbuff.height);
-	tr.verts[4] = NDC_TO_DC(0.0f, fbuff.width);
-	tr.verts[5] = NDC_TO_DC(0.5f, fbuff.height);
-	tr.color = RGB_Color(255, 0, 0);
-
-	//DrawTriangle(&fbuff, (u32*)tr.verts, RGB_Color(10, 12, 32));
+       
 	OutputFramebuffer(window.wnd_h, fbuff);
 
 	EndTimer(&t);

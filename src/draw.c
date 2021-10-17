@@ -179,13 +179,23 @@ void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x, u32 y, u32 col
     u32 *dst = (u32 *)framebuffer->buffer;
     u8 *src = bitmap.pixel;
 
-    // Clipping
+    // Return if the bitmap isn't visable at all
     if(x + bitmap.width <= 0 || y + bitmap.height <= 0 || x > framebuffer->width || y > framebuffer->height)
 	return;
+
+    // Clip the rectangle to the window dimensions
+    if(x < 0)
+	x = 0;
+    if(y < 0)
+	y = 0;
+    if(x + bitmap.width > framebuffer->width)
+	bitmap.width = framebuffer->width;
+    if(y + bitmap.height > framebuffer->height)
+	bitmap.height = framebuffer->height;
     
     dst += x + y * framebuffer->width;
     src += x + (y * bitmap.width);
-    
+  
     for(u32 yidx = 0; yidx < bitmap.height; ++yidx) {
         for(u32 xidx = 0; xidx < bitmap.width; ++xidx) {
             u8 r = *src;
