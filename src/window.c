@@ -1,7 +1,7 @@
 #include "window.h"
 
-LRESULT CALLBACK WindowProc(HWND window, UINT msg,
-			    WPARAM wparam, LPARAM lparam) {
+LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam) 
+{
     LRESULT result = 0;
     
     switch (msg) {
@@ -24,7 +24,8 @@ LRESULT CALLBACK WindowProc(HWND window, UINT msg,
     return result;
 }
 
-Window OpenWindow(int w, int h, char *title) {
+Window OpenWindow(int w, int h, char *title)
+{
     HWND window_handle = {0};
     WNDCLASSEX wc = {0};
     
@@ -69,49 +70,49 @@ Window OpenWindow(int w, int h, char *title) {
     return new_window;
 }
 
-bool MessageLoop(Input *input) {
+bool MessageLoop(Input *input) 
+{
     bool running = true;
     MSG msg;
 	
     if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
-	switch(msg.message) {
-	    case WM_QUIT:
-		running = false;
-		break;
+		switch(msg.message) {
+			case WM_QUIT:
+				running = false;
+				break;
 
-	    case WM_SYSKEYDOWN:
-	    case WM_KEYDOWN:
-		input->keyboard[msg.wParam].down = true;
-		//printf("0x%x pressed\n", msg.wParam);
-		
-		bool was_down_last_frame = (msg.lParam >> 30) & 1;
-		if(!was_down_last_frame) {
-		    input->keyboard[msg.wParam].down_previous_frame = true;
-		    //printf("0x%x pressed this frame\n", msg.wParam);
-		} else {
-		    input->keyboard[msg.wParam].down_previous_frame = false;
+			case WM_SYSKEYDOWN:
+			case WM_KEYDOWN:
+				input->keyboard[msg.wParam].down = true;
+				//printf("0x%x pressed\n", msg.wParam);
+				
+				bool was_down_last_frame = (msg.lParam >> 30) & 1;
+				
+				if(!was_down_last_frame) {
+					input->keyboard[msg.wParam].down_previous_frame = true;
+					//printf("0x%x pressed this frame\n", msg.wParam);
+				} else {
+					input->keyboard[msg.wParam].down_previous_frame = false;
+				}
+
+				if(input->keyboard[msg.wParam].toggle == false && was_down_last_frame == false) {
+					printf("toggle an\n");
+					input->keyboard[msg.wParam].toggle = true;
+				} else if(input->keyboard[msg.wParam].toggle == true && was_down_last_frame == false)	{
+					printf("toggle aus\n");
+					input->keyboard[msg.wParam].toggle = false;
+				}
+				break;
+
+			case WM_SYSKEYUP:
+			case WM_KEYUP:
+				input->keyboard[msg.wParam].down = false;
+				//printf("0x%x released\n", msg.wParam);
+				break;
 		}
-
-		if(input->keyboard[msg.wParam].toggle == false && was_down_last_frame == false) {
-		    printf("toggle an\n");
-		    input->keyboard[msg.wParam].toggle = true;
-		} else if(input->keyboard[msg.wParam].toggle == true && was_down_last_frame == false)	{
-		    printf("toggle aus\n");
-		    input->keyboard[msg.wParam].toggle = false;
-		}
-		break;
-
-	    case WM_SYSKEYUP:
-	    case WM_KEYUP:
-		input->keyboard[msg.wParam].down = false;
-		//printf("0x%x released\n", msg.wParam);
-		break;
-	}
-	
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-
     return running;
 }
 

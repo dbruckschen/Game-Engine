@@ -1,10 +1,12 @@
 #include "draw.h"
 
-Framebuffer CreateFramebuffer(HWND window) {
+Framebuffer CreateFramebuffer(HWND window)
+{
     Framebuffer framebuffer;
     RECT w_rect;
 	
     GetClientRect(window, &w_rect);
+	
     int window_width = w_rect.right - w_rect.left;
     int window_height = w_rect.bottom - w_rect.top;
 	
@@ -28,36 +30,41 @@ Framebuffer CreateFramebuffer(HWND window) {
     framebuffer.info.bmiHeader.biClrImportant = 0;
 	
     framebuffer.bitmap_hdc = CreateCompatibleDC(0);
-    framebuffer.bitmap_handle = CreateDIBSection(framebuffer.bitmap_hdc, &framebuffer.info,
-						 DIB_RGB_COLORS, &framebuffer.buffer, 0, 0);
+    framebuffer.bitmap_handle = CreateDIBSection(framebuffer.bitmap_hdc, &framebuffer.info, DIB_RGB_COLORS, &framebuffer.buffer, 0, 0);
 	
     if (framebuffer.bitmap_handle)
         SelectObject(framebuffer.bitmap_hdc, framebuffer.bitmap_handle);
+		
     return framebuffer;
 }
 
-void DestroyFramebuffer(Framebuffer *fb) {
+void DestroyFramebuffer(Framebuffer *fb) 
+
     VirtualFree(&fb->buffer, 0, MEM_RELEASE);
     fb->buffer = 0;
 }
 
-void OutputFramebuffer(HWND window, Framebuffer fb) {
+void OutputFramebuffer(HWND window, Framebuffer fb) 
+{
     HDC window_dc = GetDC(window);
     BitBlt(window_dc, 0, 0, fb.width, fb.height, fb.bitmap_hdc, 0, 0, SRCCOPY);
 }
 
-u32 RGB_Color(u8 red, u8 green, u8 blue) {
+u32 RGB_Color(u8 red, u8 green, u8 blue) 
+{
     u32 color = 0;
     return color = ((unsigned int)0 << 24) + (red << 16) + (green << 8) + blue;
 }
 
-void FillScreen(Framebuffer *framebuffer, u32 color) {
+void FillScreen(Framebuffer *framebuffer, u32 color) 
+{
     u32 *pixel = (u32 *)framebuffer->buffer;
     for(u32 i = 0; i < framebuffer->width * framebuffer->height; ++i)
         *pixel++ = color;
 } 
 
-void DrawPixel(Framebuffer* framebuffer, u32 x, u32 y, u32 color) {
+void DrawPixel(Framebuffer* framebuffer, u32 x, u32 y, u32 color)
+{
     if(x >= 0 && x <= framebuffer->width && y >= 0 && y <= framebuffer->height) {
 	u32* pixel = (u32*)framebuffer->buffer;
 	
@@ -66,7 +73,8 @@ void DrawPixel(Framebuffer* framebuffer, u32 x, u32 y, u32 color) {
     }
 }
 
-void DrawRectangle(Framebuffer *framebuffer, u32 x0, u32 y0, u32 width, u32 height, u32 color) {
+void DrawRectangle(Framebuffer *framebuffer, u32 x0, u32 y0, u32 width, u32 height, u32 color)
+{
     u32 *pixel = (u32 *)framebuffer->buffer;
     pixel += x0 + (y0 * framebuffer->width);
 	
@@ -80,7 +88,8 @@ void DrawRectangle(Framebuffer *framebuffer, u32 x0, u32 y0, u32 width, u32 heig
 
 // copied from: https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
 // lines get clipped through the DrawPixel function
-void DrawLine(Framebuffer *framebuffer, int x0, int y0, int x1, int y1, u32 color) {
+void DrawLine(Framebuffer *framebuffer, int x0, int y0, int x1, int y1, u32 color) 
+{
     int dx = abs(x1-x0);
     int dy = -abs(y1-y0);
     int sx = x0<x1 ? 1 : -1;
@@ -109,13 +118,15 @@ void DrawLine(Framebuffer *framebuffer, int x0, int y0, int x1, int y1, u32 colo
 }
 
 // Triangles get clipped thorugh the DrawPixel line inside the DrawLine function.
-void DrawTriangle(Framebuffer *framebuffer, u32 points[6], u32 color) {
+void DrawTriangle(Framebuffer *framebuffer, u32 points[6], u32 color) 
+{
     DrawLine(framebuffer, points[0], points[1], points[2], points[3], color);
     DrawLine(framebuffer, points[2], points[3], points[4], points[5], color);
     DrawLine(framebuffer, points[4], points[5], points[0], points[1], color);
 }
 
-void* ReadFileContent(char* filename) {
+void* ReadFileContent(char* filename) 
+{
     HANDLE file_handle = CreateFileA(filename, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 
     DWORD file_size;
@@ -132,7 +143,8 @@ void* ReadFileContent(char* filename) {
     return file_data;
 }
 
-Bitmap LoadBitmapFile(char *filename) {
+Bitmap LoadBitmapFile(char *filename) 
+{
     Bitmap bitmap = {0};
 	
     void *file;
@@ -154,7 +166,8 @@ Bitmap LoadBitmapFile(char *filename) {
     return bitmap;
 }
 
-void HFlipBMP24bpp(Bitmap *bitmap) {
+void HFlipBMP24bpp(Bitmap *bitmap) 
+{
     size_t bitmap_size = bitmap->height * bitmap->width * bitmap->bpp;
     u8 *copy_bmp_pixel = malloc(bitmap_size);
     GetPixelFromBMP(bitmap, copy_bmp_pixel);
@@ -175,7 +188,8 @@ void HFlipBMP24bpp(Bitmap *bitmap) {
     copy_bmp_pixel = 0;
 }
 
-void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x, u32 y, u32 color_mask) {
+void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x, u32 y, u32 color_mask)
+{
     u32 *dst = framebuffer->buffer;
     u8 *src = bitmap.pixel;
     // clipping
@@ -246,8 +260,7 @@ void DrawBuffer24bpp(Framebuffer *framebuffer, u8 *pixel, u32 x_pos, u32 y_pos, 
     }
 }
 
-void DrawBMPSubRec24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask,
-		     u32 rec_x, u32 rec_y, u32 rec_w, u32 rec_h)
+void DrawBMPSubRec24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask, u32 rec_x, u32 rec_y, u32 rec_w, u32 rec_h)
 {
     u32 *dst = (u32 *)framebuffer->buffer;
     u8 *src = bitmap.pixel;

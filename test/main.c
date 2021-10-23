@@ -7,7 +7,8 @@
 #define COIN_ANIM_COUNT 6
 #define COIN_ANIM_FRAME_TIME 0.2
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     // unreferenced arguments
     argc, argv;
 
