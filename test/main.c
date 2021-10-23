@@ -37,6 +37,7 @@ int main(int argc, char **argv) {
 			
 	UpdateSpriteAnimation(&coin);
 	DrawBMP24bpp(&fbuff, coin.frames[coin.current_frame], 100, 100, RGB_Color(255, 0, 255));
+
 	OutputFramebuffer(window.wnd_h, fbuff);
 
 	EndTimer(&t);
