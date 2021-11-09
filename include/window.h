@@ -11,6 +11,8 @@ typedef struct
 {
     HWND wnd_h;
     WNDCLASSEX wc;
+    int width;
+    int height;
 	
 } Window;
 

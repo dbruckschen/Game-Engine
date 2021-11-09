@@ -11,7 +11,7 @@
 // Framebuffer drawable area is from 0,0 to width-1, height-1
 // Clipping happens inside drawing frunctions to protect from crashes
 // Negative x,y,width,height numbers wrap to a positive number because parameter are u32
- 
+
 typedef struct
 {
     void *buffer;
@@ -36,11 +36,14 @@ typedef struct
 
 typedef struct
 {
+    float x;
+    float y;
+
     Bitmap *frames;
 
     int animation_frame_count;
     int current_frame;
-    
+
     double timer_next_frame;
     double current_timer;
 
@@ -68,15 +71,17 @@ __declspec(dllexport) void *ReadFileContent(char *filename);
 __declspec(dllexport) Bitmap LoadBitmapFile(char *filename);
 // Window's ReadFile() loads .bmp files flipped. Flip again to draw bitmaps with right direction.
 __declspec(dllexport) void HFlipBMP24bpp(Bitmap *bitmap);
+__declspec(dllexport) void HFlipBMP32bpp(Bitmap *bitmap);
 __declspec(dllexport) void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask);
 __declspec(dllexport) void DrawBuffer24bpp(Framebuffer *framebuffer, u8 *pixel, u32 x_pos, u32 y_pos, u32 w, u32 h, u32 color_mask);
 __declspec(dllexport) void DrawBMPSubRec24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask, u32 rec_x, u32 rec_y, u32 rec_w, u32 rec_h);
 __declspec(dllexport) void DrawBMP32bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask);
 // Creates a Sprite from a Bitmap. Sprites are just Bitmaps with Animation atm.
-__declspec(dllexport) void InitSprite(Sprite *s, int frame_count, Bitmap *frames, int start_frame, double frame_time);
+__declspec(dllexport) void InitSprite(Sprite *s, float x, float y, int frame_count, Bitmap *frames, int start_frame, double frame_time);
 __declspec(dllexport) void UpdateSpriteAnimation(Sprite *s);
 __declspec(dllexport) void GetSubRecPixel24bpp(Bitmap b, u32 x, u32 y, u32 w, u32 h, u8 *sub_rec);
 __declspec(dllexport) void GetPixelFromBMP(Bitmap *from, u8 *to);
+__declspec(dllexport) void DrawString(Framebuffer *buffer, Bitmap font, char *string, u32 x, u32 y);
 // NDC range: [-1,1] DC range: [0,window width] / [0, window height]
 __declspec(dllexport) float NDC_TO_DC(float v, int width_height);
 __declspec(dllexport) float DC_TO_NDC(float v, int width_height);

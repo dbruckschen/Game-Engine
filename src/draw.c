@@ -38,8 +38,8 @@ Framebuffer CreateFramebuffer(HWND window)
     return framebuffer;
 }
 
-void DestroyFramebuffer(Framebuffer *fb) 
-
+void DestroyFramebuffer(Framebuffer *fb)
+{
     VirtualFree(&fb->buffer, 0, MEM_RELEASE);
     fb->buffer = 0;
 }
@@ -160,8 +160,15 @@ Bitmap LoadBitmapFile(char *filename)
         bitmap.width = bmp_info_header->biWidth;
         bitmap.height = bmp_info_header->biHeight;
         bitmap.bpp = bmp_info_header->biBitCount / 8;
-	
-	HFlipBMP24bpp(&bitmap);
+
+	if(bitmap.bpp == 3)
+	{
+	    HFlipBMP24bpp(&bitmap);
+	}
+	else if(bitmap.bpp == 4)
+	{
+	    HFlipBMP32bpp(&bitmap);
+	}
     }	
     return bitmap;
 }
@@ -175,8 +182,10 @@ void HFlipBMP24bpp(Bitmap *bitmap)
     u8 *dst = bitmap->pixel;
     u8 *src = copy_bmp_pixel + (bitmap->width * (bitmap->height-1)) * bitmap->bpp;
 	
-    for(u32 y = 0; y < bitmap->height; y++) {
-	for(u32 x = 0; x < bitmap->width; x++) {
+    for(u32 y = 0; y < bitmap->height; y++)
+    {
+	for(u32 x = 0; x < bitmap->width; x++)
+	{
 	    *dst++ = *src++;
 	    *dst++ = *src++;
 	    *dst++ = *src++;
@@ -188,28 +197,48 @@ void HFlipBMP24bpp(Bitmap *bitmap)
     copy_bmp_pixel = 0;
 }
 
+void HFlipBMP32bpp(Bitmap *bitmap)
+{
+    size_t bitmap_size = bitmap->height * bitmap->width * bitmap->bpp;
+    u8 *copy_bmp_pixel = malloc(bitmap_size);
+    GetPixelFromBMP(bitmap, copy_bmp_pixel);
+    
+    u32 *dst = (u32 *)bitmap->pixel;
+    u32 *src = (u32 *)copy_bmp_pixel + (bitmap->width * (bitmap->height-1));
+	
+    for(u32 y = 0; y < bitmap->height; y++)
+    {
+	for(u32 x = 0; x < bitmap->width; x++)
+	{
+	    *dst++ = *src++;
+	}
+	src -= 2 * bitmap->width;
+    }
+
+    free(copy_bmp_pixel);
+    copy_bmp_pixel = 0;
+}
+
 void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x, u32 y, u32 color_mask)
 {
+    if(x >= framebuffer->width || y >= framebuffer->height) 
+	return;
+    
+    if(y + bitmap.height - 1 > framebuffer->height)
+    {
+	bitmap.height = framebuffer->height - bitmap.height -1;
+    }
+    
+        
     u32 *dst = framebuffer->buffer;
     u8 *src = bitmap.pixel;
-    // clipping
-    // If the to be drawn bitmap is not on the screen just quit the function.
-
-    if((x >= (u32)framebuffer->width) || (y >= (u32)framebuffer->height) ||
-       ((x + bitmap.width) <= 0) || ((y + bitmap.height) <= 0)) {
-		return;
-    }
-        
-    if((x + bitmap.width) > (u32)framebuffer->width)
-    	bitmap.width = (bitmap.width + x) - framebuffer->width;
-    
-    if((y + bitmap.height) > (u32)framebuffer->height)
-    	bitmap.height = (bitmap.height + y) - framebuffer->height;
     
     dst += x + y * framebuffer->width;
     
-    for(u32 yidx = 0; yidx < bitmap.height; yidx++) {
-        for(u32 xidx = 0; xidx < bitmap.width; xidx++) {
+    for(u32 yidx = 0; yidx < bitmap.height; yidx++)
+    {
+        for(u32 xidx = 0; xidx < bitmap.width; xidx++)
+	{
             u8 r = *src;
             u8 g = *(src + 1);
             u8 b = *(src + 2);
@@ -295,8 +324,8 @@ void DrawBMPSubRec24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 
 
 void DrawBMP32bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask)
 {
-    u8 *dst = (u8 *)framebuffer->buffer;
-    u8 *src = bitmap.pixel;
+    u32 *dst = (u32 *)framebuffer->buffer;
+    u8 *src = (u8 *)bitmap.pixel;
 	
     dst += x_pos + (y_pos * framebuffer->width);
 	
@@ -304,17 +333,16 @@ void DrawBMP32bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos,
     {
         for(u32 x = 0; x < bitmap.width; ++x)
         {
-            u8 r = *src;
+	    u8 r = *src;
             u8 g = *(src + 1);
             u8 b = *(src + 2);
             u8 a = *(src + 3);
-			
+
             u32 src_pixel = (a << 24) + (r << 16) + (g << 8) + b;
-			
+	    	    
             if(src_pixel != color_mask)
             {
-		// TODO: this is wrong fix later hehe
-                //*dst++ = src_pixel;
+		*dst++ = src_pixel;
             }
             else
             {
@@ -322,7 +350,6 @@ void DrawBMP32bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos,
             }
             src += bitmap.bpp;
         }
-		
         dst += (framebuffer->width - bitmap.width);
     }
 }
@@ -333,6 +360,12 @@ void GetPixelFromBMP(Bitmap *from, u8 *to)
     {
 	*(to+i) = *(from->pixel+i);
     }
+}
+
+void DrawString(Framebuffer *buff, Bitmap font, char *string, u32 x, u32 y)
+{
+    font.width = 5;
+    DrawBMP32bpp(buff, font, x, y, RGB_Color(0, 0, 0));
 }
 
 void GetSubRecPixel24bpp(Bitmap b, u32 rec_x, u32 rec_y, u32 rec_w, u32 rec_h, u8 *sub_rec)
@@ -352,8 +385,10 @@ void GetSubRecPixel24bpp(Bitmap b, u32 rec_x, u32 rec_y, u32 rec_w, u32 rec_h, u
     }
 }
 
-void InitSprite(Sprite *s, int frame_count, Bitmap *frames, int start_frame, double frame_time)
+void InitSprite(Sprite *s, float x, float y, int frame_count, Bitmap *frames, int start_frame, double frame_time)
 {
+    s->x = x;
+    s->y = y;
     s->animation_frame_count = frame_count;
     s->frames = malloc(frame_count * sizeof(Bitmap));
 
