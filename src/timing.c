@@ -1,6 +1,6 @@
 #include "timing.h"
 
-void InitTimer(Timer *t)
+void InitTimer(struct Timer *t)
 {
     LARGE_INTEGER freq = {0};
     QueryPerformanceFrequency(&freq);
@@ -8,7 +8,7 @@ void InitTimer(Timer *t)
     t->perf_freq = (double)freq.QuadPart;
 }
 
-void StartTimer(Timer *t)
+void StartTimer(struct Timer *t)
 {
     LARGE_INTEGER start_time = {0};
     QueryPerformanceCounter(&start_time);
@@ -16,7 +16,7 @@ void StartTimer(Timer *t)
     t->start_time = (double)start_time.QuadPart;
 }
 
-void EndTimer(Timer *t)
+void EndTimer(struct Timer *t)
 {
     LARGE_INTEGER end_time = {0};
     QueryPerformanceCounter(&end_time);

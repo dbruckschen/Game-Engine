@@ -24,7 +24,7 @@ LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
     return result;
 }
 
-Window OpenWindow(int w, int h, char *title)
+struct Window OpenWindow(int w, int h, char *title)
 {
     HWND window_handle = {0};
     WNDCLASSEX wc = {0};
@@ -49,8 +49,7 @@ Window OpenWindow(int w, int h, char *title)
                                    WS_MAXIMIZEBOX,
                                    CW_USEDEFAULT,
                                    CW_USEDEFAULT,
-                                   h, w,
-                                   0, 0,
+                                   h, w, 0, 0,
                                    wc.hInstance, 0);
 
     RECT window_rect = {0};
@@ -67,7 +66,7 @@ Window OpenWindow(int w, int h, char *title)
     MoveWindow(window_handle, 0, 0, window_width, window_height, 1);
     ShowWindow(window_handle, SW_SHOW);	
 
-    Window new_window;
+    struct Window new_window;
     new_window.wnd_h = window_handle;
     new_window.wc = wc;
     new_window.width = window_width;
@@ -76,13 +75,13 @@ Window OpenWindow(int w, int h, char *title)
     return new_window;
 }
 
-bool MessageLoop(Input *input) 
+bool MessageLoop(struct Input *input) 
 {
     bool running = true;
     MSG msg;
 	
     if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
-	switch(msg.message) {
+	switch (msg.message) {
 	case WM_QUIT:
 	    running = false;
 	    break;
@@ -101,21 +100,22 @@ bool MessageLoop(Input *input)
 		input->keyboard[msg.wParam].down_previous_frame = false;
 	    }
 	    
-	    if(input->keyboard[msg.wParam].toggle == false && was_down_last_frame == false) {
+	    if (input->keyboard[msg.wParam].toggle == false && was_down_last_frame == false) {
 		printf("toggle an\n");
 		input->keyboard[msg.wParam].toggle = true;
-	    } else if(input->keyboard[msg.wParam].toggle == true && was_down_last_frame == false) {
+	    } else if (input->keyboard[msg.wParam].toggle == true && was_down_last_frame == false) {
 		printf("toggle aus\n");
 		input->keyboard[msg.wParam].toggle = false;
 	    }
 	    break;
-
+	    
 	case WM_SYSKEYUP:
 	case WM_KEYUP:
 	    input->keyboard[msg.wParam].down = false;
 	    //printf("0x%x released\n", msg.wParam);
 	    break;
 	}
+	
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }

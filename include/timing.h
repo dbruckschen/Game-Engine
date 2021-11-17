@@ -4,17 +4,16 @@
 #include <windows.h>
 #include "common.h"
 
-typedef struct
+struct Timer
 {
     double perf_freq;
     double start_time;
     double end_time;
     double elapsed_time;
+};
 
-} Timer;
-
-__declspec(dllexport) void InitTimer(Timer *t);
-__declspec(dllexport) void StartTimer(Timer *t);
-__declspec(dllexport) void EndTimer(Timer *t);
+__declspec(dllexport) void InitTimer(struct Timer *t);
+__declspec(dllexport) void StartTimer(struct Timer *t);
+__declspec(dllexport) void EndTimer(struct Timer *t);
 
 #endif

@@ -52,17 +52,15 @@ enum key_code
     tilde_key = 0xC0,
 };
 
-typedef struct
+struct KeyState
 {
     bool down;
     bool down_previous_frame;
     bool pressed_this_frame;
-
     bool toggle;
-    
-} KeyState;
+};
 
-typedef struct
+struct Input
 {
     int mouse_x;
     int mouse_y;
@@ -71,11 +69,10 @@ typedef struct
     bool left_click_locked;
     bool right_click;
 
-    KeyState keyboard[256];
-    
-} Input;
+    struct KeyState keyboard[256];
+};
 
 __declspec(dllexport) v2 GetMousePosition(HWND window);
-__declspec(dllexport) void GetInput(Input *input);
+__declspec(dllexport) void GetInput(struct Input *input);
 
 #endif // INPUT_H

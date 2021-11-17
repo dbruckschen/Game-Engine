@@ -1,8 +1,8 @@
 #include "draw.h"
 
-Framebuffer CreateFramebuffer(HWND window)
+struct Framebuffer CreateFramebuffer(HWND window)
 {
-    Framebuffer framebuffer;
+    struct Framebuffer framebuffer;
     RECT w_rect;
 	
     GetClientRect(window, &w_rect);
@@ -38,13 +38,13 @@ Framebuffer CreateFramebuffer(HWND window)
     return framebuffer;
 }
 
-void DestroyFramebuffer(Framebuffer *fb)
+void DestroyFramebuffer(struct Framebuffer *fb)
 {
     VirtualFree(&fb->buffer, 0, MEM_RELEASE);
     fb->buffer = 0;
 }
 
-void OutputFramebuffer(HWND window, Framebuffer fb) 
+void OutputFramebuffer(HWND window, struct Framebuffer fb) 
 {
     HDC window_dc = GetDC(window);
     BitBlt(window_dc, 0, 0, fb.width, fb.height, fb.bitmap_hdc, 0, 0, SRCCOPY);
@@ -52,20 +52,19 @@ void OutputFramebuffer(HWND window, Framebuffer fb)
 
 u32 RGB_Color(u8 red, u8 green, u8 blue) 
 {
-    u32 color = 0;
-    return color = ((unsigned int)0 << 24) + (red << 16) + (green << 8) + blue;
+    return (unsigned int)(((u8)0 << 24) + (red << 16) + (green << 8) + blue);
 }
 
-void FillScreen(Framebuffer *framebuffer, u32 color) 
+void FillScreen(struct Framebuffer *framebuffer, u32 color) 
 {
     u32 *pixel = (u32 *)framebuffer->buffer;
-    for(u32 i = 0; i < framebuffer->width * framebuffer->height; ++i)
+    for (u32 i = 0; i < framebuffer->width * framebuffer->height; ++i) 
         *pixel++ = color;
 } 
 
-void DrawPixel(Framebuffer* framebuffer, u32 x, u32 y, u32 color)
+void DrawPixel(struct Framebuffer *framebuffer, u32 x, u32 y, u32 color)
 {
-    if(x >= 0 && x <= framebuffer->width && y >= 0 && y <= framebuffer->height) {
+    if (x >= 0 && x <= framebuffer->width && y >= 0 && y <= framebuffer->height) {
 	u32* pixel = (u32*)framebuffer->buffer;
 	
 	pixel += x + (y * framebuffer->width);
@@ -73,22 +72,20 @@ void DrawPixel(Framebuffer* framebuffer, u32 x, u32 y, u32 color)
     }
 }
 
-void DrawRectangle(Framebuffer *framebuffer, u32 x0, u32 y0, u32 width, u32 height, u32 color)
+void DrawRectangle(struct Framebuffer *framebuffer, u32 x0, u32 y0, u32 width, u32 height, u32 color)
 {
     u32 *pixel = (u32 *)framebuffer->buffer;
     pixel += x0 + (y0 * framebuffer->width);
 	
-    for(u32 y = 0; y < height; ++y) {
-        for(u32 x = 0; x < width; ++x) {
+    for (u32 y = 0; y < height; ++y) {
+        for (u32 x = 0; x < width; ++x) {
             *pixel++ = color;
         }
         pixel += framebuffer->width - width;
     }
 }
 
-// copied from: https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
-// lines get clipped through the DrawPixel function
-void DrawLine(Framebuffer *framebuffer, int x0, int y0, int x1, int y1, u32 color) 
+void DrawLine(struct Framebuffer *framebuffer, int x0, int y0, int x1, int y1, u32 color) 
 {
     int dx = abs(x1-x0);
     int dy = -abs(y1-y0);
@@ -117,8 +114,7 @@ void DrawLine(Framebuffer *framebuffer, int x0, int y0, int x1, int y1, u32 colo
     }
 }
 
-// Triangles get clipped thorugh the DrawPixel line inside the DrawLine function.
-void DrawTriangle(Framebuffer *framebuffer, u32 points[6], u32 color) 
+void DrawTriangle(struct Framebuffer *framebuffer, u32 points[6], u32 color) 
 {
     DrawLine(framebuffer, points[0], points[1], points[2], points[3], color);
     DrawLine(framebuffer, points[2], points[3], points[4], points[5], color);
@@ -143,9 +139,9 @@ void* ReadFileContent(char* filename)
     return file_data;
 }
 
-Bitmap LoadBitmapFile(char *filename) 
+struct Bitmap LoadBitmapFile(char *filename) 
 {
-    Bitmap bitmap = {0};
+    struct Bitmap bitmap = {0};
 	
     void *file;
     file = ReadFileContent(filename);
@@ -161,19 +157,17 @@ Bitmap LoadBitmapFile(char *filename)
         bitmap.height = bmp_info_header->biHeight;
         bitmap.bpp = bmp_info_header->biBitCount / 8;
 
-	if(bitmap.bpp == 3)
-	{
+	if (bitmap.bpp == 3)
 	    HFlipBMP24bpp(&bitmap);
-	}
-	else if(bitmap.bpp == 4)
-	{
+	
+	else if (bitmap.bpp == 4)
 	    HFlipBMP32bpp(&bitmap);
-	}
+	
     }	
     return bitmap;
 }
 
-void HFlipBMP24bpp(Bitmap *bitmap) 
+void HFlipBMP24bpp(struct Bitmap *bitmap) 
 {
     size_t bitmap_size = bitmap->height * bitmap->width * bitmap->bpp;
     u8 *copy_bmp_pixel = malloc(bitmap_size);
@@ -182,10 +176,8 @@ void HFlipBMP24bpp(Bitmap *bitmap)
     u8 *dst = bitmap->pixel;
     u8 *src = copy_bmp_pixel + (bitmap->width * (bitmap->height-1)) * bitmap->bpp;
 	
-    for(u32 y = 0; y < bitmap->height; y++)
-    {
-	for(u32 x = 0; x < bitmap->width; x++)
-	{
+    for (u32 y = 0; y < bitmap->height; y++) {
+	for (u32 x = 0; x < bitmap->width; x++) {
 	    *dst++ = *src++;
 	    *dst++ = *src++;
 	    *dst++ = *src++;
@@ -197,7 +189,7 @@ void HFlipBMP24bpp(Bitmap *bitmap)
     copy_bmp_pixel = 0;
 }
 
-void HFlipBMP32bpp(Bitmap *bitmap)
+void HFlipBMP32bpp(struct Bitmap *bitmap)
 {
     size_t bitmap_size = bitmap->height * bitmap->width * bitmap->bpp;
     u8 *copy_bmp_pixel = malloc(bitmap_size);
@@ -206,10 +198,8 @@ void HFlipBMP32bpp(Bitmap *bitmap)
     u32 *dst = (u32 *)bitmap->pixel;
     u32 *src = (u32 *)copy_bmp_pixel + (bitmap->width * (bitmap->height-1));
 	
-    for(u32 y = 0; y < bitmap->height; y++)
-    {
-	for(u32 x = 0; x < bitmap->width; x++)
-	{
+    for (u32 y = 0; y < bitmap->height; y++) {
+	for (u32 x = 0; x < bitmap->width; x++) {
 	    *dst++ = *src++;
 	}
 	src -= 2 * bitmap->width;
@@ -219,7 +209,7 @@ void HFlipBMP32bpp(Bitmap *bitmap)
     copy_bmp_pixel = 0;
 }
 
-void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x, u32 y, u32 color_mask)
+void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, u32 x, u32 y, u32 color_mask)
 {
     if(x >= framebuffer->width || y >= framebuffer->height) 
 	return;
@@ -235,10 +225,8 @@ void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x, u32 y, u32 col
     
     dst += x + y * framebuffer->width;
     
-    for(u32 yidx = 0; yidx < bitmap.height; yidx++)
-    {
-        for(u32 xidx = 0; xidx < bitmap.width; xidx++)
-	{
+    for(u32 yidx = 0; yidx < bitmap.height; yidx++) {
+        for(u32 xidx = 0; xidx < bitmap.width; xidx++) {
             u8 r = *src;
             u8 g = *(src + 1);
             u8 b = *(src + 2);
@@ -256,83 +244,15 @@ void DrawBMP24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x, u32 y, u32 col
     }
 }
 
-void DrawBuffer24bpp(Framebuffer *framebuffer, u8 *pixel, u32 x_pos, u32 y_pos, u32 w, u32 h, u32 color_mask)
-{
-    u32 *dst = (u32 *)framebuffer->buffer;
-    u8 *src = pixel;
-    u32 bytes_per_pixel = 3;
-	
-    dst += x_pos + (y_pos * framebuffer->width);
-	
-    for(u32 y = 0; y < h; ++y) 
-    {
-        for(u32 x = 0; x < w; ++x)
-        {
-            u8 r = *src;
-            u8 g = *(src + 1);
-            u8 b = *(src + 2);
-			
-            u32 src_pixel = (0 << 24) + (b << 16) + (g << 8) + r;
-			
-            if(src_pixel != color_mask)
-            {
-                *dst++ = src_pixel;
-            }
-            else
-            {
-                dst++;
-            }
-            src += bytes_per_pixel;
-        }
-
-        dst += (framebuffer->width - w);
-    }
-}
-
-void DrawBMPSubRec24bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask, u32 rec_x, u32 rec_y, u32 rec_w, u32 rec_h)
-{
-    u32 *dst = (u32 *)framebuffer->buffer;
-    u8 *src = bitmap.pixel;
-	
-    dst += x_pos + (y_pos * framebuffer->width);
-    src += rec_x * rec_y * bitmap.bpp;
-	
-    for(u32 y = 0; y < rec_h; ++y) 
-    {
-        for(u32 x = 0; x < rec_w; ++x)
-        {
-            u8 r = *src;
-            u8 g = *(src + 1);
-            u8 b = *(src + 2);
-			
-            u32 src_pixel = (0 << 24) + (b << 16) + (g << 8) + r;
-			
-            if(src_pixel != color_mask)
-            {
-                *dst++ = src_pixel;
-            }
-            else
-            {
-                dst++;
-            }
-            src += bitmap.bpp;
-        }
-		src += (bitmap.width - rec_w) * bitmap.bpp;
-        dst += (framebuffer->width - rec_w);
-    }   
-}
-
-void DrawBMP32bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask)
+void DrawBMP32bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask)
 {
     u32 *dst = (u32 *)framebuffer->buffer;
     u8 *src = (u8 *)bitmap.pixel;
 	
     dst += x_pos + (y_pos * framebuffer->width);
 	
-    for(u32 y = 0; y < bitmap.height; ++y)
-    {
-        for(u32 x = 0; x < bitmap.width; ++x)
-        {
+    for(u32 y = 0; y < bitmap.height; ++y) {
+        for(u32 x = 0; x < bitmap.width; ++x) {
 	    u8 r = *src;
             u8 g = *(src + 1);
             u8 b = *(src + 2);
@@ -341,71 +261,68 @@ void DrawBMP32bpp(Framebuffer *framebuffer, Bitmap bitmap, u32 x_pos, u32 y_pos,
             u32 src_pixel = (a << 24) + (r << 16) + (g << 8) + b;
 	    	    
             if(src_pixel != color_mask)
-            {
 		*dst++ = src_pixel;
-            }
             else
-            {
-                dst++;
-            }
+		dst++;
+            
             src += bitmap.bpp;
         }
         dst += (framebuffer->width - bitmap.width);
     }
 }
 
-void GetPixelFromBMP(Bitmap *from, u8 *to)
+void GetPixelFromBMP(struct Bitmap *from, u8 *to)
 {
     for(u32 i = 0; i < from->height * from->width * from->bpp; i++)
-    {
-	*(to+i) = *(from->pixel+i);
+    	*(to+i) = *(from->pixel+i);
+}
+
+void DrawString(struct Framebuffer *framebuffer, struct Bitmap font, char *string, u32 x_pos, u32 y_pos, u32 color_mask)
+{
+    u32 *dst = (u32 *)framebuffer->buffer;
+    u8 *src = (u8 *)font.pixel;
+	
+    dst += x_pos + (y_pos * framebuffer->width);
+	
+    for(u32 y = 0; y < font.height; ++y) {
+        for(u32 x = 0; x < 5; ++x) {
+	    u8 r = *src;
+            u8 g = *(src + 1);
+            u8 b = *(src + 2);
+            u8 a = *(src + 3);
+
+            u32 src_pixel = (a << 24) + (r << 16) + (g << 8) + b;
+	    	    
+            if(src_pixel != color_mask)
+		*dst++ = src_pixel;
+            else
+	    	dst++;
+            
+            src += font.bpp;
+        }
+	src += (font.width - 5) * font.bpp;
+        dst += framebuffer->width - 5;
     }
 }
 
-void DrawString(Framebuffer *buff, Bitmap font, char *string, u32 x, u32 y)
-{
-    font.width = 5;
-    DrawBMP32bpp(buff, font, x, y, RGB_Color(0, 0, 0));
-}
-
-void GetSubRecPixel24bpp(Bitmap b, u32 rec_x, u32 rec_y, u32 rec_w, u32 rec_h, u8 *sub_rec)
-{
-    u8 *p = b.pixel;
-    p += (rec_x * rec_y * b.bpp);
-
-    for(u32 y = 0; y < rec_h; y++)
-    {
-	for(u32 x = 0; x < rec_w; x++)
-	{
-	    *sub_rec++ = *p++;
-	    *sub_rec++ = *p++;
-	    *sub_rec++ = *p++;
-	}
-	p += (b.width - rec_w) * b.bpp;
-    }
-}
-
-void InitSprite(Sprite *s, float x, float y, int frame_count, Bitmap *frames, int start_frame, double frame_time)
+void InitSprite(struct Sprite *s, float x, float y, int frame_count, struct Bitmap *frames, int start_frame, double frame_time)
 {
     s->x = x;
     s->y = y;
     s->animation_frame_count = frame_count;
-    s->frames = malloc(frame_count * sizeof(Bitmap));
+    s->frames = malloc(frame_count * sizeof(struct Bitmap));
 
     for(int i = 0; i < frame_count; i++)
-    {
-	*(s->frames+i) = *(frames+i);
-    }
-        
+    	*(s->frames+i) = *(frames+i);
+            
     s->current_frame = start_frame;
     s->timer_next_frame = frame_time;
     s->current_timer = 0.0f;
 }
 
-void UpdateSpriteAnimation(Sprite *s)
+void UpdateSpriteAnimation(struct Sprite *s)
 {
-    if(s->current_timer >= s->timer_next_frame)
-    {
+    if(s->current_timer >= s->timer_next_frame) {
 	s->current_frame++;
 	s->current_timer = 0.0;
 	    
@@ -416,28 +333,20 @@ void UpdateSpriteAnimation(Sprite *s)
 
 float DC_TO_NDC(float v, int width_height)
 {
-    v = (v*2)/width_height - 1;
-    return v;
+    return (v*2)/width_height - 1;
 }
 
 float NDC_TO_DC(float v, int width_height)
 {
-    v = (float)fabs((v/2)*width_height);
-    return v;
+    return (float)fabs((v/2)*width_height);
 }
 
 bool BBAA(v2 b1, int width1, int height1, v2 b2, int width2, int height2)
 {
-    if(b1.x < b2.x + width2 &&
-       b1.x + width1 > b2.x &&
-       b1.y < b2.y + height2 &&
-       b1.y + height1 > b2.y)
-    {
+    if(b1.x < b2.x + width2 && b1.x + width1 > b2.x &&
+       b1.y < b2.y + height2 && b1.y + height1 > b2.y)
         return true;
-    }
     else
-    {
         return false;
-    }
 }
 
