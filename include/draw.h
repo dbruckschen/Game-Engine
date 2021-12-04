@@ -8,9 +8,73 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+enum glyph_idx {
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
+    H,
+    I,
+    J,
+    K,
+    L,
+    M,
+    N,
+    O,
+    P,
+    Q,
+    R,
+    S,
+    T,
+    U,
+    V,
+    W,
+    X,
+    Y,
+    Z,
+    a,
+    b,
+    c,
+    d,
+    e,
+    f,
+    g,
+    h,
+    i,
+    j,
+    k,
+    l,
+    m,
+    n,
+    o,
+    p,
+    q,
+    r,
+    s,
+    t,
+    u,
+    v,
+    w,
+    x,
+    y,
+    z,
+    nill,
+    one,
+    two,
+    three,
+    four,
+    five,
+    six,
+    seven,
+    eight,
+    nine,
+};
+
 // The framebuffer drawable area is from (0, 0) to (width-1, height-1).
-struct Framebuffer
-{
+struct Framebuffer {
     void *buffer;
     u32 bpp;
     u32 width;
@@ -19,20 +83,16 @@ struct Framebuffer
     HBITMAP bitmap_handle;
     BITMAPINFO info;
     HDC bitmap_hdc;
-	
 };
 
-struct Bitmap
-{
+struct Bitmap {
     u8 *pixel;
     u32 bpp;
     u32 width;
     u32 height;
-	
 };
-    
-struct Sprite
-{
+
+struct Sprite {
     float x;
     float y;
 
@@ -43,21 +103,18 @@ struct Sprite
 
     double timer_next_frame;
     double current_timer;
-
 };
 
-struct Triangles
-{
+struct Triangles {
     float verts[6];
     u32 color;
-    
 };
 
 // Create only one framebuffer at a time with the win32 window handle
 __declspec(dllexport) struct Framebuffer CreateFramebuffer(HWND window);
 
 /*
- * This function is mainly used when recreating the Framebuffer. 
+ * This function is mainly used when recreating the Framebuffer.
  * It doens't need to be called otherwise really,
  * since a framebuffer needs to be up at all times to be able to render stuff.
  */
@@ -69,9 +126,9 @@ __declspec(dllexport) void DestroyFramebuffer(struct Framebuffer *fb);
 __declspec(dllexport)void OutputFramebuffer(HWND window, struct Framebuffer fb);
 
 /*
- * u32 RGB_Color(u8 red, u8 green, u8 blue); 
- * Packs three 8bit values in a unsigned 32bit value in the order the framebuffer uses it and returns the value. 
- * The Format: 0RGB.  
+ * u32 RGB_Color(u8 red, u8 green, u8 blue);
+ * Packs three 8bit values in a unsigned 32bit value in the order the framebuffer uses it and returns the value.
+ * The Format: 0RGB.
  */
 __declspec(dllexport) u32 RGB_Color(u8 red, u8 green, u8 blue);
 
@@ -83,7 +140,7 @@ __declspec(dllexport) void DrawRectangle(struct Framebuffer *framebuffer, u32 x0
 // I copied this function from: https://en.wikipedia.org/wiki/Bresenham's_line_algorithm.
 // I should make an effort to fully understand this algorithm :P.
 // Lines get clipped through the DrawPixel function
-__declspec(dllexport) void DrawLine(struct Framebuffer* framebuffer, int x0, int y0, int x1, int y1, u32 color);
+__declspec(dllexport) void DrawLine(struct Framebuffer *framebuffer, int x0, int y0, int x1, int y1, u32 color);
 // Triangles get clipped thorugh the DrawPixel function inside the DrawLine function.
 __declspec(dllexport) void DrawTriangle(struct Framebuffer *framebuffer, u32 points[6], u32 color);
 
@@ -107,15 +164,16 @@ __declspec(dllexport) void DrawBMP32bpp(struct Framebuffer *framebuffer, struct 
 /*
  * Initalizes a sprite with a collection of bitmaps (animation frames).
  * Sprites are just bitmaps with animation variables at the moment.
- * To update sprite animations call UpdateSpriteAnimation(). 
+ * To update sprite animations call UpdateSpriteAnimation().
  * Bitmap *frames: an array with all the possible frames for an animation cycle.
  */
 __declspec(dllexport) void InitSprite(struct Sprite *s, float x, float y, int frame_count, struct Bitmap *frames, int start_frame, double frame_time);
 __declspec(dllexport) void UpdateSpriteAnimation(struct Sprite *s);
 __declspec(dllexport) void GetPixelFromBMP(struct Bitmap *from, u8 *to);
 
-__declspec(dllexport) void DrawString(struct Framebuffer *buffer, struct Bitmap font, char *string, u32 x, u32 y, u32 color_mask);
+__declspec(dllexport) void DrawGlyph(struct Framebuffer *buffer, struct Bitmap font, char ch, u32 x, u32 y, u32 color_mask);
 
+__declspec(dllexport) void DrawString(struct Framebuffer *buffer, struct Bitmap font, char *string, u32 x, u32 y, u32 color_mask);
 
 // NDC range: [-1, 1] DC range: [0, window width] / [0, window height]
 __declspec(dllexport) float NDC_TO_DC(float v, int width_height);

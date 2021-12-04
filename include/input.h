@@ -4,8 +4,7 @@
 #include <windows.h>
 #include "..\include\mathlib.h"
 
-enum key_code
-{
+enum key_code {
     space_key = 0x20,
 
     key = 0x30,
@@ -18,13 +17,13 @@ enum key_code
     row_7_key,
     row_8_key,
     row_9_key,
-    
+
     a_key = 0x41,
-    b_key, 
+    b_key,
     c_key,
-    d_key, 
-    e_key, 
-    f_key, 
+    d_key,
+    e_key,
+    f_key,
     g_key,
     h_key,
     i_key,
@@ -52,19 +51,17 @@ enum key_code
     tilde_key = 0xC0,
 };
 
-struct KeyState
-{
+struct KeyState {
     bool down;
     bool down_previous_frame;
     bool pressed_this_frame;
     bool toggle;
 };
 
-struct Input
-{
+struct Input {
     int mouse_x;
     int mouse_y;
-	
+
     bool left_click;
     bool left_click_locked;
     bool right_click;

@@ -1,25 +1,25 @@
 #include "window.h"
 
-LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam) 
+LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
 {
     LRESULT result = 0;
-    
+
     switch (msg) {
-	case WM_SIZE: 
-	    break;
-        
-	case WM_PAINT: 
-	    PAINTSTRUCT ps = {0};
-	    BeginPaint(window, &ps);
-	    EndPaint(window, &ps);
-	    break;
-		
-	case WM_DESTROY: 
-	    PostQuitMessage(0);
-	    break;
-	
-	default:
-	    result = DefWindowProc(window, msg, wparam, lparam);
+    case WM_SIZE:
+        break;
+
+    case WM_PAINT:
+        PAINTSTRUCT ps = {0};
+        BeginPaint(window, &ps);
+        EndPaint(window, &ps);
+        break;
+
+    case WM_DESTROY:
+        PostQuitMessage(0);
+        break;
+
+    default:
+        result = DefWindowProc(window, msg, wparam, lparam);
     }
     return result;
 }
@@ -28,9 +28,9 @@ struct Window OpenWindow(int w, int h, char *title)
 {
     HWND window_handle = {0};
     WNDCLASSEX wc = {0};
-    
+
     wc.cbSize = sizeof(WNDCLASSEX);
-    wc.style  = CS_HREDRAW|CS_VREDRAW|CS_OWNDC;
+    wc.style  = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = GetModuleHandle(0);
     //wc.hIcon = (HICON)LoadImage(GetModuleHandle(0), MAKEINTRESOURCE(ID_ICON), IMAGE_ICON, 32, 32, 0);
@@ -40,12 +40,12 @@ struct Window OpenWindow(int w, int h, char *title)
     wc.lpszMenuName = 0;
     wc.lpszClassName = "WindowClass";
     //wc.hIconSm = (HICON)LoadImage(GetModuleHandle(0), MAKEINTRESOURCE(ID_ICON), IMAGE_ICON, 32, 32, 0);
-    
+
     RegisterClassEx(&wc);
-    window_handle = CreateWindowEx(0, wc.lpszClassName, title, WS_CAPTION|
-                                   WS_SYSMENU|
-                                   WS_THICKFRAME|
-                                   WS_MINIMIZEBOX|
+    window_handle = CreateWindowEx(0, wc.lpszClassName, title, WS_CAPTION |
+                                   WS_SYSMENU |
+                                   WS_THICKFRAME |
+                                   WS_MINIMIZEBOX |
                                    WS_MAXIMIZEBOX,
                                    CW_USEDEFAULT,
                                    CW_USEDEFAULT,
@@ -58,64 +58,64 @@ struct Window OpenWindow(int w, int h, char *title)
     window_rect.right = w;
     window_rect.bottom = h;
 
-    AdjustWindowRect(&window_rect, WS_CAPTION|WS_SYSMENU, GetMenu(window_handle) != 0);
-        
+    AdjustWindowRect(&window_rect, WS_CAPTION | WS_SYSMENU, GetMenu(window_handle) != 0);
+
     int window_width = window_rect.right - window_rect.left;
     int window_height = window_rect.bottom - window_rect.top;
-    
+
     MoveWindow(window_handle, 0, 0, window_width, window_height, 1);
-    ShowWindow(window_handle, SW_SHOW);	
+    ShowWindow(window_handle, SW_SHOW);
 
     struct Window new_window;
     new_window.wnd_h = window_handle;
     new_window.wc = wc;
     new_window.width = window_width;
     new_window.height = window_height;
-	
+
     return new_window;
 }
 
-bool MessageLoop(struct Input *input) 
+bool MessageLoop(struct Input *input)
 {
     bool running = true;
     MSG msg;
-	
-    if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
-	switch (msg.message) {
-	case WM_QUIT:
-	    running = false;
-	    break;
 
-	case WM_SYSKEYDOWN:
-	case WM_KEYDOWN:
-	    input->keyboard[msg.wParam].down = true;
-	    //printf("0x%x pressed\n", msg.wParam);
-				
-	    bool was_down_last_frame = (msg.lParam >> 30) & 1;
-				
-	    if(!was_down_last_frame) {
-		input->keyboard[msg.wParam].down_previous_frame = true;
-		//printf("0x%x pressed this frame\n", msg.wParam);
-	    } else {
-		input->keyboard[msg.wParam].down_previous_frame = false;
-	    }
-	    
-	    if (input->keyboard[msg.wParam].toggle == false && was_down_last_frame == false) {
-		printf("toggle an\n");
-		input->keyboard[msg.wParam].toggle = true;
-	    } else if (input->keyboard[msg.wParam].toggle == true && was_down_last_frame == false) {
-		printf("toggle aus\n");
-		input->keyboard[msg.wParam].toggle = false;
-	    }
-	    break;
-	    
-	case WM_SYSKEYUP:
-	case WM_KEYUP:
-	    input->keyboard[msg.wParam].down = false;
-	    //printf("0x%x released\n", msg.wParam);
-	    break;
-	}
-	
+    if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
+        switch (msg.message) {
+        case WM_QUIT:
+            running = false;
+            break;
+
+        case WM_SYSKEYDOWN:
+        case WM_KEYDOWN:
+            input->keyboard[msg.wParam].down = true;
+            //printf("0x%x pressed\n", msg.wParam);
+
+            bool was_down_last_frame = (msg.lParam >> 30) & 1;
+
+            if(!was_down_last_frame) {
+                input->keyboard[msg.wParam].down_previous_frame = true;
+                //printf("0x%x pressed this frame\n", msg.wParam);
+            } else {
+                input->keyboard[msg.wParam].down_previous_frame = false;
+            }
+
+            if (input->keyboard[msg.wParam].toggle == false && was_down_last_frame == false) {
+                printf("toggle an\n");
+                input->keyboard[msg.wParam].toggle = true;
+            } else if (input->keyboard[msg.wParam].toggle == true && was_down_last_frame == false) {
+                printf("toggle aus\n");
+                input->keyboard[msg.wParam].toggle = false;
+            }
+            break;
+
+        case WM_SYSKEYUP:
+        case WM_KEYUP:
+            input->keyboard[msg.wParam].down = false;
+            //printf("0x%x released\n", msg.wParam);
+            break;
+        }
+
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }

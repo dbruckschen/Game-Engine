@@ -4,8 +4,7 @@
 #include <windows.h>
 #include "common.h"
 
-struct Timer
-{
+struct Timer {
     double perf_freq;
     double start_time;
     double end_time;

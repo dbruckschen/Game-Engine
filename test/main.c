@@ -41,72 +41,6 @@ void DrawTileMap(struct Framebuffer *fbuff)
     }
 }
 
-enum glyph_idx
-{
-    A,
-    B,
-    C,
-    D,
-    E,
-    F,
-    G,
-    H,
-    I,
-    J,
-    K,
-    L,
-    M,
-    N,
-    O,
-    P,
-    Q,
-    R,
-    S,
-    T,
-    U,
-    V,
-    W,
-    X,
-    Y,
-    Z,
-    a,
-    b,
-    c,
-    d,
-    e,
-    f,
-    g,
-    h,
-    i,
-    j,
-    k,
-    l,
-    m,
-    n,
-    o,
-    p,
-    q,
-    r,
-    s,
-    t,
-    u,
-    v,
-    w,
-    x,
-    y,
-    z,
-    nill,
-    one,
-    two,
-    three,
-    four,
-    five,
-    six,
-    seven,
-    eight,
-    nine,
-};
-
 int main(void)
 {
     struct Window window = OpenWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Rudimentary Multimedia Library demo");
@@ -154,13 +88,14 @@ int main(void)
 	DrawTileMap(&fbuff);
 	UpdateSpriteAnimation(&coin);
 	DrawBMP24bpp(&fbuff, coin.frames[coin.current_frame], (u32)coin.x, (u32)coin.y, RGB_Color(255, 0, 255));
-	DrawBMP32bpp(&fbuff, font, 0, 0, RGB_Color(0, 0, 0));
+	//DrawBMP32bpp(&fbuff, font, 0, 0, RGB_Color(0, 0, 0));
 
-	// test drawing string
-	DrawString(&fbuff, font, "Hallo", 300, 300, RGB_Color(0, 0, 0));
-		
+	char buff[256];
+	sprintf(buff, "ms/frame: %f", t.elapsed_time);
+	DrawString(&fbuff, font, buff, 5, 10, RGB_Color(255, 255, 255));
+
 	OutputFramebuffer(window.wnd_h, fbuff);
-
+	
 	EndTimer(&t);
 	coin.current_timer += t.elapsed_time;
     }

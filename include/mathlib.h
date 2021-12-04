@@ -9,8 +9,7 @@
 #define V2(value1, value2) V2(value1, value2)
 #define PI 3.14159265359L
 
-typedef struct
-{
+typedef struct {
     float x;
     float y;
 } v2;

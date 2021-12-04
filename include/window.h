@@ -7,8 +7,7 @@
 #include <stdlib.h> // maybe already in <window.h> ?
 #include "input.h"
 
-struct Window
-{
+struct Window {
     HWND wnd_h;
     WNDCLASSEX wc;
     int width;
