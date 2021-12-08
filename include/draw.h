@@ -106,7 +106,7 @@ struct Sprite {
 };
 
 struct Triangles {
-    float verts[6];
+    float verts[6;]
     u32 color;
 };
 

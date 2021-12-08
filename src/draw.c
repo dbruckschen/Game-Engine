@@ -162,7 +162,6 @@ struct Bitmap LoadBitmapFile(char *filename)
 
         else if (bitmap.bpp == 4)
             HFlipBMP32bpp(&bitmap);
-
     }
     return bitmap;
 }

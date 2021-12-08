@@ -4,8 +4,8 @@
 #include "timing.h"
 #include "common.h"
 
-#define WINDOW_WIDTH  1600
-#define WINDOW_HEIGHT 900
+#define WINDOW_WIDTH  1024
+#define WINDOW_HEIGHT 768
 #define TILE_SIZE 64
 #define NUM_TILES_X (WINDOW_WIDTH / TILE_SIZE)
 #define NUM_TILES_Y (WINDOW_HEIGHT / TILE_SIZE)
@@ -14,15 +14,18 @@
 #define COIN_ANIM_FRAME_TIME 0.2
 
 char map[NUM_TILES_Y][NUM_TILES_X] = {
-    {'1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'},
-    {'1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1'},
-    {'1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1'},
-    {'1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1'},
-    {'1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1'},
-    {'1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1'},
-    {'1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1'},
-    {'1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1'},
-    {'1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'}
+    {'1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'},
+    {'1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1'},
+    {'1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '1'},
+    {'1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '1'},
+    {'1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '1'},
+    {'1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '1'},
+    {'1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '1'},
+    {'1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '1'},
+    {'1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '1'},
+    {'1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '1'},
+    {'1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '1'},
+    {'1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '0', '0', '1'}
 };
 
 void DrawTileMap(struct Framebuffer *fbuff)
@@ -63,6 +66,10 @@ int main(void)
     InitSprite(&coin, 100, 100, COIN_ANIM_COUNT, coin_animation, 0, COIN_ANIM_FRAME_TIME);
 
     printf("window width: %d window height: %d\n", window.width, window.height);
+
+    int frames = 0;
+    int fps = 0;
+    double fps_timer = 0.0;
     
     while(1) {
 	StartTimer(&t);
@@ -90,11 +97,25 @@ int main(void)
 	DrawBMP24bpp(&fbuff, coin.frames[coin.current_frame], (u32)coin.x, (u32)coin.y, RGB_Color(255, 0, 255));
 	//DrawBMP32bpp(&fbuff, font, 0, 0, RGB_Color(0, 0, 0));
 
-	char buff[256];
-	sprintf(buff, "ms/frame: %f", t.elapsed_time);
-	DrawString(&fbuff, font, buff, 5, 10, RGB_Color(255, 255, 255));
+	char performance_values[256];
+	sprintf(performance_values, "ms/frame: %f", t.elapsed_time);
+	DrawString(&fbuff, font, performance_values, 5, 10, RGB_Color(255, 255, 255));
 
+	sprintf(performance_values, "#frames: %d", frames);
+	DrawString(&fbuff, font, performance_values, 5, 20, RGB_Color(255, 255, 255));
+
+	fps_timer += t.elapsed_time;
+	if(fps_timer >= 1.0) {
+	    fps = (int)(frames/fps_timer);
+	    frames = 0;
+	    fps_timer = 0;
+	}
+	sprintf(performance_values, "fps: %d", fps);
+	DrawString(&fbuff, font, performance_values, 5, 30, RGB_Color(255, 255, 255));
+	
 	OutputFramebuffer(window.wnd_h, fbuff);
+
+	frames++;
 	
 	EndTimer(&t);
 	coin.current_timer += t.elapsed_time;
