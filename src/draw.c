@@ -289,98 +289,98 @@ void DrawGlyph(struct Framebuffer *framebuffer, struct Bitmap font, char ch, u32
     u32 glyph_offset = 0;
 
     for(int c = 0; c < 255; c ++) {
-	if(ch == (char)c) {
-	    int start_of_char_type = 0;
+		if(ch == (char)c) {
+			int start_of_char_type = 0;
 
-	    if(c >= 65 && c <= 90) { 
-		start_of_char_type = 65;
-		glyph_offset = glyph_offsets[c - start_of_char_type];
-	    } else if(c >= 97 && c <= 122) {
-		start_of_char_type = 71;
-		glyph_offset = glyph_offsets[c - start_of_char_type];
-	    } else if(c >= 48 && c <= 57) {
-		start_of_char_type = 4;
-		glyph_offset = glyph_offsets[c + start_of_char_type];
-	    } else if(c == '`') {
-		glyph_offset = glyph_offsets[62];
-	    } else if(c == '~') {
-		glyph_offset = glyph_offsets[63];
-	    } else if(c == '!') {
-		glyph_offset = glyph_offsets[64];
-	    } else if(c == 196) { // copyright sign
-		glyph_offset = glyph_offsets[65];
-	    } else if(c == '#') {
-		glyph_offset = glyph_offsets[66];
-	    } else if(c == '$') {
-		glyph_offset = glyph_offsets[67];
-	    } else if(c == '%') {
-		glyph_offset = glyph_offsets[68];
-	    } else if(c == '^') {
-		glyph_offset = glyph_offsets[69];
-	    } else if(c == '&') {
-		glyph_offset = glyph_offsets[70];
-	    } else if(c == '*') {
-		glyph_offset = glyph_offsets[71];
-	    } else if(c == '(') {
-		glyph_offset = glyph_offsets[72];
-	    } else if(c == ')') {
-		glyph_offset = glyph_offsets[73];
-	    } else if(c == '-') {
-		glyph_offset = glyph_offsets[74];
-	    } else if(c == '=') {
-		glyph_offset = glyph_offsets[75];
-	    } else if(c == '_') {
-		glyph_offset = glyph_offsets[76];
-	    } else if(c == '+') {
-		glyph_offset = glyph_offsets[77];
-	    } else if(c == '\\') {
-		glyph_offset = glyph_offsets[78];
-	    } else if(c == '|') {
-		glyph_offset = glyph_offsets[79];
-	    } else if(c == '[') {
-		glyph_offset = glyph_offsets[80];
-	    } else if(c == ']') {
-		glyph_offset = glyph_offsets[81];
-	    } else if(c == '{') {
-		glyph_offset = glyph_offsets[82];
-	    } else if(c == '}') {
-		glyph_offset = glyph_offsets[83];
-	    } else if(c == ';') {
-		glyph_offset = glyph_offsets[84];
-	    } else if(c == '\'') {
-		glyph_offset = glyph_offsets[85];
-	    } else if(c == ':') {
-		glyph_offset = glyph_offsets[86];
-	    } else if(c == '"') {
-		glyph_offset = glyph_offsets[87];
-	    }else if(c == ',') {
-		glyph_offset = glyph_offsets[88];
-	    }else if(c == '<') {
-		glyph_offset = glyph_offsets[89];
-	    }else if(c == '>') {
-		glyph_offset = glyph_offsets[90];
-	    } else if(c == '.') {
-		glyph_offset = glyph_offsets[91];
-	    } else if(c == '/') {
-		glyph_offset = glyph_offsets[92];
-	    }else if(c == '?') {
-		glyph_offset = glyph_offsets[93];
-	    }/*else if(c == '') {
-		glyph_offset = glyph_offsets[94];
-	    }else if(c == '') {
-		glyph_offset = glyph_offsets[95];
-	    }else if(c == '') {
-		glyph_offset = glyph_offsets[96];
-		} */
-	    else {
-		glyph_offset = glyph_offsets[97];
-	    }
+			if(c >= 65 && c <= 90) { 
+				start_of_char_type = 65;
+				glyph_offset = glyph_offsets[c - start_of_char_type];
+			} else if(c >= 97 && c <= 122) {
+				start_of_char_type = 71;
+				glyph_offset = glyph_offsets[c - start_of_char_type];
+			} else if(c >= 48 && c <= 57) {
+				start_of_char_type = 4;
+				glyph_offset = glyph_offsets[c + start_of_char_type];
+			} else if(c == '`') {
+				glyph_offset = glyph_offsets[62];
+			} else if(c == '~') {
+				glyph_offset = glyph_offsets[63];
+			} else if(c == '!') {
+				glyph_offset = glyph_offsets[64];
+			} else if(c == 196) { // copyright sign
+				glyph_offset = glyph_offsets[65];
+			} else if(c == '#') {
+				glyph_offset = glyph_offsets[66];
+			} else if(c == '$') {
+				glyph_offset = glyph_offsets[67];
+			} else if(c == '%') {
+				glyph_offset = glyph_offsets[68];
+			} else if(c == '^') {
+				glyph_offset = glyph_offsets[69];
+			} else if(c == '&') {
+				glyph_offset = glyph_offsets[70];
+			} else if(c == '*') {
+				glyph_offset = glyph_offsets[71];
+			} else if(c == '(') {
+				glyph_offset = glyph_offsets[72];
+			} else if(c == ')') {
+				glyph_offset = glyph_offsets[73];
+			} else if(c == '-') {
+				glyph_offset = glyph_offsets[74];
+			} else if(c == '=') {
+				glyph_offset = glyph_offsets[75];
+			} else if(c == '_') {
+				glyph_offset = glyph_offsets[76];
+			} else if(c == '+') {
+				glyph_offset = glyph_offsets[77];
+			} else if(c == '\\') {
+				glyph_offset = glyph_offsets[78];
+			} else if(c == '|') {
+				glyph_offset = glyph_offsets[79];
+			} else if(c == '[') {
+				glyph_offset = glyph_offsets[80];
+			} else if(c == ']') {
+				glyph_offset = glyph_offsets[81];
+			} else if(c == '{') {
+				glyph_offset = glyph_offsets[82];
+			} else if(c == '}') {
+				glyph_offset = glyph_offsets[83];
+			} else if(c == ';') {
+				glyph_offset = glyph_offsets[84];
+			} else if(c == '\'') {
+				glyph_offset = glyph_offsets[85];
+			} else if(c == ':') {
+				glyph_offset = glyph_offsets[86];
+			} else if(c == '"') {
+				glyph_offset = glyph_offsets[87];
+			}else if(c == ',') {
+				glyph_offset = glyph_offsets[88];
+			}else if(c == '<') {
+				glyph_offset = glyph_offsets[89];
+			}else if(c == '>') {
+				glyph_offset = glyph_offsets[90];
+			} else if(c == '.') {
+				glyph_offset = glyph_offsets[91];
+			} else if(c == '/') {
+				glyph_offset = glyph_offsets[92];
+			}else if(c == '?') {
+				glyph_offset = glyph_offsets[93];
+			}/*else if(c == '') {
+			   glyph_offset = glyph_offsets[94];
+			   }else if(c == '') {
+			   glyph_offset = glyph_offsets[95];
+			   }else if(c == '') {
+			   glyph_offset = glyph_offsets[96];
+			   } */
+			else {
+				glyph_offset = glyph_offsets[97];
+			}
 
-	    // H - 72 ascii - index 7  (+65)
-	    // a - 97 ascii - index 26 (+71)
-	    // 0 - 48 ascii - index 52 (+3)
-	    // 
-	}
+			// H - 72 ascii - index 7  (+65)
+			// a - 97 ascii - index 26 (+71)
+			// 0 - 48 ascii - index 52 (+3)
+			// 
+		}
     }
         
     u32 *dst = (u32 *)framebuffer->buffer;
@@ -404,7 +404,7 @@ void DrawGlyph(struct Framebuffer *framebuffer, struct Bitmap font, char ch, u32
 
             src += font.bpp;
         }
-	src += (font.width - glyph_width) * font.bpp;
+		src += (font.width - glyph_width) * font.bpp;
         dst += framebuffer->width - glyph_width;
     }
 }
@@ -416,12 +416,12 @@ void DrawString(struct Framebuffer *buffer, struct Bitmap font, char *string, u3
     int glyph_spacing = 2;
     
     for(int i = 0; i < StringLen(string)-1; i++) {
-	if(string[i] == ' ') {
-	    new_char_offset += glyph_width + glyph_spacing;
-	} else {
-	    DrawGlyph(buffer, font, string[i], x + new_char_offset, y, color_mask);
-	    new_char_offset += glyph_width + glyph_spacing;
-	}
+		if(string[i] == ' ') {
+			new_char_offset += glyph_width + glyph_spacing;
+		} else {
+			DrawGlyph(buffer, font, string[i], x + new_char_offset, y, color_mask);
+			new_char_offset += glyph_width + glyph_spacing;
+		}
     }
 }
 
@@ -464,7 +464,7 @@ float NDC_TO_DC(float v, int width_height)
 bool BBAA(v2 b1, int width1, int height1, v2 b2, int width2, int height2)
 {
     if(b1.x < b2.x + width2 && b1.x + width1 > b2.x &&
-            b1.y < b2.y + height2 && b1.y + height1 > b2.y)
+	   b1.y < b2.y + height2 && b1.y + height1 > b2.y)
         return true;
     else
         return false;
