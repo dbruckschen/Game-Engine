@@ -4,8 +4,8 @@
 #include "timing.h"
 #include "common.h"
 
-#define WINDOW_WIDTH  1024
-#define WINDOW_HEIGHT 768
+#define WINDOW_WIDTH  1920
+#define WINDOW_HEIGHT 1080
 #define TILE_SIZE 64
 #define NUM_TILES_X (WINDOW_WIDTH / TILE_SIZE)
 #define NUM_TILES_Y (WINDOW_HEIGHT / TILE_SIZE)
@@ -31,16 +31,20 @@ char map[NUM_TILES_Y][NUM_TILES_X] = {
 void DrawTileMap(struct Framebuffer *fbuff)
 {
     for(int y = 0; y < NUM_TILES_Y; y++) {
-	for(int x = 0; x < NUM_TILES_X; x++) {
-	    switch(map[y][x]) {
-	    case '0':
-		DrawRectangle(fbuff, x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE, RGB_Color(0, 255, 0));
-		break;
-	    case '1':
-		DrawRectangle(fbuff, x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE, RGB_Color(100, 100, 100));
-		break;
-	    }
-	}
+		for(int x = 0; x < NUM_TILES_X; x++) {
+			switch(map[y][x]) {
+			case '0':
+				DrawRectangle(fbuff, x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE, RGB_Color(0, 255, 0));
+				break;
+			
+			case '1':
+				DrawRectangle(fbuff, x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE, RGB_Color(100, 100, 100));
+				break;
+			
+			default:
+				DrawRectangle(fbuff, x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE, RGB_Color(50, 58, 69));
+			}
+		}
     }
 }
 
@@ -95,7 +99,6 @@ int main(void)
 	DrawTileMap(&fbuff);
 	UpdateSpriteAnimation(&coin);
 	DrawBMP24bpp(&fbuff, coin.frames[coin.current_frame], (u32)coin.x, (u32)coin.y, RGB_Color(255, 0, 255));
-	//DrawBMP32bpp(&fbuff, font, 0, 0, RGB_Color(0, 0, 0));
 
 	char performance_values[256];
 	sprintf(performance_values, "ms/frame: %f", t.elapsed_time);
