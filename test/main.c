@@ -76,52 +76,54 @@ int main(void)
     double fps_timer = 0.0;
     
     while(1) {
-	StartTimer(&t);
+		StartTimer(&t);
 		
-	if(!MessageLoop(&input))
-	    break;
+		if(!MessageLoop(&input))
+			break;
 
-	if(input.keyboard[d_key].down)
-	    coin.x += (float)t.elapsed_time * 500;
+		if(input.keyboard[d_key].down)
+			coin.x += (float)t.elapsed_time * 500;
 	
-	else if(input.keyboard[a_key].down)
-	    coin.x -= (float)t.elapsed_time * 500;
+		else if(input.keyboard[a_key].down)
+			coin.x -= (float)t.elapsed_time * 500;
 	
-	else if(input.keyboard[s_key].down)
-	    coin.y += (float)t.elapsed_time * 500;
+		else if(input.keyboard[s_key].down)
+			coin.y += (float)t.elapsed_time * 500;
 	
-	else if(input.keyboard[w_key].down)
-	    coin.y -= (float)t.elapsed_time * 500;
+		else if(input.keyboard[w_key].down)
+			coin.y -= (float)t.elapsed_time * 500;
 	
     	
-	FillScreen(&fbuff, RGB_Color(100, 100, 0));
+		FillScreen(&fbuff, RGB_Color(100, 100, 0));
 	
-	DrawTileMap(&fbuff);
-	UpdateSpriteAnimation(&coin);
-	DrawBMP24bpp(&fbuff, coin.frames[coin.current_frame], (u32)coin.x, (u32)coin.y, RGB_Color(255, 0, 255));
+		DrawTileMap(&fbuff);
+		UpdateSpriteAnimation(&coin);
+		DrawBMP24bpp(&fbuff, coin.frames[coin.current_frame], (u32)coin.x, (u32)coin.y, RGB_Color(255, 0, 255));
 
-	char performance_values[256];
-	sprintf(performance_values, "ms/frame: %f", t.elapsed_time);
-	DrawString(&fbuff, font, performance_values, 5, 10, RGB_Color(255, 255, 255));
+		char performance_values[256];
+		sprintf(performance_values, "ms/frame: %f", t.elapsed_time);
+		DrawString(&fbuff, font, performance_values, 5, 10, RGB_Color(255, 255, 255));
 
-	sprintf(performance_values, "#frames: %d", frames);
-	DrawString(&fbuff, font, performance_values, 5, 20, RGB_Color(255, 255, 255));
+		sprintf(performance_values, "#frames: %d", frames);
+		DrawString(&fbuff, font, performance_values, 5, 20, RGB_Color(255, 255, 255));
 
-	fps_timer += t.elapsed_time;
-	if(fps_timer >= 1.0) {
-	    fps = (int)(frames/fps_timer);
-	    frames = 0;
-	    fps_timer = 0;
-	}
-	sprintf(performance_values, "fps: %d", fps);
-	DrawString(&fbuff, font, performance_values, 5, 30, RGB_Color(255, 255, 255));
+		fps_timer += t.elapsed_time;
+		if(fps_timer >= 1.0) {
+			fps = (int)(frames/fps_timer);
+			frames = 0;
+			fps_timer = 0;
+		}
+		sprintf(performance_values, "fps: %d", fps);
+		DrawString(&fbuff, font, performance_values, 5, 30, RGB_Color(255, 255, 255));
+
+		DrawString(&fbuff, font, "HELLO", 100, 100, RGB_Color(255, 255, 255));
 	
-	OutputFramebuffer(window.wnd_h, fbuff);
+		OutputFramebuffer(window.wnd_h, fbuff);
 
-	frames++;
+		frames++;
 	
-	EndTimer(&t);
-	coin.current_timer += t.elapsed_time;
+		EndTimer(&t);
+		coin.current_timer += t.elapsed_time;
     }
 
     return 0;

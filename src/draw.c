@@ -217,7 +217,6 @@ void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, u32 x, 
         bitmap.height = framebuffer->height - bitmap.height - 1;
     }
 
-
     u32 *dst = framebuffer->buffer;
     u8 *src = bitmap.pixel;
 
