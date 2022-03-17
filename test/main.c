@@ -58,16 +58,16 @@ int main(void)
 
     struct Bitmap font = LoadBitmapFile("../assets/font.bmp");
 
-    struct Bitmap coin_animation[COIN_ANIM_COUNT];
-    coin_animation[0] = LoadBitmapFile("../assets/coin1.bmp");
-    coin_animation[1] = LoadBitmapFile("../assets/coin2.bmp");
-    coin_animation[2] = LoadBitmapFile("../assets/coin3.bmp");
-    coin_animation[3] = LoadBitmapFile("../assets/coin4.bmp");
-    coin_animation[4] = LoadBitmapFile("../assets/coin5.bmp");
-    coin_animation[5] = LoadBitmapFile("../assets/coin6.bmp");
+    /* struct Bitmap coin_animation[COIN_ANIM_COUNT]; */
+    /* coin_animation[0] = LoadBitmapFile("../assets/coin1.bmp"); */
+    /* coin_animation[1] = LoadBitmapFile("../assets/coin2.bmp"); */
+    /* coin_animation[2] = LoadBitmapFile("../assets/coin3.bmp"); */
+    /* coin_animation[3] = LoadBitmapFile("../assets/coin4.bmp"); */
+    /* coin_animation[4] = LoadBitmapFile("../assets/coin5.bmp"); */
+    /* coin_animation[5] = LoadBitmapFile("../assets/coin6.bmp"); */
 
-    struct Sprite coin = {0};
-    InitSprite(&coin, 100, 100, COIN_ANIM_COUNT, coin_animation, 0, COIN_ANIM_FRAME_TIME);
+    /* struct Sprite coin = {0}; */
+    /* InitSprite(&coin, 100, 100, COIN_ANIM_COUNT, coin_animation, 0, COIN_ANIM_FRAME_TIME); */
 
     printf("window width: %d window height: %d\n", window.width, window.height);
 
@@ -97,8 +97,8 @@ int main(void)
 		FillScreen(&fbuff, RGB_Color(100, 100, 0));
 	
 		DrawTileMap(&fbuff);
-		UpdateSpriteAnimation(&coin);
-		DrawBMP24bpp(&fbuff, coin.frames[coin.current_frame], (u32)coin.x, (u32)coin.y, RGB_Color(255, 0, 255));
+		//UpdateSpriteAnimation(&coin);
+		//DrawBMP24bpp(&fbuff, coin.frames[coin.current_frame], (u32)coin.x, (u32)coin.y, RGB_Color(255, 0, 255));
 
 		char performance_values[256];
 		sprintf(performance_values, "ms/frame: %f", t.elapsed_time);
@@ -123,7 +123,7 @@ int main(void)
 		frames++;
 	
 		EndTimer(&t);
-		coin.current_timer += t.elapsed_time;
+		//coin.current_timer += t.elapsed_time;
     }
 
     return 0;
