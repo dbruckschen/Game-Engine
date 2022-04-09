@@ -52,7 +52,12 @@ void OutputFramebuffer(HWND window, struct Framebuffer fb)
 
 u32 RGB_Color(u8 red, u8 green, u8 blue)
 {
-    return (unsigned int)(((u8)0 << 24) + (red << 16) + (green << 8) + blue);
+    return (u32)(((u8)0 << 24) + (red << 16) + (green << 8) + blue);
+}
+
+u32 RGBA_Color(u8 red, u8 green, u8 blue, u8 alpha)
+{
+	return (u32)((alpha << 24) + (red << 16) + (green << 8) + blue);
 }
 
 void FillScreen(struct Framebuffer *framebuffer, u32 color)
@@ -276,109 +281,38 @@ void GetPixelFromBMP(struct Bitmap *from, u8 *to)
 
 void DrawGlyph(struct Framebuffer *framebuffer, struct Bitmap font, char ch, u32 x_pos, u32 y_pos, u32 color_mask)
 {
-    u32 glyph_width = 5;
-    u32 num_glyphs = 98;
+    int glyph_width = 5;
+    int num_glyphs = 98;
     u32 glyph_offsets[98];
 
-    for(int i = 0; i < num_glyphs; i ++) {
+    for(int i = 0; i < num_glyphs; i++) {
         glyph_offsets[i] = i * (glyph_width + 1) * font.bpp;
     }
 
     // find glyph offset of the current character to be drawn
     u32 glyph_offset = 0;
 
+	// calculate the offset in the font bitmap for the specific glyph
     for(int c = 0; c < 255; c ++) {
 		if(ch == (char)c) {
 			int start_of_char_type = 0;
-
-			if(c >= 65 && c <= 90) { 
+			
+			if(c >= 65 && c <= 90) { // A-Z
 				start_of_char_type = 65;
 				glyph_offset = glyph_offsets[c - start_of_char_type];
-			} else if(c >= 97 && c <= 122) {
+			}
+			else if(c >= 97 && c <= 122) { // a-z
 				start_of_char_type = 71;
 				glyph_offset = glyph_offsets[c - start_of_char_type];
-			} else if(c >= 48 && c <= 57) {
+			}
+			else if(c >= 48 && c <= 57) { // numbers 0-9
 				start_of_char_type = 4;
 				glyph_offset = glyph_offsets[c + start_of_char_type];
-			} else if(c == '`') {
-				glyph_offset = glyph_offsets[62];
-			} else if(c == '~') {
-				glyph_offset = glyph_offsets[63];
-			} else if(c == '!') {
-				glyph_offset = glyph_offsets[64];
-			} else if(c == 196) { // copyright sign
-				glyph_offset = glyph_offsets[65];
-			} else if(c == '#') {
-				glyph_offset = glyph_offsets[66];
-			} else if(c == '$') {
-				glyph_offset = glyph_offsets[67];
-			} else if(c == '%') {
-				glyph_offset = glyph_offsets[68];
-			} else if(c == '^') {
-				glyph_offset = glyph_offsets[69];
-			} else if(c == '&') {
-				glyph_offset = glyph_offsets[70];
-			} else if(c == '*') {
-				glyph_offset = glyph_offsets[71];
-			} else if(c == '(') {
-				glyph_offset = glyph_offsets[72];
-			} else if(c == ')') {
-				glyph_offset = glyph_offsets[73];
-			} else if(c == '-') {
-				glyph_offset = glyph_offsets[74];
-			} else if(c == '=') {
-				glyph_offset = glyph_offsets[75];
-			} else if(c == '_') {
-				glyph_offset = glyph_offsets[76];
-			} else if(c == '+') {
-				glyph_offset = glyph_offsets[77];
-			} else if(c == '\\') {
-				glyph_offset = glyph_offsets[78];
-			} else if(c == '|') {
-				glyph_offset = glyph_offsets[79];
-			} else if(c == '[') {
-				glyph_offset = glyph_offsets[80];
-			} else if(c == ']') {
-				glyph_offset = glyph_offsets[81];
-			} else if(c == '{') {
-				glyph_offset = glyph_offsets[82];
-			} else if(c == '}') {
-				glyph_offset = glyph_offsets[83];
-			} else if(c == ';') {
-				glyph_offset = glyph_offsets[84];
-			} else if(c == '\'') {
-				glyph_offset = glyph_offsets[85];
-			} else if(c == ':') {
-				glyph_offset = glyph_offsets[86];
-			} else if(c == '"') {
-				glyph_offset = glyph_offsets[87];
-			}else if(c == ',') {
-				glyph_offset = glyph_offsets[88];
-			}else if(c == '<') {
-				glyph_offset = glyph_offsets[89];
-			}else if(c == '>') {
-				glyph_offset = glyph_offsets[90];
-			} else if(c == '.') {
-				glyph_offset = glyph_offsets[91];
-			} else if(c == '/') {
-				glyph_offset = glyph_offsets[92];
-			}else if(c == '?') {
-				glyph_offset = glyph_offsets[93];
-			}/*else if(c == '') {
-			   glyph_offset = glyph_offsets[94];
-			   }else if(c == '') {
-			   glyph_offset = glyph_offsets[95];
-			   }else if(c == '') {
-			   glyph_offset = glyph_offsets[96];
-			   } */
-			else {
-				glyph_offset = glyph_offsets[97];
 			}
-
-			// H - 72 ascii - index 7  (+65)
-			// a - 97 ascii - index 26 (+71)
-			// 0 - 48 ascii - index 52 (+3)
-			// 
+			else if(c == 126) {
+				start_of_char_type = 64;
+				glyph_offset = glyph_offsets[c + start_of_char_type];
+			}
 		}
     }
         
@@ -392,7 +326,8 @@ void DrawGlyph(struct Framebuffer *framebuffer, struct Bitmap font, char ch, u32
             u8 r = *src;
             u8 g = *(src + 1);
             u8 b = *(src + 2);
-            u8 a = *(src + 3);
+            //u8 a = *(src + 3);
+			u8 a = 0;
 
             u32 src_pixel = (a << 24) + (r << 16) + (g << 8) + b;
 

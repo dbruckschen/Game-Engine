@@ -132,6 +132,14 @@ __declspec(dllexport)void OutputFramebuffer(HWND window, struct Framebuffer fb);
  */
 __declspec(dllexport) u32 RGB_Color(u8 red, u8 green, u8 blue);
 
+/*
+ * u32 RGB_Color(u8 red, u8 green, u8 blue);
+ * Packs three 8bit values in a unsigned 32bit value in the order the framebuffer uses it and returns the value.
+ * The Format: ARGB.
+ */
+__declspec(dllexport) u32 RGBA_Color(u8 red, u8 green, u8 blue, u8 alpha);
+
+
 // Fill the screen with a solid color. The Color format is 0RGB.
 __declspec(dllexport) void FillScreen(struct Framebuffer *framebuffer, u32 color);
 __declspec(dllexport) void DrawPixel(struct Framebuffer *framebuffer, u32 x, u32 y, u32 color);
