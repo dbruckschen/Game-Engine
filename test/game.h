@@ -27,10 +27,15 @@
 #define GREEN 0x8EC85A
 #define RED 0xE11A21
 
-#define FALL_SPEED 1
+#define FALL_SPEED .5
+#define GENERATION_TIME .2
+#define LOCK_DOWN_TIMER .5
 #define SOFT_DROP_SPEED (FALL_SPEED/20.0)
 #define HARD_DROP_SPEED 0.0001
 #define AUTO_REPEAD_TIME 0.3
+
+#define MAX_SHAPES 512
+#define SHAPE_BLOCK_COUNT 4
 
 enum ShapeType {
 	O_SHAPE,
@@ -42,10 +47,28 @@ enum ShapeType {
 	Z_SHAPE,
 };
 
+struct Point {
+	int x;
+	int y;
+};
+
+struct Shape {
+	bool alive;
+	struct Point p[SHAPE_BLOCK_COUNT];
+	enum ShapeType type;
+	u32 color;
+	bool locked;
+};
+
 struct GameState {
 	bool running;
+	bool first_frame;
+	bool previous_lock_down;
+
+	double spawn_timer;
+	double move_timer;
 	
-	struct Shape shapes[512];
+	struct Shape shapes[MAX_SHAPES];
 	int num_shapes;
 
 	struct Window window;
@@ -55,29 +78,19 @@ struct GameState {
 	struct Bitmap font;
 };
 
-struct Point {
-	int x;
-	int y;
-};
-
-struct Shape {
-	struct Point p[4];
-	enum ShapeType type;
-	u32 color;
-	bool locked;
-};
-
 static int matrix[MATRIX_HEIGHT][MATRIX_WIDTH];
 
 static void GameInit(struct GameState *game_state);
 void GameStart();
 static void GameUpdate(struct GameState *game_state);
-static void GameRender();
+static void GameRender(struct GameState *game_state);
 
 static void DrawMatrix(struct Framebuffer *fbuff);
-static void FillMatrixTile(struct GameState *game_state, int x, int y, u32 color);
-static void DrawShape(struct GameState *game_state, int x, int y, enum ShapeType type);
+static void FillMatrixTile(struct Framebuffer *fbuff, int x, int y, u32 color);
+static void DrawShape(struct Framebuffer *fbuff, struct Shape *shape);
 
-static void SpawnShape(enum ShapeType tpye);
+static void SpawnShape(struct GameState *game_state, enum ShapeType tpye);
+static struct Point InitPoint(int x, int y);
+static struct Shape InitShape(enum ShapeType type);
 
 #endif

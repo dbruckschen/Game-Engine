@@ -2,6 +2,7 @@
 
 void GameInit(struct GameState *game_state) {
 	game_state->running = true;
+	game_state->previous_lock_down = true;
 
 	/* create window */
 	const char *window_title = "Rudimentary Multimedia Library demo";
@@ -19,6 +20,7 @@ void GameInit(struct GameState *game_state) {
 
 void GameStart() {
 	struct GameState game_state;
+	memset(&game_state, 0, sizeof game_state);
 	GameInit(&game_state);
 		
 	while(game_state.running) {
@@ -29,7 +31,7 @@ void GameStart() {
 		}
 
 		GameUpdate(&game_state);
-		GameRender(&game_state.fbuff, &game_state.window);
+		GameRender(&game_state);
 	
 		EndTimer(&game_state.timer);
 	}
@@ -51,24 +53,70 @@ void GameUpdate(struct GameState *game_state) {
 	/* } */
 	/* sprintf(performance_values, "fps: %d", fps); */
 	/* DrawString(&fbuff, font, performance_values, 5, 30, RGB_Color(255, 255, 255)); */
+
+	/* update timer */
+	if(game_state->previous_lock_down) {
+		game_state->spawn_timer += game_state->timer.elapsed_time;
+	}
 	
-	FillScreen(&game_state->fbuff, RGB_Color(186, 188, 190));
-	DrawMatrix(&game_state->fbuff);
-	/* DrawShape(game_state, 3, 3, O_SHAPE); */
-	/* DrawShape(game_state, 5, 5, I_SHAPE); */
-	/* DrawShape(game_state, 6, 8, T_SHAPE); */
-	/* DrawShape(game_state, 2, 8, L_SHAPE); */
-	/* DrawShape(game_state, 4, 11, J_SHAPE); */
-	/* DrawShape(game_state, 2, 14, S_SHAPE); */
-	/* DrawShape(game_state, 2, 17, Z_SHAPE); */
+	game_state->move_timer += game_state->timer.elapsed_time;
+
+	/* spawn shape after certain time, timer starts only if previous shape locked */
+	if(game_state->spawn_timer >= GENERATION_TIME) {
+		game_state->previous_lock_down = false;
+		game_state->spawn_timer = 0.0;
 		
-	DrawString(&game_state->fbuff, game_state->font, "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ", 10, 50, RGB_Color(255, 255, 255));
+		for(int i = 0; i < MAX_SHAPES; i++) {
+			/* find unused shape */
+			if(!game_state->shapes[i].alive) {
+				game_state->shapes[i] = InitShape(L_SHAPE);
+				break;
+			}
+		}
+	}
+
+	/* lock shape if it reached the ground or had collusion with other shapes*/
+	for(int i_shape = 0; i_shape < MAX_SHAPES; i_shape++) {
+		for(int i_block = 0; i_block < SHAPE_BLOCK_COUNT; i_block++) {
+			if(game_state->shapes[i_shape].p[i_block].y == MATRIX_HEIGHT-1 &&
+			   !game_state->shapes[i_shape].locked) {
+				game_state->shapes[i_shape].locked = true;
+				game_state->previous_lock_down = true;
+				break;
+			}
+		}
+	}
+
+	/* move shape every .5 sec for now */
+	if(game_state->move_timer >= FALL_SPEED) {
+		for(int i = 0; i < MAX_SHAPES; i++) {
+			if(game_state->shapes[i].alive && !game_state->shapes[i].locked) {
+				/* check if matrix square is already occupied before moving shape */
+				
+				
+				for(int i_block = 0; i_block < SHAPE_BLOCK_COUNT; i_block++) {
+					game_state->shapes[i].p[i_block].y++;
+				}
+			}
+		}
+		game_state->move_timer = 0.0;
+	}
+	
+	//DrawString(&game_state->fbuff, game_state->font, "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ", 10, 50, RGB_Color(255, 255, 255));
 	//~!@#$%^&*()-_+={}[];:'\",<.>/?
 	/* frames++; */
 }
 
-void GameRender(struct Framebuffer *fbuff, struct Window *window) {
-	OutputFramebuffer(window->wnd_h, *fbuff);
+void GameRender(struct GameState *game_state) {
+	FillScreen(&game_state->fbuff, RGB_Color(186, 188, 190));
+	DrawMatrix(&game_state->fbuff);
+
+	for(int i = 0; i < MAX_SHAPES; i++) {
+		if(game_state->shapes[i].alive) {
+			DrawShape(&game_state->fbuff, &game_state->shapes[i]);
+		}
+	}
+	OutputFramebuffer(game_state->window.wnd_h, game_state->fbuff);
 }
 
 void DrawMatrix(struct Framebuffer *fbuff) {
@@ -140,70 +188,138 @@ void DrawMatrix(struct Framebuffer *fbuff) {
 				  border_color);
 }
 
-static void FillMatrixTile(struct GameState *game_state, int x, int y, u32 color) {
+static void FillMatrixTile(struct Framebuffer *fbuff, int x, int y, u32 color) {
 	int offset_matrix_x = WINDOW_WIDTH/2 - (MATRIX_WIDTH*TILE_SIZE)/2;
 	int offset_matrix_y = WINDOW_HEIGHT/2 - (MATRIX_HEIGHT*TILE_SIZE)/2;
 
 	int x_rec = (x * TILE_SIZE) + offset_matrix_x + 1;
 	int y_rec = (y * TILE_SIZE) + offset_matrix_y + 1;
 	
-	DrawRectangle(&game_state->fbuff, x_rec, y_rec, TILE_SIZE-1, TILE_SIZE-1, color);
+	DrawRectangle(fbuff, x_rec, y_rec, TILE_SIZE-1, TILE_SIZE-1, color);
 }
 
-static void DrawShape(struct GameState *game_state, int x, int y, enum ShapeType type) {
-	switch(type) {
+static void DrawShape(struct Framebuffer *fbuff, struct Shape *shape) {
+	switch(shape->type) {
 	case O_SHAPE:
-		FillMatrixTile(game_state, x, y, YELLOW);
-		FillMatrixTile(game_state, x+1, y, YELLOW);
-		FillMatrixTile(game_state, x+1, y+1, YELLOW);
-		FillMatrixTile(game_state, x, y+1, YELLOW);
+		for(int i = 0; i < SHAPE_BLOCK_COUNT; i++) {
+			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, YELLOW);
+		}
 		break;
 
 	case I_SHAPE:
-		FillMatrixTile(game_state, x, y, LIGHT_BLUE);
-		FillMatrixTile(game_state, x+1, y, LIGHT_BLUE);
-		FillMatrixTile(game_state, x+2, y, LIGHT_BLUE);
-		FillMatrixTile(game_state, x+3, y, LIGHT_BLUE);
+		for(int i = 0; i < SHAPE_BLOCK_COUNT; i++) {
+			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, LIGHT_BLUE);
+		}
 		break;
 
 	case T_SHAPE:
-		FillMatrixTile(game_state, x, y, PURPLE);
-		FillMatrixTile(game_state, x-1, y+1, PURPLE);
-		FillMatrixTile(game_state, x, y+1, PURPLE);
-		FillMatrixTile(game_state, x+1, y+1, PURPLE);
+		for(int i = 0; i < SHAPE_BLOCK_COUNT; i++) {
+			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, PURPLE);
+		}
 		break;
 		
 	case L_SHAPE:
-		FillMatrixTile(game_state, x, y, ORANGE);
-		FillMatrixTile(game_state, x+1, y, ORANGE);
-		FillMatrixTile(game_state, x+2, y, ORANGE);
-		FillMatrixTile(game_state, x+2, y-1, ORANGE);
+		for(int i = 0; i < SHAPE_BLOCK_COUNT; i++) {
+			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, ORANGE);
+		}
 		break;
 
 	case J_SHAPE:
-		FillMatrixTile(game_state, x, y, DARK_BLUE);
-		FillMatrixTile(game_state, x, y+1, DARK_BLUE);
-		FillMatrixTile(game_state, x+1, y+1, DARK_BLUE);
-		FillMatrixTile(game_state, x+2, y+1, DARK_BLUE);
+		for(int i = 0; i < SHAPE_BLOCK_COUNT; i++) {
+			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, DARK_BLUE);
+		}
 		break;
 
 	case S_SHAPE:
-		FillMatrixTile(game_state, x, y, GREEN);
-		FillMatrixTile(game_state, x+1, y, GREEN);
-		FillMatrixTile(game_state, x+1, y-1, GREEN);
-		FillMatrixTile(game_state, x+2, y-1, GREEN);
+		for(int i = 0; i < SHAPE_BLOCK_COUNT; i++) {
+			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, GREEN);
+		}
 		break;
 
 	case Z_SHAPE:
-		FillMatrixTile(game_state, x, y, RED);
-		FillMatrixTile(game_state, x+1, y, RED);
-		FillMatrixTile(game_state, x+1, y+1, RED);
-		FillMatrixTile(game_state, x+2, y+1, RED);
+		for(int i = 0; i < SHAPE_BLOCK_COUNT; i++) {
+			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, RED);
+		}
 		break;
 	};
 }
 
-static void SpawnShape(struct GameState *game_sate, enum ShapeType tpye) {
-	game_state->shapes[num_shapes].type = type;
+static void SpawnShape(struct GameState *game_state, enum ShapeType type) {
+	game_state->shapes[game_state->num_shapes].type = type;
 	game_state->num_shapes++;
+}
+
+static struct Point InitPoint(int x, int y) {
+	struct Point p = {x, y};
+	return p;
+}
+
+static struct Shape InitShape(enum ShapeType type) {
+	struct Shape s = {0};
+	s.alive = true;
+	s.locked = false;
+
+	/* starting spawn points*/
+	int x = 4;
+	int y = 0;
+	
+	switch(type) {
+	case O_SHAPE:
+		s.color = YELLOW;	
+		s.p[0] = InitPoint(x, y);
+		s.p[1] = InitPoint(x+1, y);
+		s.p[2] = InitPoint(x+1, y+1);
+		s.p[3] = InitPoint(x, y+1);
+		break;
+
+	case I_SHAPE:
+		s.color = LIGHT_BLUE;	
+		s.p[0] = InitPoint(x, y);
+		s.p[1] = InitPoint(x+1, y);
+		s.p[2] = InitPoint(x+2, y);
+		s.p[3] = InitPoint(x+3, y);
+		break;
+
+	case T_SHAPE:
+		s.color = PURPLE;	
+		s.p[0] = InitPoint(x, y);
+		s.p[1] = InitPoint(x-1, y+1);
+		s.p[2] = InitPoint(x, y+1);
+		s.p[3] = InitPoint(x+1, y+1);
+		break;
+
+	case L_SHAPE:
+		s.color = ORANGE;	
+		s.p[0] = InitPoint(x, y);
+		s.p[1] = InitPoint(x+1, y);
+		s.p[2] = InitPoint(x+2, y);
+		s.p[3] = InitPoint(x+2, y-1);
+		break;
+
+	case J_SHAPE:
+		s.color = DARK_BLUE;	
+		s.p[0] = InitPoint(x, y);
+		s.p[0] = InitPoint(x+1, y);
+		s.p[0] = InitPoint(x+2, y);
+		s.p[0] = InitPoint(x+2, y-1);
+		break;
+		
+	case S_SHAPE:
+		s.color = GREEN;	
+		s.p[0] = InitPoint(x, y);
+		s.p[0] = InitPoint(x+1, y);
+		s.p[0] = InitPoint(x+1, y-1);
+		s.p[0] = InitPoint(x+2, y-1);
+		break;
+
+	case Z_SHAPE:
+		s.color = RED;	
+		s.p[0] = InitPoint(x, y);
+		s.p[0] = InitPoint(x+1, y);
+		s.p[0] = InitPoint(x+1, y+1);
+		s.p[0] = InitPoint(x+2, y+1);
+		break;
+	};
+
+	return s;
 }
