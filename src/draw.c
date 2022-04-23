@@ -213,19 +213,41 @@ void HFlipBMP32bpp(struct Bitmap *bitmap)
     copy_bmp_pixel = 0;
 }
 
-void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, u32 x, u32 y, u32 color_mask)
+void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap,int x, int y, u32 color_mask)
 {
-    if(x >= framebuffer->width || y >= framebuffer->height)
+    if(x >= framebuffer->width || y >= framebuffer->height ||
+	   (x + bitmap.width <= 0) || (y + bitmap.height <= 0))
         return;
 
-    if(y + bitmap.height - 1 > framebuffer->height) {
-        bitmap.height = framebuffer->height - bitmap.height - 1;
-    }
+	int x1 = x;
+	int y1 = y;
+
+	if(x1 < 0) {
+		x1 = 0;
+	}
+
+	if(y1 < 0) {
+		y1 = 0;
+	}
+
+	int x2 = x1 + bitmap.width;
+	int y2 = y1 + bitmap.height;
+
+	if(x2 > framebuffer->width) {
+		x2 = framebuffer->width;
+	}
+
+	if(y2 > framebuffer->height) {
+		y2 = framebuffer->height;
+	}
+
+	int x_off = x1 - x;
+	int y_off = y1 - y;
 
     u32 *dst = framebuffer->buffer;
-    u8 *src = bitmap.pixel;
+    u8 *src = bitmap.pixel + (x_off + (y_off * bitmap.width));
 
-    dst += x + y * framebuffer->width;
+    dst += x1 + y1 * framebuffer->width;
 
     for(u32 yidx = 0; yidx < bitmap.height; yidx++) {
         for(u32 xidx = 0; xidx < bitmap.width; xidx++) {

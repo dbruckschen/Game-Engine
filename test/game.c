@@ -189,7 +189,7 @@ void DrawMatrix(struct Framebuffer *fbuff) {
 }
 
 static void FillMatrixTile(struct Framebuffer *fbuff, int x, int y, u32 color) {
-	int offset_matrix_x = WINDOW_WIDTH/2 - (MATRIX_WIDTH*TILE_SIZE)/2;
+v	int offset_matrix_x = WINDOW_WIDTH/2 - (MATRIX_WIDTH*TILE_SIZE)/2;
 	int offset_matrix_y = WINDOW_HEIGHT/2 - (MATRIX_HEIGHT*TILE_SIZE)/2;
 
 	int x_rec = (x * TILE_SIZE) + offset_matrix_x + 1;

@@ -166,7 +166,7 @@ __declspec(dllexport) void HFlipBMP32bpp(struct Bitmap *bitmap);
 
 
 // Bitmap drawing functions for 24 bytes per pixel and 32 bytes per pixel.
-__declspec(dllexport) void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask);
+__declspec(dllexport) void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x_pos, int y_pos, u32 color_mask);
 __declspec(dllexport) void DrawBMP32bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask);
 
 /*
