@@ -67,7 +67,7 @@ struct GameState {
 
 	double spawn_timer;
 	double move_timer;
-	
+
 	struct Shape shapes[MAX_SHAPES];
 	int num_shapes;
 
@@ -76,6 +76,8 @@ struct GameState {
 	struct Input input;
 	struct Timer timer;
 	struct Bitmap font;
+
+	struct Bitmap debug;
 };
 
 static int matrix[MATRIX_HEIGHT][MATRIX_WIDTH];

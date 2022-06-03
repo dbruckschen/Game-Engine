@@ -16,6 +16,7 @@ void GameInit(struct GameState *game_state) {
 
 	/* load font bitmap */
 	game_state->font = LoadBitmapFile("../assets/font.bmp");
+	game_state->debug = LoadBitmapFile("../assets/test.bmp");
 }
 
 void GameStart() {
@@ -92,8 +93,6 @@ void GameUpdate(struct GameState *game_state) {
 		for(int i = 0; i < MAX_SHAPES; i++) {
 			if(game_state->shapes[i].alive && !game_state->shapes[i].locked) {
 				/* check if matrix square is already occupied before moving shape */
-				
-				
 				for(int i_block = 0; i_block < SHAPE_BLOCK_COUNT; i_block++) {
 					game_state->shapes[i].p[i_block].y++;
 				}
@@ -116,6 +115,14 @@ void GameRender(struct GameState *game_state) {
 			DrawShape(&game_state->fbuff, &game_state->shapes[i]);
 		}
 	}
+ 
+	//DrawBMP24bpp(&game_state->fbuff, game_state->debug, 20, 100, RGB_Color(255, 0, 255));
+	//DrawBMP24bpp(&game_state->fbuff, game_state->debug, 200, 200, RGB_Color(255, 0, 255));
+	//DrawBMP24bpp(&game_state->fbuff, game_state->debug, 760, 200, RGB_Color(255, 0, 255));
+	DrawBMP24bpp(&game_state->fbuff, game_state->debug, 760, -50, RGB_Color(255, 0, 255));
+	DrawBMP24bpp(&game_state->fbuff, game_state->debug, -20, -20, RGB_Color(255, 0, 255));
+	DrawBMP24bpp(&game_state->fbuff, game_state->debug, -20, 100, RGB_Color(255, 0, 255)); 
+	
 	OutputFramebuffer(game_state->window.wnd_h, game_state->fbuff);
 }
 
@@ -189,7 +196,7 @@ void DrawMatrix(struct Framebuffer *fbuff) {
 }
 
 static void FillMatrixTile(struct Framebuffer *fbuff, int x, int y, u32 color) {
-v	int offset_matrix_x = WINDOW_WIDTH/2 - (MATRIX_WIDTH*TILE_SIZE)/2;
+	int offset_matrix_x = WINDOW_WIDTH/2 - (MATRIX_WIDTH*TILE_SIZE)/2;
 	int offset_matrix_y = WINDOW_HEIGHT/2 - (MATRIX_HEIGHT*TILE_SIZE)/2;
 
 	int x_rec = (x * TILE_SIZE) + offset_matrix_x + 1;
