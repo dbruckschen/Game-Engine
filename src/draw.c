@@ -213,14 +213,17 @@ void HFlipBMP32bpp(struct Bitmap *bitmap)
     copy_bmp_pixel = 0;
 }
 
-void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap,int x, int y, u32 color_mask)
+void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x, int y, u32 color_mask)
 {
-    if(x >= framebuffer->width || y >= framebuffer->height ||
-	   (x + bitmap.width <= 0) || (y + bitmap.height <= 0))
+    if((x >= (int)framebuffer->width) || (y >= (int)framebuffer->height) ||
+	   ((x + (int)bitmap.width) <= 0) || ((y + (int)bitmap.height) <= 0)) {
         return;
-
+	}
+	
 	int x1 = x;
 	int y1 = y;
+	int x2 = x1 + bitmap.width - 1;
+	int y2 = y1 + bitmap.height - 1;
 
 	if(x1 < 0) {
 		x1 = 0;
@@ -230,27 +233,27 @@ void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap,int x, i
 		y1 = 0;
 	}
 
-	int x2 = x1 + bitmap.width;
-	int y2 = y1 + bitmap.height;
-
-	if(x2 > framebuffer->width) {
-		x2 = framebuffer->width;
+	if(x2 >= (int)framebuffer->width) {
+		x2 = framebuffer->width - 1;
 	}
 
-	if(y2 > framebuffer->height) {
-		y2 = framebuffer->height;
+	if(y2 >= (int)framebuffer->height) {
+		y2 = framebuffer->height - 1;
 	}
 
 	int x_off = x1 - x;
 	int y_off = y1 - y;
 
+	int dx = x2 - x1 + 1;
+	int dy = y2 - y1 + 1;
+
     u32 *dst = framebuffer->buffer;
-    u8 *src = bitmap.pixel + (x_off + (y_off * bitmap.width));
+	dst += x1 + (y1 * framebuffer->width);
+    u8 *src = bitmap.pixel;
+	src += x_off + (y_off * bitmap.width);
 
-    dst += x1 + y1 * framebuffer->width;
-
-    for(u32 yidx = 0; yidx < bitmap.height; yidx++) {
-        for(u32 xidx = 0; xidx < bitmap.width; xidx++) {
+    for(int yidx = 0; yidx < dy; yidx++) {
+        for(int xidx = 0; xidx < dx; xidx++) {
             u8 r = *src;
             u8 g = *(src + 1);
             u8 b = *(src + 2);
@@ -264,7 +267,8 @@ void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap,int x, i
 
             src += bitmap.bpp;
         }
-        dst += (framebuffer->width - bitmap.width);
+		src += (bitmap.width - dx) * bitmap.bpp;
+        dst += framebuffer->width - dx;
     }
 }
 
@@ -343,8 +347,8 @@ void DrawGlyph(struct Framebuffer *framebuffer, struct Bitmap font, char ch, u32
 
     dst += x_pos + (y_pos * framebuffer->width);
 
-    for(u32 y = 0; y < font.height; ++y) {
-        for(u32 x = 0; x < glyph_width; ++x) {
+    for(int y = 0; y < (int)font.height; ++y) {
+        for(int x = 0; x < glyph_width; ++x) {
             u8 r = *src;
             u8 g = *(src + 1);
             u8 b = *(src + 2);
