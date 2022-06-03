@@ -34,6 +34,7 @@
 #define HARD_DROP_SPEED 0.0001
 #define AUTO_REPEAD_TIME 0.3
 
+#define NUM_SHAPE_TYPES 7
 #define MAX_SHAPES 512
 #define SHAPE_BLOCK_COUNT 4
 
@@ -76,6 +77,8 @@ struct GameState {
 	struct Input input;
 	struct Timer timer;
 	struct Bitmap font;
+
+	enum ShapeType random_shape_queue[7];
 };
 
 static int matrix[MATRIX_HEIGHT][MATRIX_WIDTH];
@@ -92,5 +95,7 @@ static void DrawShape(struct Framebuffer *fbuff, struct Shape *shape);
 static void SpawnShape(struct GameState *game_state, enum ShapeType tpye);
 static struct Point InitPoint(int x, int y);
 static struct Shape InitShape(enum ShapeType type);
+
+static void	GenerateShapeOrder(enum ShapeType *shape_queue);
 
 #endif

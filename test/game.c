@@ -1,6 +1,9 @@
 #include "game.h"
 
 void GameInit(struct GameState *game_state) {
+	InitRandomNumberGen();
+	GenerateShapeOrder(game_state->random_shape_queue);
+		
 	game_state->running = true;
 	game_state->previous_lock_down = true;
 
@@ -69,7 +72,8 @@ void GameUpdate(struct GameState *game_state) {
 		for(int i = 0; i < MAX_SHAPES; i++) {
 			/* find unused shape */
 			if(!game_state->shapes[i].alive) {
-				game_state->shapes[i] = InitShape(L_SHAPE);
+				/* get next shape out of shape queue */
+				game_state->shapes[i] = InitShape(J_SHAPE);
 				break;
 			}
 		}
@@ -92,7 +96,6 @@ void GameUpdate(struct GameState *game_state) {
 		for(int i = 0; i < MAX_SHAPES; i++) {
 			if(game_state->shapes[i].alive && !game_state->shapes[i].locked) {
 				/* check if matrix square is already occupied before moving shape */
-				
 				
 				for(int i_block = 0; i_block < SHAPE_BLOCK_COUNT; i_block++) {
 					game_state->shapes[i].p[i_block].y++;
@@ -189,7 +192,7 @@ void DrawMatrix(struct Framebuffer *fbuff) {
 }
 
 static void FillMatrixTile(struct Framebuffer *fbuff, int x, int y, u32 color) {
-v	int offset_matrix_x = WINDOW_WIDTH/2 - (MATRIX_WIDTH*TILE_SIZE)/2;
+	int offset_matrix_x = WINDOW_WIDTH/2 - (MATRIX_WIDTH*TILE_SIZE)/2;
 	int offset_matrix_y = WINDOW_HEIGHT/2 - (MATRIX_HEIGHT*TILE_SIZE)/2;
 
 	int x_rec = (x * TILE_SIZE) + offset_matrix_x + 1;
@@ -202,43 +205,43 @@ static void DrawShape(struct Framebuffer *fbuff, struct Shape *shape) {
 	switch(shape->type) {
 	case O_SHAPE:
 		for(int i = 0; i < SHAPE_BLOCK_COUNT; i++) {
-			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, YELLOW);
+			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, shape->color);
 		}
 		break;
 
 	case I_SHAPE:
 		for(int i = 0; i < SHAPE_BLOCK_COUNT; i++) {
-			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, LIGHT_BLUE);
+			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, shape->color);
 		}
 		break;
 
 	case T_SHAPE:
 		for(int i = 0; i < SHAPE_BLOCK_COUNT; i++) {
-			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, PURPLE);
+			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, shape->color);
 		}
 		break;
 		
 	case L_SHAPE:
 		for(int i = 0; i < SHAPE_BLOCK_COUNT; i++) {
-			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, ORANGE);
+			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, shape->color);
 		}
 		break;
 
 	case J_SHAPE:
 		for(int i = 0; i < SHAPE_BLOCK_COUNT; i++) {
-			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, DARK_BLUE);
+			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, shape->color);
 		}
 		break;
 
 	case S_SHAPE:
 		for(int i = 0; i < SHAPE_BLOCK_COUNT; i++) {
-			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, GREEN);
+			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, shape->color);
 		}
 		break;
 
 	case Z_SHAPE:
 		for(int i = 0; i < SHAPE_BLOCK_COUNT; i++) {
-			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, RED);
+			FillMatrixTile(fbuff, shape->p[i].x, shape->p[i].y, shape->color);
 		}
 		break;
 	};
@@ -283,25 +286,25 @@ static struct Shape InitShape(enum ShapeType type) {
 	case T_SHAPE:
 		s.color = PURPLE;	
 		s.p[0] = InitPoint(x, y);
-		s.p[1] = InitPoint(x-1, y+1);
-		s.p[2] = InitPoint(x, y+1);
-		s.p[3] = InitPoint(x+1, y+1);
+		s.p[1] = InitPoint(x-1, y);
+		s.p[2] = InitPoint(x+1, y);
+		s.p[3] = InitPoint(x, y+1);
 		break;
 
 	case L_SHAPE:
 		s.color = ORANGE;	
-		s.p[0] = InitPoint(x, y);
-		s.p[1] = InitPoint(x+1, y);
-		s.p[2] = InitPoint(x+2, y);
-		s.p[3] = InitPoint(x+2, y-1);
+		s.p[0] = InitPoint(x, y+1);
+		s.p[1] = InitPoint(x, y+2);
+		s.p[2] = InitPoint(x, y+3);
+		s.p[3] = InitPoint(x+1, y+3);
 		break;
 
 	case J_SHAPE:
 		s.color = DARK_BLUE;	
-		s.p[0] = InitPoint(x, y);
-		s.p[0] = InitPoint(x+1, y);
-		s.p[0] = InitPoint(x+2, y);
-		s.p[0] = InitPoint(x+2, y-1);
+		s.p[0] = InitPoint(x, y+1);
+		s.p[1] = InitPoint(x, y+2);
+		s.p[2] = InitPoint(x, y+3);
+		s.p[3] = InitPoint(x-1, y+3);
 		break;
 		
 	case S_SHAPE:
@@ -322,4 +325,16 @@ static struct Shape InitShape(enum ShapeType type) {
 	};
 
 	return s;
+}
+
+static void	GenerateShapeOrder(enum ShapeType *shape_queue) {
+	int lower = 1;
+	int upper = NUM_SHAPE_TYPE;
+	bool shapes_drawn[7] = {0};
+
+	for(int i = 0; i < NUM_SHAPE_TYPE; i++) {
+		int next_type = GetRandomInit(lower, upper);
+		shape_queue[i] = next_type;
+		shapes_drawn[next_type] = true;
+	}
 }
