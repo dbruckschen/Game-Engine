@@ -6,6 +6,7 @@
 #include "timing.h"
 #include "input.h"
 #include "common.h"
+#include "mathlib.h"
 //#include "allocator.h"
 
 #define WINDOW_WIDTH 800

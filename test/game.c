@@ -337,11 +337,11 @@ static struct Shape InitShape(enum ShapeType type) {
 
 static void	GenerateShapeOrder(enum ShapeType *shape_queue) {
 	int lower = 1;
-	int upper = NUM_SHAPE_TYPE;
+	int upper = NUM_SHAPE_TYPES;
 	bool shapes_drawn[7] = {0};
 
-	for(int i = 0; i < NUM_SHAPE_TYPE; i++) {
-		int next_type = GetRandomInit(lower, upper);
+	for(int i = 0; i < NUM_SHAPE_TYPES; i++) {
+		int next_type = GenRandomInt(lower, upper);
 		shape_queue[i] = next_type;
 		shapes_drawn[next_type] = true;
 	}
