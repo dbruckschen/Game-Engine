@@ -250,7 +250,7 @@ void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x, 
     u32 *dst = framebuffer->buffer;
 	dst += x1 + (y1 * framebuffer->width);
     u8 *src = bitmap.pixel;
-	src += x_off + (y_off * bitmap.width);
+	src += (x_off + (y_off * bitmap.width)) * bitmap.bpp;
 
     for(int yidx = 0; yidx < dy; yidx++) {
         for(int xidx = 0; xidx < dx; xidx++) {

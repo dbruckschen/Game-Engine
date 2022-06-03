@@ -119,13 +119,11 @@ void GameRender(struct GameState *game_state) {
 			DrawShape(&game_state->fbuff, &game_state->shapes[i]);
 		}
 	}
- 
-	//DrawBMP24bpp(&game_state->fbuff, game_state->debug, 20, 100, RGB_Color(255, 0, 255));
-	//DrawBMP24bpp(&game_state->fbuff, game_state->debug, 200, 200, RGB_Color(255, 0, 255));
-	//DrawBMP24bpp(&game_state->fbuff, game_state->debug, 760, 200, RGB_Color(255, 0, 255));
-	DrawBMP24bpp(&game_state->fbuff, game_state->debug, 760, -50, RGB_Color(255, 0, 255));
-	DrawBMP24bpp(&game_state->fbuff, game_state->debug, -20, -20, RGB_Color(255, 0, 255));
-	DrawBMP24bpp(&game_state->fbuff, game_state->debug, -20, 100, RGB_Color(255, 0, 255)); 
+	v2 mouse_pos = GetMousePosition(game_state->window.wnd_h);
+	int center_x = mouse_pos.x - 32;
+	int center_y = mouse_pos.y - 32;
+	
+	DrawBMP24bpp(&game_state->fbuff, game_state->debug, center_x, center_y, RGB_Color(255, 0, 255)); 
 	
 	OutputFramebuffer(game_state->window.wnd_h, game_state->fbuff);
 }
