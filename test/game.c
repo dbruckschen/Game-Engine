@@ -19,7 +19,9 @@ void GameInit(struct GameState *game_state) {
 
 	/* load font bitmap */
 	game_state->font = LoadBitmapFile("../assets/font.bmp");
+	
 	game_state->debug = LoadBitmapFile("../assets/test.bmp");
+	InitSprite(&game_state->debug_sprite, 100, 100, 1, &game_state->debug, 1, RGB_Color(255, 0, 255));
 }
 
 void GameStart() {
@@ -41,15 +43,15 @@ void GameStart() {
 	}
 }
 
-void GameUpdate(struct GameState *game_state) {
+void GameUpdate(struct GameState *gs) {
 	/* char performance_values[256]; */
-	/* sprintf(performance_values, "ms frame: %f", game_state->timer.elapsed_time); */
-	/* DrawString(game_state->fbuff, game_state->font, performance_values, 5, 10, RGB_Color(255, 255, 255)); */
+	/* sprintf(performance_values, "ms frame: %f", gs->timer.elapsed_time); */
+	/* DrawString(gs->fbuff, gs->font, performance_values, 5, 10, RGB_Color(255, 255, 255)); */
 
 	/* sprintf(performance_values, "frames: %d", frames); */
 	/* DrawString(&fbuff, font, performance_values, 5, 20, RGB_Color(255, 255, 255)); */
 
-	/* fps_timer += game_state->timer.elapsed_time; */
+	/* fps_timer += gs->timer.elapsed_time; */
 	/* if(fps_timer >= 1.0) { */
 	/* 	fps = (int)(frames/fps_timer); */
 	/* 	frames = 0; */
@@ -59,22 +61,22 @@ void GameUpdate(struct GameState *game_state) {
 	/* DrawString(&fbuff, font, performance_values, 5, 30, RGB_Color(255, 255, 255)); */
 
 	/* update timer */
-	if(game_state->previous_lock_down) {
-		game_state->spawn_timer += game_state->timer.elapsed_time;
+	if(gs->previous_lock_down) {
+		gs->spawn_timer += gs->timer.elapsed_time;
 	}
 	
-	game_state->move_timer += game_state->timer.elapsed_time;
+	gs->move_timer += gs->timer.elapsed_time;
 
 	/* spawn shape after certain time, timer starts only if previous shape locked */
-	if(game_state->spawn_timer >= GENERATION_TIME) {
-		game_state->previous_lock_down = false;
-		game_state->spawn_timer = 0.0;
+	if(gs->spawn_timer >= GENERATION_TIME) {
+		gs->previous_lock_down = false;
+		gs->spawn_timer = 0.0;
 		
 		for(int i = 0; i < MAX_SHAPES; i++) {
 			/* find unused shape */
-			if(!game_state->shapes[i].alive) {
+			if(!gs->shapes[i].alive) {
 				/* get next shape out of shape queue */
-				game_state->shapes[i] = InitShape(J_SHAPE);
+				gs->shapes[i] = InitShape(J_SHAPE);
 				break;
 			}
 		}
@@ -83,49 +85,62 @@ void GameUpdate(struct GameState *game_state) {
 	/* lock shape if it reached the ground or had collusion with other shapes*/
 	for(int i_shape = 0; i_shape < MAX_SHAPES; i_shape++) {
 		for(int i_block = 0; i_block < SHAPE_BLOCK_COUNT; i_block++) {
-			if(game_state->shapes[i_shape].p[i_block].y == MATRIX_HEIGHT-1 &&
-			   !game_state->shapes[i_shape].locked) {
-				game_state->shapes[i_shape].locked = true;
-				game_state->previous_lock_down = true;
+			if(gs->shapes[i_shape].p[i_block].y == MATRIX_HEIGHT-1 &&
+			   !gs->shapes[i_shape].locked) {
+				gs->shapes[i_shape].locked = true;
+				gs->previous_lock_down = true;
 				break;
 			}
 		}
 	}
 
 	/* move shape every .5 sec for now */
-	if(game_state->move_timer >= FALL_SPEED) {
+	if(gs->move_timer >= FALL_SPEED) {
 		for(int i = 0; i < MAX_SHAPES; i++) {
-			if(game_state->shapes[i].alive && !game_state->shapes[i].locked) {
+			if(gs->shapes[i].alive && !gs->shapes[i].locked) {
 				/* check if matrix square is already occupied before moving shape */
 				for(int i_block = 0; i_block < SHAPE_BLOCK_COUNT; i_block++) {
-					game_state->shapes[i].p[i_block].y++;
+					gs->shapes[i].p[i_block].y++;
 				}
 			}
 		}
-		game_state->move_timer = 0.0;
+		gs->move_timer = 0.0;
 	}
 	
-	//DrawString(&game_state->fbuff, game_state->font, "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ", 10, 50, RGB_Color(255, 255, 255));
+	//DrawString(&gs->fbuff, gs->font, "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ", 10, 50, RGB_Color(255, 255, 255));
 	//~!@#$%^&*()-_+={}[];:'\",<.>/?
 	/* frames++; */
 }
 
-void GameRender(struct GameState *game_state) {
-	FillScreen(&game_state->fbuff, RGB_Color(186, 188, 190));
-	DrawMatrix(&game_state->fbuff);
+void GameRender(struct GameState *gs) {
+	FillScreen(&gs->fbuff, RGB_Color(186, 188, 190));
+	DrawMatrix(&gs->fbuff);
 
 	for(int i = 0; i < MAX_SHAPES; i++) {
-		if(game_state->shapes[i].alive) {
-			DrawShape(&game_state->fbuff, &game_state->shapes[i]);
+		if(gs->shapes[i].alive) {
+			DrawShape(&gs->fbuff, &gs->shapes[i]);
 		}
 	}
-	v2 mouse_pos = GetMousePosition(game_state->window.wnd_h);
-	int center_x = mouse_pos.x - 32;
-	int center_y = mouse_pos.y - 32;
+
+	if(gs->input.left_click_down) {
+		v2 mouse_pos = GetMousePosition(gs->window.wnd_h);
+		int center_x = mouse_pos.x - 32;
+		int center_y = mouse_pos.y - 32;
+			
+		v2 bmp_pos = {gs->debug_sprite.x, gs->debug_sprite.y};
+		if(BBAA(mouse_pos, 32, 32, bmp_pos, gs->debug_sprite.frames[0].width, gs->debug_sprite.frames[0].height)) {
+			printf("mouse & bitmap collision\n");
+			/* gs->debug_sprite.x = mouse_pos.x; */
+			/* gs->debug_sprite.y = mouse_pos.y; */
+		}
+	}
 	
-	DrawBMP24bpp(&game_state->fbuff, game_state->debug, center_x, center_y, RGB_Color(255, 0, 255)); 
+	DrawColorPicker(&gs->fbuff, 200, 200);
+	DrawBMP24bpp(&gs->fbuff, gs->debug, (int)gs->debug_sprite.x, (int)gs->debug_sprite.y, RGB_Color(255, 0, 255));
+
+	DrawString(&gs->fbuff, gs->font, "Hello World 1234567890", 300, 300, RGB_Color(255, 255, 255));
 	
-	OutputFramebuffer(game_state->window.wnd_h, game_state->fbuff);
+	OutputFramebuffer(gs->window.wnd_h, gs->fbuff);
 }
 
 void DrawMatrix(struct Framebuffer *fbuff) {
@@ -253,9 +268,9 @@ static void DrawShape(struct Framebuffer *fbuff, struct Shape *shape) {
 	};
 }
 
-static void SpawnShape(struct GameState *game_state, enum ShapeType type) {
-	game_state->shapes[game_state->num_shapes].type = type;
-	game_state->num_shapes++;
+static void SpawnShape(struct GameState *gs, enum ShapeType type) {
+	gs->shapes[gs->num_shapes].type = type;
+	gs->num_shapes++;
 }
 
 static struct Point InitPoint(int x, int y) {

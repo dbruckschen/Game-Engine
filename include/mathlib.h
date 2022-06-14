@@ -39,5 +39,12 @@ __declspec(dllexport) int GenRandomInt(int lower, int upper);
 __declspec(dllexport) double DegToRad(float deg);
 __declspec(dllexport) double RadToDeg(float rad);
 
+// NDC range: [-1, 1] DC range: [0, window width] / [0, window height]
+__declspec(dllexport) float NDC_TO_DC(float v, int width_height);
+__declspec(dllexport) float DC_TO_NDC(float v, int width_height);
+
+// Bounding Box Axis Aligned Collision Detection
+__declspec(dllexport) bool BBAA(v2 b1, int width1, int height1, v2 b2, int width2, int height2);
+
 #endif //MATH_H
 

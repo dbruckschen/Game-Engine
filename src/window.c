@@ -88,25 +88,7 @@ bool MessageLoop(struct Input *input)
 
         case WM_SYSKEYDOWN:
         case WM_KEYDOWN:
-            input->keyboard[msg.wParam].down = true;
-            //printf("0x%x pressed\n", msg.wParam);
-
-            bool was_down_last_frame = (msg.lParam >> 30) & 1;
-
-            if(!was_down_last_frame) {
-                input->keyboard[msg.wParam].down_previous_frame = true;
-                //printf("0x%x pressed this frame\n", msg.wParam);
-            } else {
-                input->keyboard[msg.wParam].down_previous_frame = false;
-            }
-
-            if (input->keyboard[msg.wParam].toggle == false && was_down_last_frame == false) {
-                printf("toggle an\n");
-                input->keyboard[msg.wParam].toggle = true;
-            } else if (input->keyboard[msg.wParam].toggle == true && was_down_last_frame == false) {
-                printf("toggle aus\n");
-                input->keyboard[msg.wParam].toggle = false;
-            }
+			GetKeyboardInput(input, msg);
             break;
 
         case WM_SYSKEYUP:
@@ -114,11 +96,32 @@ bool MessageLoop(struct Input *input)
             input->keyboard[msg.wParam].down = false;
             //printf("0x%x released\n", msg.wParam);
             break;
+			
+		case WM_LBUTTONDOWN:
+			input->left_click_down = true;
+			printf("l button down \n");
+			break;
+
+		case WM_LBUTTONUP:
+			input->left_click_down = false;
+			printf("l button up\n");
+			break;
+			
+		case WM_RBUTTONDOWN:
+			input->right_click_down = true;
+			printf("r button down \n");
+			break;
+			
+		case WM_RBUTTONUP:
+			input->right_click_down = false;
+			printf("r button up\n");
+			break;
         }
 
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
     return running;
+
 }
 

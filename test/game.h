@@ -7,6 +7,7 @@
 #include "input.h"
 #include "common.h"
 #include "mathlib.h"
+#include "ui.h"
 //#include "allocator.h"
 
 #define WINDOW_WIDTH 800
@@ -79,7 +80,9 @@ struct GameState {
 	struct Timer timer;
 	struct Bitmap font;
 	enum ShapeType random_shape_queue[7];
+
 	struct Bitmap debug;
+	struct Sprite debug_sprite;
 };
 
 static int matrix[MATRIX_HEIGHT][MATRIX_WIDTH];

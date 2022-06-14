@@ -2,6 +2,7 @@
 #define INPUT_H
 
 #include <windows.h>
+#include <stdio.h>
 #include "..\include\mathlib.h"
 
 enum key_code {
@@ -62,14 +63,14 @@ struct Input {
     int mouse_x;
     int mouse_y;
 
-    bool left_click;
-    bool left_click_locked;
-    bool right_click;
-
+    bool left_click_down;
+	bool right_click_down;
+	
     struct KeyState keyboard[256];
 };
 
 __declspec(dllexport) v2 GetMousePosition(HWND window);
-__declspec(dllexport) void GetInput(struct Input *input);
+/* NOTE: Gets called by MessageLoop(), don't just call it. */
+__declspec(dllexport) void GetKeyboardInput(struct Input *input, MSG msg);
 
 #endif // INPUT_H

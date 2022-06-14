@@ -410,23 +410,3 @@ void UpdateSpriteAnimation(struct Sprite *s)
             s->current_frame = 0;
     }
 }
-
-float DC_TO_NDC(float v, int width_height)
-{
-    return (v * 2) / width_height - 1;
-}
-
-float NDC_TO_DC(float v, int width_height)
-{
-    return (float)fabs((v / 2) * width_height);
-}
-
-bool BBAA(v2 b1, int width1, int height1, v2 b2, int width2, int height2)
-{
-    if(b1.x < b2.x + width2 && b1.x + width1 > b2.x &&
-	   b1.y < b2.y + height2 && b1.y + height1 > b2.y)
-        return true;
-    else
-        return false;
-}
-

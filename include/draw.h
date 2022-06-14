@@ -183,11 +183,4 @@ __declspec(dllexport) void DrawGlyph(struct Framebuffer *buffer, struct Bitmap f
 
 __declspec(dllexport) void DrawString(struct Framebuffer *buffer, struct Bitmap font, char *string, u32 x, u32 y, u32 color_mask);
 
-// NDC range: [-1, 1] DC range: [0, window width] / [0, window height]
-__declspec(dllexport) float NDC_TO_DC(float v, int width_height);
-__declspec(dllexport) float DC_TO_NDC(float v, int width_height);
-
-// Bounding Box Axis Aligned Collision Detection
-__declspec(dllexport) bool BBAA(v2 b1, int width1, int height1, v2 b2, int width2, int height2);
-
 #endif // DRAW_H
