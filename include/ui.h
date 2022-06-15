@@ -21,6 +21,9 @@ struct Button {
 	bool active;
 	bool hover;
 	bool toggle;
+
+	double delay_time;
+	double delay_timer;
 };
 
 struct TextField {
@@ -44,9 +47,9 @@ struct TextField {
 __declspec(dllexport) struct Button
 InitTextButton(struct Font *font, int x, int y,
 		   int width, int height,
-		   char *text, u32 color, int border_thickness, u32 border_color);
+			   char *text, u32 color, int border_thickness, u32 border_color, float delay);
 
-__declspec(dllexport) void UpdateButtonStatus(struct Button *btn, struct Input input);
+__declspec(dllexport) void UpdateButtonStatus(struct Button *btn, struct Input input, double dt);
 __declspec(dllexport) void DrawTextButton(struct Framebuffer *fb, struct Button *btn);
 
 

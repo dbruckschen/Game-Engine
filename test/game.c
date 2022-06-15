@@ -28,7 +28,7 @@ void GameInit(struct GameState *gs) {
 	gs->debug = LoadBitmapFile("../assets/test.bmp");
 	InitSprite(&gs->debug_sprite, 100, 100, 1, &gs->debug, 1, RGB_Color(255, 0, 255));
 
-	gs->btn1 = InitTextButton(&gs->font, 100, 200, 75, 25, "Click", RGB_Color(255, 0, 0), 5, RGB_Color(0, 255, 0));
+	gs->btn1 = InitTextButton(&gs->font, 100, 200, 75, 25, "Click", RGB_Color(255, 0, 0), 5, RGB_Color(0, 255, 0), .1f);
 }
 
 void GameStart() {
@@ -122,12 +122,12 @@ void GameUpdate(struct GameState *gs) {
 	/* frames++; */
 
 	/* UI Update */
-	UpdateButtonStatus(&gs->btn1, gs->input);
+	UpdateButtonStatus(&gs->btn1, gs->input, gs->timer.elapsed_time);
 	if(gs->btn1.toggle) {
 		printf("btn1 toggled on\n");
 	}
-	if(gs->btn1.hover) {
-		printf("btn1 hover on\n");
+	else {
+		printf("btn1 toggled off\n");
 	}
 }
 

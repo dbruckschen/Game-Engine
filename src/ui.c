@@ -1,6 +1,6 @@
 #include "ui.h"
 
-struct Button InitTextButton(struct Font *font, int x, int y, int width, int height, char *text, u32 color, int border_thickness, u32 border_color) {
+struct Button InitTextButton(struct Font *font, int x, int y, int width, int height, char *text, u32 color, int border_thickness, u32 border_color, float delay_time) {
 	struct Button btn = {0};
 
 	btn.x = x;
@@ -17,23 +17,33 @@ struct Button InitTextButton(struct Font *font, int x, int y, int width, int hei
 	btn.active = true;
 	btn.hover = false;
 	btn.toggle = false;
+	btn.delay_time = delay_time;
+	btn.delay_timer = delay_time;
 
 	return btn;
 }
 
-void UpdateButtonStatus(struct Button *btn, struct Input input) {
+void UpdateButtonStatus(struct Button *btn, struct Input input, double dt) {
+	if(!input.left_click_down) {
+		btn->delay_timer += dt;
+	}
+	
 	v2 b1 = {(float)btn->x, (float)btn->y};
 	int mouse_ptr_w = 1;
 	int mouse_ptr_h = 1;
-	
-	if((BBAA(input.mouse_cursor_pos, 1, 1, b1, btn->width, btn->height)) && (btn->active)) {
-		printf("mouse & button collision\n");
+
+	/* check if mouse is hovering over button */
+	if((BBAA(input.mouse_cursor_pos, mouse_ptr_w, mouse_ptr_h, b1, btn->width, btn->height)) &&
+	   (btn->active)) {
 		btn->hover = true;
-		if(input.left_click_down && !btn->toggle) {
+		/* check for click event */
+		if((input.left_click_down) && (!btn->toggle) && (btn->delay_timer >= btn->delay_time)) {
 			btn->toggle = true;
+			btn->delay_timer = 0;
 		}
-		else if(input.left_click_down && btn->toggle) {
+		else if(input.left_click_down && btn->toggle && (btn->delay_timer >= btn->delay_time)) {
 			btn->toggle = false;
+			btn->delay_timer = 0;
 		}
 	}
 	else {
