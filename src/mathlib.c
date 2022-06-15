@@ -113,3 +113,13 @@ bool BBAA(v2 b1, int width1, int height1, v2 b2, int width2, int height2)
     else
         return false;
 }
+
+v2 GetCenteredCoordinates(int rec_x, int rec_y, int rec_width, int rec_height, int width_of_center_obj, int height_of_center_obj)
+{
+	v2 result = {0};
+
+	result.x = (float)(rec_x + ((rec_width - width_of_center_obj) / 2));
+	result.y = (float)(rec_y + ((rec_height - height_of_center_obj) / 2));
+
+	return result;
+}

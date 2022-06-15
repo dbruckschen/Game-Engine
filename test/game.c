@@ -1,45 +1,52 @@
 #include "game.h"
 
-void GameInit(struct GameState *game_state) {
+void GameInit(struct GameState *gs) {
 	InitRandomNumberGen();
-	GenerateShapeOrder(game_state->random_shape_queue);
+	GenerateShapeOrder(gs->random_shape_queue);
 		
-	game_state->running = true;
-	game_state->previous_lock_down = true;
+	gs->running = true;
+	gs->previous_lock_down = true;
 
 	/* create window */
-	const char *window_title = "Rudimentary Multimedia Library demo";
-	game_state->window = OpenWindow(WINDOW_WIDTH, WINDOW_HEIGHT, window_title);
+	char *window_title = "Rudimentary Multimedia Library demo";
+	gs->window = OpenWindow(WINDOW_WIDTH, WINDOW_HEIGHT, window_title);
 
 	/* create framebuffer */
-	game_state->fbuff = CreateFramebuffer(game_state->window.wnd_h);
+	gs->fbuff = CreateFramebuffer(gs->window.wnd_h);
 
 	/* init timer */
-	InitTimer(&game_state->timer);
+	InitTimer(&gs->timer);
 
 	/* load font bitmap */
-	game_state->font = LoadBitmapFile("../assets/font.bmp");
-	
-	game_state->debug = LoadBitmapFile("../assets/test.bmp");
-	InitSprite(&game_state->debug_sprite, 100, 100, 1, &game_state->debug, 1, RGB_Color(255, 0, 255));
+	gs->font.bmp = LoadBitmapFile("../assets/font.bmp");
+	gs->font.glyph_width = 5;
+	gs->font.glyph_height = 7;
+	gs->font.glyph_count = 98;
+	gs->font.glyph_spacing = 2;
+	gs->font.color_mask = RGB_Color(255, 255, 255);
+		
+	gs->debug = LoadBitmapFile("../assets/test.bmp");
+	InitSprite(&gs->debug_sprite, 100, 100, 1, &gs->debug, 1, RGB_Color(255, 0, 255));
+
+	gs->btn1 = InitTextButton(&gs->font, 100, 200, 75, 25, "Click", RGB_Color(255, 0, 0), 5, RGB_Color(0, 255, 0));
 }
 
 void GameStart() {
-	struct GameState game_state;
-	memset(&game_state, 0, sizeof game_state);
-	GameInit(&game_state);
+	struct GameState gs;
+	memset(&gs, 0, sizeof gs);
+	GameInit(&gs);
 		
-	while(game_state.running) {
-		StartTimer(&game_state.timer);
+	while(gs.running) {
+		StartTimer(&gs.timer);
 		
-		if(!MessageLoop(&game_state.input)) {
+		if(!MessageLoop(&gs.input)) {
 			break;
 		}
-
-		GameUpdate(&game_state);
-		GameRender(&game_state);
+			
+		GameUpdate(&gs);
+		GameRender(&gs);
 	
-		EndTimer(&game_state.timer);
+		EndTimer(&gs.timer);
 	}
 }
 
@@ -60,6 +67,9 @@ void GameUpdate(struct GameState *gs) {
 	/* sprintf(performance_values, "fps: %d", fps); */
 	/* DrawString(&fbuff, font, performance_values, 5, 30, RGB_Color(255, 255, 255)); */
 
+	/* update the mouse position */
+	gs->input.mouse_cursor_pos = GetMousePosition(gs->window.wnd_h);
+		
 	/* update timer */
 	if(gs->previous_lock_down) {
 		gs->spawn_timer += gs->timer.elapsed_time;
@@ -110,6 +120,15 @@ void GameUpdate(struct GameState *gs) {
 	//DrawString(&gs->fbuff, gs->font, "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ", 10, 50, RGB_Color(255, 255, 255));
 	//~!@#$%^&*()-_+={}[];:'\",<.>/?
 	/* frames++; */
+
+	/* UI Update */
+	UpdateButtonStatus(&gs->btn1, gs->input);
+	if(gs->btn1.toggle) {
+		printf("btn1 toggled on\n");
+	}
+	if(gs->btn1.hover) {
+		printf("btn1 hover on\n");
+	}
 }
 
 void GameRender(struct GameState *gs) {
@@ -124,21 +143,25 @@ void GameRender(struct GameState *gs) {
 
 	if(gs->input.left_click_down) {
 		v2 mouse_pos = GetMousePosition(gs->window.wnd_h);
-		int center_x = mouse_pos.x - 32;
-		int center_y = mouse_pos.y - 32;
+		//int center_x = (int)mouse_pos.x - 32;
+		//int center_y = (int)mouse_pos.y - 32;
 			
 		v2 bmp_pos = {gs->debug_sprite.x, gs->debug_sprite.y};
-		if(BBAA(mouse_pos, 32, 32, bmp_pos, gs->debug_sprite.frames[0].width, gs->debug_sprite.frames[0].height)) {
-			printf("mouse & bitmap collision\n");
+		if(BBAA(mouse_pos, 1, 1, bmp_pos, gs->debug_sprite.frames[0].width, gs->debug_sprite.frames[0].height)) {
+			//printf("mouse & bitmap collision\n");
 			/* gs->debug_sprite.x = mouse_pos.x; */
 			/* gs->debug_sprite.y = mouse_pos.y; */
 		}
-	}
-	
-	DrawColorPicker(&gs->fbuff, 200, 200);
-	DrawBMP24bpp(&gs->fbuff, gs->debug, (int)gs->debug_sprite.x, (int)gs->debug_sprite.y, RGB_Color(255, 0, 255));
 
-	DrawString(&gs->fbuff, gs->font, "Hello World 1234567890", 300, 300, RGB_Color(255, 255, 255));
+		v2 b1 = {(float)gs->btn1.x, (float)gs->btn1.y};
+		if(BBAA(mouse_pos, 1, 1, b1, gs->btn1.width, gs->btn1.height)) {
+			//printf("mouse & button collision\n");
+		}
+	}
+		
+	DrawBMP24bpp(&gs->fbuff, gs->debug, (int)gs->debug_sprite.x, (int)gs->debug_sprite.y, RGB_Color(255, 0, 255));
+	DrawString(&gs->fbuff, gs->font, "Hello World 1234567890", 300, 300);
+	DrawTextButton(&gs->fbuff, &gs->btn1);
 	
 	OutputFramebuffer(gs->window.wnd_h, gs->fbuff);
 }

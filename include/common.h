@@ -21,4 +21,7 @@ typedef double f64;
 __declspec(dllexport) long long StringLen(char *s);
 __declspec(dllexport) bool StringCmp(char *s1, char *s2);
 
+// the last character will be the null terminator 
+__declspec(dllexport) void StringCpy(char *dst, char *src, size_t dst_len);
+
 #endif //COMMON_H

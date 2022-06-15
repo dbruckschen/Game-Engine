@@ -92,6 +92,15 @@ struct Bitmap {
     u32 height;
 };
 
+struct Font {
+	struct Bitmap bmp;
+	int glyph_width;
+	int glyph_height;
+	int glyph_count;
+	int glyph_spacing;
+	u32 color_mask;
+};
+
 struct Sprite {
     float x;
     float y;
@@ -179,8 +188,8 @@ __declspec(dllexport) void InitSprite(struct Sprite *s, float x, float y, int fr
 __declspec(dllexport) void UpdateSpriteAnimation(struct Sprite *s);
 __declspec(dllexport) void GetPixelFromBMP(struct Bitmap *from, u8 *to);
 
-__declspec(dllexport) void DrawGlyph(struct Framebuffer *buffer, struct Bitmap font, char ch, u32 x, u32 y, u32 color_mask);
+__declspec(dllexport) void DrawGlyph(struct Framebuffer *buffer, struct Font font, char ch, u32 x, u32 y);
 
-__declspec(dllexport) void DrawString(struct Framebuffer *buffer, struct Bitmap font, char *string, u32 x, u32 y, u32 color_mask);
+__declspec(dllexport) void DrawString(struct Framebuffer *buffer, struct Font font, char *string, u32 x, u32 y);
 
 #endif // DRAW_H

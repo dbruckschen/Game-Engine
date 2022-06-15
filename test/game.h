@@ -78,11 +78,12 @@ struct GameState {
 	struct Framebuffer fbuff;
 	struct Input input;
 	struct Timer timer;
-	struct Bitmap font;
+	struct Font font;
 	enum ShapeType random_shape_queue[7];
 
 	struct Bitmap debug;
 	struct Sprite debug_sprite;
+	struct Button btn1;
 };
 
 static int matrix[MATRIX_HEIGHT][MATRIX_WIDTH];

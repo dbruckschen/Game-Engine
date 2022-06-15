@@ -22,11 +22,24 @@ bool StringCmp(char *s1, char *s2)
         s2++;
     }
 
-    if(cnt == 0)
+    if(cnt == 0) {
         return 0;
+	}
 
-    if(*s1 == *s2)
+    if(*s1 == *s2) {
         return 1;
-    else
+	}
+	else {
         return 0;
+	}
 }
+
+void StringCpy(char *dst, char *src, size_t dst_len)
+{
+	for(int i = 0; i < dst_len - 1; i++) {
+		dst[i] = src[i];
+	}
+
+	dst[dst_len] = '\0';
+}
+

@@ -60,8 +60,7 @@ struct KeyState {
 };
 
 struct Input {
-    int mouse_x;
-    int mouse_y;
+	v2 mouse_cursor_pos;
 
     bool left_click_down;
 	bool right_click_down;

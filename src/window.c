@@ -99,22 +99,18 @@ bool MessageLoop(struct Input *input)
 			
 		case WM_LBUTTONDOWN:
 			input->left_click_down = true;
-			printf("l button down \n");
 			break;
 
 		case WM_LBUTTONUP:
 			input->left_click_down = false;
-			printf("l button up\n");
 			break;
 			
 		case WM_RBUTTONDOWN:
 			input->right_click_down = true;
-			printf("r button down \n");
 			break;
 			
 		case WM_RBUTTONUP:
 			input->right_click_down = false;
-			printf("r button up\n");
 			break;
         }
 
