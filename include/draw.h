@@ -76,10 +76,10 @@ enum glyph_idx {
 // The framebuffer drawable area is from (0, 0) to (width-1, height-1).
 struct Framebuffer {
     void *buffer;
-    u32 bpp;
-    u32 width;
-    u32 height;
-    u32 size;
+    int bpp;
+    int width;
+    int height;
+    int size;
     HBITMAP bitmap_handle;
     BITMAPINFO info;
     HDC bitmap_hdc;
@@ -87,9 +87,9 @@ struct Framebuffer {
 
 struct Bitmap {
     u8 *pixel;
-    u32 bpp;
-    u32 width;
-    u32 height;
+    int bpp;
+    int width;
+	int height;
 };
 
 struct Font {
@@ -102,8 +102,8 @@ struct Font {
 };
 
 struct Sprite {
-    float x;
-    float y;
+    int x;
+    int y;
 
     struct Bitmap *frames;
 
@@ -151,15 +151,15 @@ __declspec(dllexport) u32 RGBA_Color(u8 red, u8 green, u8 blue, u8 alpha);
 
 // Fill the screen with a solid color. The Color format is 0RGB.
 __declspec(dllexport) void FillScreen(struct Framebuffer *framebuffer, u32 color);
-__declspec(dllexport) void DrawPixel(struct Framebuffer *framebuffer, u32 x, u32 y, u32 color);
-__declspec(dllexport) void DrawRectangle(struct Framebuffer *framebuffer, u32 x0, u32 y0, u32 width, u32 height, u32 color);
+__declspec(dllexport) void DrawPixel(struct Framebuffer *framebuffer, int x, int y, u32 color);
+__declspec(dllexport) void DrawRectangle(struct Framebuffer *framebuffer, int x0, int y0, int width, int height, u32 color);
 
 // I copied this function from: https://en.wikipedia.org/wiki/Bresenham's_line_algorithm.
 // I should make an effort to fully understand this algorithm :P.
 // Lines get clipped through the DrawPixel function
 __declspec(dllexport) void DrawLine(struct Framebuffer *framebuffer, int x0, int y0, int x1, int y1, u32 color);
 // Triangles get clipped thorugh the DrawPixel function inside the DrawLine function.
-__declspec(dllexport) void DrawTriangle(struct Framebuffer *framebuffer, u32 points[6], u32 color);
+__declspec(dllexport) void DrawTriangle(struct Framebuffer *framebuffer, int points[6], u32 color);
 
 
 // This function gets only used in LoadBitmapFile().
@@ -176,7 +176,7 @@ __declspec(dllexport) void HFlipBMP32bpp(struct Bitmap *bitmap);
 
 // Bitmap drawing functions for 24 bytes per pixel and 32 bytes per pixel.
 __declspec(dllexport) void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x_pos, int y_pos, u32 color_mask);
-__declspec(dllexport) void DrawBMP32bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask);
+__declspec(dllexport) void DrawBMP32bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x_pos, int y_pos, u32 color_mask);
 
 /*
  * Initalizes a sprite with a collection of bitmaps (animation frames).
@@ -184,12 +184,12 @@ __declspec(dllexport) void DrawBMP32bpp(struct Framebuffer *framebuffer, struct 
  * To update sprite animations call UpdateSpriteAnimation().
  * Bitmap *frames: an array with all the possible frames for an animation cycle.
  */
-__declspec(dllexport) void InitSprite(struct Sprite *s, float x, float y, int frame_count, struct Bitmap *frames, int start_frame, double frame_time);
+__declspec(dllexport) void InitSprite(struct Sprite *s, int x, int y, int frame_count, struct Bitmap *frames, int start_frame, double frame_time);
 __declspec(dllexport) void UpdateSpriteAnimation(struct Sprite *s);
 __declspec(dllexport) void GetPixelFromBMP(struct Bitmap *from, u8 *to);
 
-__declspec(dllexport) void DrawGlyph(struct Framebuffer *buffer, struct Font font, char ch, u32 x, u32 y);
+__declspec(dllexport) void DrawGlyph(struct Framebuffer *buffer, struct Font font, char ch, int x, int y);
 
-__declspec(dllexport) void DrawString(struct Framebuffer *buffer, struct Font font, char *string, u32 x, u32 y);
-
+__declspec(dllexport) void DrawString(struct Framebuffer *buffer, struct Font font, char *string, int x, int y);
+ 
 #endif // DRAW_H

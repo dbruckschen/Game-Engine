@@ -83,7 +83,9 @@ struct GameState {
 
 	struct Bitmap debug;
 	struct Sprite debug_sprite;
+	
 	struct Button btn1;
+	struct TextField tf1;
 };
 
 static int matrix[MATRIX_HEIGHT][MATRIX_WIDTH];

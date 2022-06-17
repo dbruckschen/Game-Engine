@@ -24,25 +24,30 @@ struct Button InitTextButton(struct Font *font, int x, int y, int width, int hei
 }
 
 void UpdateButtonStatus(struct Button *btn, struct Input input, double dt) {
-	if(!input.left_click_down) {
+	int mouse_ptr_w = 1;
+	int mouse_ptr_h = 1;
+	v2 b1 = {(float)btn->x, (float)btn->y};
+	
+	bool collision_with_ui_element = BBAA(input.mouse_cursor_pos, mouse_ptr_w, mouse_ptr_h, b1, btn->width, btn->height);
+	
+	if(!input.left_click_down || !collision_with_ui_element) {
 		btn->delay_timer += dt;
 	}
 	
-	v2 b1 = {(float)btn->x, (float)btn->y};
-	int mouse_ptr_w = 1;
-	int mouse_ptr_h = 1;
-
 	/* check if mouse is hovering over button */
 	if((BBAA(input.mouse_cursor_pos, mouse_ptr_w, mouse_ptr_h, b1, btn->width, btn->height)) &&
-	   (btn->active)) {
+	   btn->active) {
 		btn->hover = true;
+		
 		/* check for click event */
 		if((input.left_click_down) && (!btn->toggle) && (btn->delay_timer >= btn->delay_time)) {
 			btn->toggle = true;
 			btn->delay_timer = 0;
+			btn->color = RGB_Color(0, 255, 0);
 		}
 		else if(input.left_click_down && btn->toggle && (btn->delay_timer >= btn->delay_time)) {
 			btn->toggle = false;
+			btn->color = RGB_Color(255, 0, 0);
 			btn->delay_timer = 0;
 		}
 	}
@@ -71,16 +76,96 @@ void DrawTextButton(struct Framebuffer *fb, struct Button *btn) {
 	DrawString(fb, *btn->font, btn->text, (int)rec_center.x, (int)rec_center.y);
 }
 
-/* void DrawTextField(struct Framebuffer *fb, struct TextField *tf) { */
-/* 	// this is the border rectangle of the text field */
-/* 	DrawRectangle(fb, */
-/* 				  tf->x - tf->border_thickness, tf->y - tf->border_thickness, */
-/* 				  tf->width + (tf->border_thickness*2), tf->height + (tf->border_thickness*2), */
-/* 				  tf->border_color); */
+struct TextField InitTextField(struct Font *font, int x, int y, int width, int height,
+							   u32 color, int border_thickness, u32 border_color, float delay,
+							   int cursor_width, int cursor_height, float cursor_blink_rate, u32 cursor_color) {
 	
-/* 	// this is the text field */
-/* 	DrawRectangle(fb, tf->x, tf->y, tf->width, tf->height, tf->color); */
+	struct TextField tf = {0};
 
-/* 	// draw filler text */
-/* 	DrawString(fb, tf->font, "Text Field", tf->x + tf->font.width); */
-/* } */
+	tf.x = x;
+	tf.y = y;
+	tf.width = width;
+	tf.height = height;
+	tf.font = font;
+
+	char *placeholder_str = "placeholder";
+	StringCpy(tf.text, placeholder_str, StringLen(placeholder_str));
+	tf.color = color;
+	tf.border_thickness = border_thickness;
+	tf.border_color = border_color;
+	tf.active = true;
+	tf.write_focus = false;
+	tf.inital_state = true;
+	tf.delay_time = delay;
+	tf.delay_timer = tf.delay_time;
+
+	v2 cursor_rec = GetCenteredCoordinates(x, y, width, height, cursor_width, cursor_height);
+	
+	tf.cursor.pos.x = (float)(x + font->glyph_width);
+	tf.cursor.pos.y = (float) cursor_rec.y;
+	tf.cursor.width = cursor_width;
+	tf.cursor.height = cursor_height;
+	tf.cursor.blink_rate = cursor_blink_rate;
+	tf.cursor.blink_timer = 0.0;
+	tf.cursor.color = cursor_color;
+	
+	return tf;
+}
+
+void DrawTextField(struct Framebuffer *fb, struct TextField *tf) {
+	// this is the border rectangle of the text field
+	DrawRectangle(fb,
+				  tf->x - tf->border_thickness, tf->y - tf->border_thickness,
+				  tf->width + (tf->border_thickness*2), tf->height + (tf->border_thickness*2),
+				  tf->border_color);
+	
+	// this is the text field
+	DrawRectangle(fb, tf->x, tf->y, tf->width, tf->height, tf->color);
+
+	size_t string_len = StringLen(tf->text);
+	int string_width = (int)string_len * tf->font->glyph_width;
+	int font_height = tf->font->glyph_height;
+	v2 rec_center = GetCenteredCoordinates(tf->x, tf->y, tf->width, tf->height, string_width, font_height);
+	
+	// draw filler text
+	if(!tf->write_focus && tf->inital_state) {
+		DrawString(fb, *tf->font, tf->text, (int)rec_center.x, (int)rec_center.y);
+	}
+	if(tf->write_focus) {
+		// draw a blinking cursor
+		if(tf->cursor.blink_timer >= tf->cursor.blink_rate) {
+			DrawRectangle(fb, (int)tf->cursor.pos.x, (int)tf->cursor.pos.y, tf->cursor.width, tf->cursor.height, tf->cursor.color);
+			
+			if(tf->cursor.blink_timer >= (2*tf->cursor.blink_rate)) {
+				tf->cursor.blink_timer = 0.0f;
+			}
+		}
+	}
+}
+
+void UpdateTextField(struct TextField *tf, struct Input input, double dt) {
+	v2 tf_pos = {(float)tf->x, (float)tf->y};	
+	bool collision_with_ui_element = BBAA(input.mouse_cursor_pos, 1, 1, tf_pos, tf->width, tf->height);
+	
+	tf->cursor.blink_timer += dt;
+
+	if(tf->delay_timer <= tf->delay_time) {
+		tf->delay_timer += dt;
+	}
+ 
+	if(collision_with_ui_element && tf->active &&
+	   (tf->delay_timer >= tf->delay_time) && input.left_click_down) {
+		tf->delay_timer = 0.0;
+		tf->write_focus = true;
+		tf->inital_state = false;
+
+		printf("write focus on\n");
+	}
+	else if(!collision_with_ui_element && tf->write_focus && input.left_click_down) {
+		// if mouse clicked somewhere but the text field, remove write focus from text field
+		tf->write_focus = false;
+		tf->delay_timer = 0.0;
+		tf->cursor.blink_timer = tf->cursor.blink_rate;
+		printf("write focus off\n");
+	}
+}

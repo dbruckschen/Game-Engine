@@ -48,7 +48,7 @@ __declspec(dllexport) bool BBAA(v2 b1, int width1, int height1, v2 b2, int width
 
 // Computes the upper left coordinates for a rectangle centered inside another rectangle
 // useful for aligning text inside a button rectangle for example
-__declspec(dllexport) v2 GetCenteredCoordinates(int rec_x, int rec_y, int rec_width, int rec_h, int width_of_center_obj, int height_of_center_obj);
+__declspec(dllexport) v2 GetCenteredCoordinates(int rec_x, int rec_y, int rec_width, int rec_height, int width_of_center_obj, int height_of_center_obj);
 
 
 #endif //MATH_H

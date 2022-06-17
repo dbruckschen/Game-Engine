@@ -1,5 +1,4 @@
 #include "draw.h"
-
 struct Framebuffer CreateFramebuffer(HWND window)
 {
     struct Framebuffer framebuffer;
@@ -63,11 +62,11 @@ u32 RGBA_Color(u8 red, u8 green, u8 blue, u8 alpha)
 void FillScreen(struct Framebuffer *framebuffer, u32 color)
 {
     u32 *pixel = (u32 *)framebuffer->buffer;
-    for (u32 i = 0; i < framebuffer->width * framebuffer->height; ++i)
+    for (int i = 0; i < framebuffer->width * framebuffer->height; ++i)
         *pixel++ = color;
 }
 
-void DrawPixel(struct Framebuffer *framebuffer, u32 x, u32 y, u32 color)
+void DrawPixel(struct Framebuffer *framebuffer, int x, int y, u32 color)
 {
     if (x >= 0 && x <= framebuffer->width && y >= 0 && y <= framebuffer->height) {
         u32 *pixel = (u32 *)framebuffer->buffer;
@@ -77,13 +76,33 @@ void DrawPixel(struct Framebuffer *framebuffer, u32 x, u32 y, u32 color)
     }
 }
 
-void DrawRectangle(struct Framebuffer *framebuffer, u32 x0, u32 y0, u32 width, u32 height, u32 color)
+void DrawRectangle(struct Framebuffer *framebuffer, int x0, int y0, int width, int height, u32 color)
 {
+	/* clip the rectangle to the framebuffer dimensions */
+	if((x0 > framebuffer->width) || ((x0 + width) < 0) ||
+	   (y0 > framebuffer->height) || (y0 + height) < 0) {
+		return;
+	}
+
+	int x = x0;
+	int y = y0;
+	
+	if(x0 < 0) {
+		x0 = 0;
+	}
+
+	if(y0 < 0) {
+		y0 = 0;
+	}
+
+	width += x - x0;
+	height += y - y0;
+	
     u32 *pixel = (u32 *)framebuffer->buffer;
     pixel += x0 + (y0 * framebuffer->width);
 
-    for (u32 y = 0; y < height; ++y) {
-        for (u32 x = 0; x < width; ++x) {
+    for (int yidx = 0; yidx < height; ++yidx) {
+        for (int xidx = 0; xidx < width; ++xidx) {
             *pixel++ = color;
         }
         pixel += framebuffer->width - width;
@@ -119,7 +138,7 @@ void DrawLine(struct Framebuffer *framebuffer, int x0, int y0, int x1, int y1, u
     }
 }
 
-void DrawTriangle(struct Framebuffer *framebuffer, u32 points[6], u32 color)
+void DrawTriangle(struct Framebuffer *framebuffer, int points[6], u32 color)
 {
     DrawLine(framebuffer, points[0], points[1], points[2], points[3], color);
     DrawLine(framebuffer, points[2], points[3], points[4], points[5], color);
@@ -180,8 +199,8 @@ void HFlipBMP24bpp(struct Bitmap *bitmap)
     u8 *dst = bitmap->pixel;
     u8 *src = copy_bmp_pixel + (bitmap->width * (bitmap->height - 1)) * bitmap->bpp;
 
-    for (u32 y = 0; y < bitmap->height; y++) {
-        for (u32 x = 0; x < bitmap->width; x++) {
+    for (int y = 0; y < bitmap->height; y++) {
+        for (int x = 0; x < bitmap->width; x++) {
             *dst++ = *src++;
             *dst++ = *src++;
             *dst++ = *src++;
@@ -202,8 +221,8 @@ void HFlipBMP32bpp(struct Bitmap *bitmap)
     u32 *dst = (u32 *)bitmap->pixel;
     u32 *src = (u32 *)copy_bmp_pixel + (bitmap->width * (bitmap->height - 1));
 
-    for (u32 y = 0; y < bitmap->height; y++) {
-        for (u32 x = 0; x < bitmap->width; x++) {
+    for (int y = 0; y < bitmap->height; y++) {
+        for (int x = 0; x < bitmap->width; x++) {
             *dst++ = *src++;
         }
         src -= 2 * bitmap->width;
@@ -272,15 +291,15 @@ void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x, 
     }
 }
 
-void DrawBMP32bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, u32 x_pos, u32 y_pos, u32 color_mask)
+void DrawBMP32bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x_pos, int y_pos, u32 color_mask)
 {
     u32 *dst = (u32 *)framebuffer->buffer;
     u8 *src = (u8 *)bitmap.pixel;
 
     dst += x_pos + (y_pos * framebuffer->width);
 
-    for(u32 y = 0; y < bitmap.height; ++y) {
-        for(u32 x = 0; x < bitmap.width; ++x) {
+    for(int y = 0; y < bitmap.height; ++y) {
+        for(int x = 0; x < bitmap.width; ++x) {
             u8 r = *src;
             u8 g = *(src + 1);
             u8 b = *(src + 2);
@@ -301,11 +320,11 @@ void DrawBMP32bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, u32 x_p
 
 void GetPixelFromBMP(struct Bitmap *from, u8 *to)
 {
-    for(u32 i = 0; i < from->height * from->width * from->bpp; i++)
+    for(int i = 0; i < from->height * from->width * from->bpp; i++)
         *(to + i) = *(from->pixel + i);
 }
 
-void DrawGlyph(struct Framebuffer *framebuffer, struct Font font, char ch, u32 x_pos, u32 y_pos)
+void DrawGlyph(struct Framebuffer *framebuffer, struct Font font, char ch, int x_pos, int y_pos)
 {
     u32 glyph_offsets[98];
 
@@ -367,7 +386,7 @@ void DrawGlyph(struct Framebuffer *framebuffer, struct Font font, char ch, u32 x
     }
 }
 
-void DrawString(struct Framebuffer *buffer, struct Font font, char *string, u32 x, u32 y)
+void DrawString(struct Framebuffer *buffer, struct Font font, char *string, int x, int y)
 {
     int new_char_offset = 0;
     
@@ -381,7 +400,7 @@ void DrawString(struct Framebuffer *buffer, struct Font font, char *string, u32 
     }
 }
 
-void InitSprite(struct Sprite *s, float x, float y, int frame_count, struct Bitmap *frames, int start_frame, double frame_time)
+void InitSprite(struct Sprite *s, int x, int y, int frame_count, struct Bitmap *frames, int start_frame, double frame_time)
 {
     s->x = x;
     s->y = y;

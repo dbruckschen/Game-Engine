@@ -28,7 +28,10 @@ void GameInit(struct GameState *gs) {
 	gs->debug = LoadBitmapFile("../assets/test.bmp");
 	InitSprite(&gs->debug_sprite, 100, 100, 1, &gs->debug, 1, RGB_Color(255, 0, 255));
 
-	gs->btn1 = InitTextButton(&gs->font, 100, 200, 75, 25, "Click", RGB_Color(255, 0, 0), 5, RGB_Color(0, 255, 0), .1f);
+	gs->btn1 = InitTextButton(&gs->font, 100, 200, 75, 25, "Click", RGB_Color(255, 0, 0), 2, RGB_Color(255, 255, 255), .1f);
+
+	gs->tf1 = InitTextField(&gs->font, 100, 300, 150, 25, RGB_Color(255, 255, 255),
+							2, RGB_Color(0, 0, 0), .3f, 3, 16, .5, RGB_Color(0, 255, 0));
 }
 
 void GameStart() {
@@ -124,11 +127,13 @@ void GameUpdate(struct GameState *gs) {
 	/* UI Update */
 	UpdateButtonStatus(&gs->btn1, gs->input, gs->timer.elapsed_time);
 	if(gs->btn1.toggle) {
-		printf("btn1 toggled on\n");
+		//printf("btn1 toggled on\n");
 	}
 	else {
-		printf("btn1 toggled off\n");
+		//printf("btn1 toggled off\n");
 	}
+
+	UpdateTextField(&gs->tf1, gs->input, gs->timer.elapsed_time);
 }
 
 void GameRender(struct GameState *gs) {
@@ -146,7 +151,7 @@ void GameRender(struct GameState *gs) {
 		//int center_x = (int)mouse_pos.x - 32;
 		//int center_y = (int)mouse_pos.y - 32;
 			
-		v2 bmp_pos = {gs->debug_sprite.x, gs->debug_sprite.y};
+		v2 bmp_pos = {(float)gs->debug_sprite.x, (float)gs->debug_sprite.y};
 		if(BBAA(mouse_pos, 1, 1, bmp_pos, gs->debug_sprite.frames[0].width, gs->debug_sprite.frames[0].height)) {
 			//printf("mouse & bitmap collision\n");
 			/* gs->debug_sprite.x = mouse_pos.x; */
@@ -160,8 +165,10 @@ void GameRender(struct GameState *gs) {
 	}
 		
 	DrawBMP24bpp(&gs->fbuff, gs->debug, (int)gs->debug_sprite.x, (int)gs->debug_sprite.y, RGB_Color(255, 0, 255));
-	DrawString(&gs->fbuff, gs->font, "Hello World 1234567890", 300, 300);
 	DrawTextButton(&gs->fbuff, &gs->btn1);
+	DrawTextField(&gs->fbuff, &gs->tf1);
+	
+	DrawRectangle(&gs->fbuff, -50, -50, 100, 100, RGB_Color(255, 0, 0));
 	
 	OutputFramebuffer(gs->window.wnd_h, gs->fbuff);
 }
