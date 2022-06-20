@@ -87,9 +87,9 @@ struct TextField InitTextField(struct Font *font, int x, int y, int width, int h
 	tf.width = width;
 	tf.height = height;
 	tf.font = font;
+	tf.text_current_len = 0;
+	tf.text[0] = '\0';
 
-	char *placeholder_str = "placeholder";
-	StringCpy(tf.text, placeholder_str, StringLen(placeholder_str));
 	tf.color = color;
 	tf.border_thickness = border_thickness;
 	tf.border_color = border_color;
@@ -127,10 +127,6 @@ void DrawTextField(struct Framebuffer *fb, struct TextField *tf) {
 	int font_height = tf->font->glyph_height;
 	v2 rec_center = GetCenteredCoordinates(tf->x, tf->y, tf->width, tf->height, string_width, font_height);
 	
-	// draw filler text
-	if(!tf->write_focus && tf->inital_state) {
-		DrawString(fb, *tf->font, tf->text, (int)rec_center.x, (int)rec_center.y);
-	}
 	if(tf->write_focus) {
 		// draw a blinking cursor
 		if(tf->cursor.blink_timer >= tf->cursor.blink_rate) {
@@ -140,6 +136,14 @@ void DrawTextField(struct Framebuffer *fb, struct TextField *tf) {
 				tf->cursor.blink_timer = 0.0f;
 			}
 		}
+	}
+	
+    // draw filler text
+	if(!tf->write_focus && tf->inital_state) {
+		DrawString(fb, *tf->font, "placeholder", (int)rec_center.x, (int)rec_center.y);
+	}
+	else {
+		DrawString(fb, *tf->font, tf->text, tf->x + 5, rec_center.y);
 	}
 }
 
@@ -158,14 +162,23 @@ void UpdateTextField(struct TextField *tf, struct Input input, double dt) {
 		tf->delay_timer = 0.0;
 		tf->write_focus = true;
 		tf->inital_state = false;
-
-		printf("write focus on\n");
 	}
 	else if(!collision_with_ui_element && tf->write_focus && input.left_click_down) {
 		// if mouse clicked somewhere but the text field, remove write focus from text field
 		tf->write_focus = false;
 		tf->delay_timer = 0.0;
 		tf->cursor.blink_timer = tf->cursor.blink_rate;
-		printf("write focus off\n");
+	}
+
+	// update the text field text 
+	if(tf->write_focus) {
+		for(int i = 0; i < MAX_KEYS; i++) {
+			if(input.keyboard[i].pressed_this_frame) {
+				tf->text[tf->text_current_len] = (char)i;
+				tf->text[tf->text_current_len+1] = '\0';
+				tf->text_current_len++;
+				tf->cursor.pos.x += tf->font->glyph_width;
+			}
+		}
 	}
 }

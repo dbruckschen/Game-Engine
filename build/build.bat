@@ -1,7 +1,7 @@
 @echo off
 cls
 
-set dllfiles=..\src\common.c ..\src\draw.c ..\src\mathlib.c ..\src\timing.c ..\src\window.c ..\src\input.c ..\src\ui.c
+set dllfiles=..\src\common.c ..\src\draw.c ..\src\mathlib.c ..\src\timing.c ..\src\window.c ..\src\input.c ..\src\ui.c ..\src\linked_list.c
 
 REM compile dll 
 cl /Zi /W4 /c %dllfiles% /I ..\include /Fo"..\obj\\"

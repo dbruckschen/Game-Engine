@@ -3,7 +3,7 @@
 void GameInit(struct GameState *gs) {
 	InitRandomNumberGen();
 	GenerateShapeOrder(gs->random_shape_queue);
-		
+
 	gs->running = true;
 	gs->previous_lock_down = true;
 
@@ -41,11 +41,13 @@ void GameStart() {
 		
 	while(gs.running) {
 		StartTimer(&gs.timer);
+
+		ResetInput(&gs.input);
 		
 		if(!MessageLoop(&gs.input)) {
 			break;
 		}
-			
+		
 		GameUpdate(&gs);
 		GameRender(&gs);
 	
@@ -69,7 +71,7 @@ void GameUpdate(struct GameState *gs) {
 	/* } */
 	/* sprintf(performance_values, "fps: %d", fps); */
 	/* DrawString(&fbuff, font, performance_values, 5, 30, RGB_Color(255, 255, 255)); */
-
+	
 	/* update the mouse position */
 	gs->input.mouse_cursor_pos = GetMousePosition(gs->window.wnd_h);
 		

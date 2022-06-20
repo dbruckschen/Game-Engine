@@ -3,7 +3,10 @@
 
 #include <windows.h>
 #include <stdio.h>
-#include "..\include\mathlib.h"
+#include "mathlib.h"
+#include "linked_list.h"
+
+#define MAX_KEYS 256
 
 enum key_code {
     space_key = 0x20,
@@ -65,11 +68,12 @@ struct Input {
     bool left_click_down;
 	bool right_click_down;
 	
-    struct KeyState keyboard[256];
+    struct KeyState keyboard[MAX_KEYS];
 };
 
 __declspec(dllexport) v2 GetMousePosition(HWND window);
 /* NOTE: Gets called by MessageLoop(), don't just call it. */
 __declspec(dllexport) void GetKeyboardInput(struct Input *input, MSG msg);
+__declspec(dllexport) void ResetInput(struct Input *input);
 
 #endif // INPUT_H

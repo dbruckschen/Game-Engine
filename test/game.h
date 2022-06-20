@@ -8,6 +8,7 @@
 #include "common.h"
 #include "mathlib.h"
 #include "ui.h"
+#include "linked_list.h"
 //#include "allocator.h"
 
 #define WINDOW_WIDTH 800

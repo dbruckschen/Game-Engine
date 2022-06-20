@@ -1,7 +1,7 @@
-#include "linkedList.h"
+#include "linked_list.h"
 
-struct list list_init(void *data, size_t data_type_size) {
-	struct list l = {0};
+struct List ListInit(void *data, size_t data_type_size) {
+	struct List l = {0};
 	l.head = malloc(sizeof *l.head);
 	
 	l.head->data = malloc(data_type_size);
@@ -14,8 +14,8 @@ struct list list_init(void *data, size_t data_type_size) {
 	return l;
 }
 
-void list_append(struct list *list, void *data) {
-	struct node *itr = list->head;
+void ListAppend(struct List *list, void *data) {
+	struct Node *itr = list->head;
 	while(itr->next) {
 		itr = itr->next;
 	}
@@ -28,10 +28,10 @@ void list_append(struct list *list, void *data) {
 	list->num_nodes++;
 }
 
-void list_destroy(struct list *list) {
-	struct node *itr = list->head;
+void ListDestroy(struct List *list) {
+	struct Node *itr = list->head;
 	for(int i = 0; i < list->num_nodes; i++) {
-		struct node *tmp_node = itr->next;
+		struct Node *tmp_node = itr->next;
 		free(itr->data);
 		free(itr);
 		itr = tmp_node;

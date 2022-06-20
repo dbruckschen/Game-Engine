@@ -54,6 +54,7 @@ struct TextField {
 	double delay_timer;
 
 	char text[256];
+	int text_current_len;
 
 	struct Cursor cursor;
 };

@@ -4,13 +4,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct node {
+struct Node {
 	void *data;
-	struct node *next;
+	struct Node *next;
 };
 
-struct list {
-	struct node *head;
+struct List {
+	struct Node *head;
 	size_t data_type_size;
 	int num_nodes;
 };
@@ -18,8 +18,8 @@ struct list {
 /* void *data: void pointer to inital data
  * size_t data_size: size int bytes of *data 
  */
-struct list list_init(void *data, size_t data_size);
-void list_append(struct list *list, void *data);
-void list_destroy(struct list *list);
+__declspec(dllexport) struct List ListInit(void *data, size_t data_size);
+__declspec(dllexport) void ListAppend(struct List *list, void *data);
+__declspec(dllexport) void ListDestroy(struct List *list);
 
 #endif
