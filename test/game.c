@@ -136,6 +136,9 @@ void GameUpdate(struct GameState *gs) {
 	}
 
 	UpdateTextField(&gs->tf1, gs->input, gs->timer.elapsed_time);
+
+	int debug_color = CharToInt(gs->tf1.text);
+	FillScreen(&gs->fbuff, RGB_Color(debug_color, 0, 0));
 }
 
 void GameRender(struct GameState *gs) {

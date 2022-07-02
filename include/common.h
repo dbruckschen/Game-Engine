@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <assert.h>
+#include <math.h>
 
 typedef uint8_t u8;
 typedef uint16_t u16;
@@ -23,5 +24,7 @@ __declspec(dllexport) bool StringCmp(char *s1, char *s2);
 
 // the last character will be the null terminator 
 __declspec(dllexport) void StringCpy(char *dst, char *src, size_t dst_len);
+__declspec(dllexport) bool CharBelongsToText(char c);
+__declspec(dllexport) int CharToInt(char *s);
 
 #endif //COMMON_H

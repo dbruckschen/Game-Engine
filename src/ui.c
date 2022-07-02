@@ -100,9 +100,11 @@ struct TextField InitTextField(struct Font *font, int x, int y, int width, int h
 	tf.delay_timer = tf.delay_time;
 
 	v2 cursor_rec = GetCenteredCoordinates(x, y, width, height, cursor_width, cursor_height);
-	
-	tf.cursor.pos.x = (float)(x + font->glyph_width);
-	tf.cursor.pos.y = (float) cursor_rec.y;
+
+	tf.cursor.inital_pos.x = (float)(x + font->glyph_width);
+	tf.cursor.inital_pos.y = (float)cursor_rec.y;
+	tf.cursor.pos.x = tf.cursor.inital_pos.x;
+	tf.cursor.pos.y = tf.cursor.inital_pos.y;
 	tf.cursor.width = cursor_width;
 	tf.cursor.height = cursor_height;
 	tf.cursor.blink_rate = cursor_blink_rate;
@@ -172,12 +174,28 @@ void UpdateTextField(struct TextField *tf, struct Input input, double dt) {
 
 	// update the text field text 
 	if(tf->write_focus) {
-		for(int i = 0; i < MAX_KEYS; i++) {
-			if(input.keyboard[i].pressed_this_frame) {
-				tf->text[tf->text_current_len] = (char)i;
+		for(int iChar = 0; iChar < MAX_KEYS; iChar++) {
+			if(input.keyboard[iChar].pressed_this_frame && CharBelongsToText(iChar)) {
+				tf->text[tf->text_current_len] = (char)iChar;
 				tf->text[tf->text_current_len+1] = '\0';
 				tf->text_current_len++;
-				tf->cursor.pos.x += tf->font->glyph_width;
+
+				// TODO: don't move cursor out of text field to the right
+				if(tf->cursor.pos.x + tf->cursor.width + tf->width > tf->cursor.pos.x) {
+					tf->cursor.pos.x += tf->font->glyph_width + tf->font->glyph_spacing;
+				}
+			}
+			// delete last character if backspace is pressed
+			else if(input.keyboard[iChar].pressed_this_frame && (iChar == bs_key)) {
+				if(tf->text_current_len > 0) {
+					tf->text[tf->text_current_len-1] = '\0';
+					tf->text_current_len--;
+
+					// don't move the cursor back out of the text field
+					if(tf->cursor.pos.x > tf->cursor.inital_pos.x) {
+						tf->cursor.pos.x -= tf->font->glyph_width + tf->font->glyph_spacing;
+					}
+				}
 			}
 		}
 	}

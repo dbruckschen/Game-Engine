@@ -28,6 +28,7 @@ struct Button {
 
 struct Cursor {
 	v2 pos;
+	v2 inital_pos;
 	int width;
 	int height;
 	float blink_rate;

@@ -9,6 +9,8 @@
 #define MAX_KEYS 256
 
 enum key_code {
+	bs_key = 0x8,
+	
     space_key = 0x20,
 
     key = 0x30,
