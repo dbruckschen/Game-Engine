@@ -197,6 +197,12 @@ void UpdateTextField(struct TextField *tf, struct Input input, double dt) {
 					}
 				}
 			}
+			// move cursor with arrow keys
+			else if(input.keyboard[iChar].pressed_this_frame && (iChar == arrow_left)) {
+				if(tf->cursor.pos.x > tf->cursor.inital_pos.x) {
+					tf->cursor.pos.x -= tf->font->glyph_width + tf->font->glyph_spacing;
+				}
+			}
 		}
 	}
 }
