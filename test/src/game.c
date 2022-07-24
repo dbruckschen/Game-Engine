@@ -8,7 +8,7 @@ void GameInit(struct GameState *gs) {
 	gs->previous_lock_down = true;
 
 	/* create window */
-	char *window_title = "Rudimentary Multimedia Library demo";
+	char *window_title = "Game Engine";
 	gs->window = OpenWindow(WINDOW_WIDTH, WINDOW_HEIGHT, window_title);
 
 	/* create framebuffer */
