@@ -1,7 +1,6 @@
 #include "allocator.h"
 
-struct MemAllocator allocator_init(size_t bytes)
-{
+struct MemAllocator allocator_init(size_t bytes) {
 	/* global reference counter */
 	malloc_ref_counter++;
 	struct MemAllocator allocator = {0};
@@ -18,8 +17,7 @@ struct MemAllocator allocator_init(size_t bytes)
 	return allocator;
 }
 
-void *mem_alloc(struct MemAllocator *allocator, size_t amount)
-{
+void *mem_alloc(struct MemAllocator *allocator, size_t amount) {
 	void *result = 0;
 
 	if(amount <= 0) {
@@ -54,8 +52,7 @@ void *mem_alloc(struct MemAllocator *allocator, size_t amount)
 	return result;
 }
 
-void print_allocator_info(struct MemAllocator *allocator)
-{
+void print_allocator_info(struct MemAllocator *allocator) {
 	printf("allocator info: \n");
 	printf("current base address: 0x%p\n", allocator->base);
 	printf("size: %zd\n", allocator->size);

@@ -75,7 +75,7 @@ struct Input {
 };
 
 __declspec(dllexport) v2 GetMousePosition(HWND window);
-/* NOTE: Gets called by MessageLoop(), don't just call it. */
+/* NOTE: should only called by MessageLoop */
 __declspec(dllexport) void GetKeyboardInput(struct Input *input, MSG msg);
 __declspec(dllexport) void ResetInput(struct Input *input);
 

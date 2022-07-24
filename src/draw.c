@@ -1,6 +1,6 @@
 #include "draw.h"
-struct Framebuffer CreateFramebuffer(HWND window)
-{
+
+struct Framebuffer CreateFramebuffer(HWND window) {
     struct Framebuffer framebuffer;
     RECT w_rect;
 
@@ -37,37 +37,31 @@ struct Framebuffer CreateFramebuffer(HWND window)
     return framebuffer;
 }
 
-void DestroyFramebuffer(struct Framebuffer *fb)
-{
+void DestroyFramebuffer(struct Framebuffer *fb) {
     VirtualFree(&fb->buffer, 0, MEM_RELEASE);
     fb->buffer = 0;
 }
 
-void OutputFramebuffer(HWND window, struct Framebuffer fb)
-{
+void OutputFramebuffer(HWND window, struct Framebuffer fb) {
     HDC window_dc = GetDC(window);
     BitBlt(window_dc, 0, 0, fb.width, fb.height, fb.bitmap_hdc, 0, 0, SRCCOPY);
 }
 
-u32 RGB_Color(u8 red, u8 green, u8 blue)
-{
+u32 RGB_Color(u8 red, u8 green, u8 blue) {
     return (u32)(((u8)0 << 24) + (red << 16) + (green << 8) + blue);
 }
 
-u32 RGBA_Color(u8 red, u8 green, u8 blue, u8 alpha)
-{
+u32 RGBA_Color(u8 red, u8 green, u8 blue, u8 alpha) {
 	return (u32)((alpha << 24) + (red << 16) + (green << 8) + blue);
 }
 
-void FillScreen(struct Framebuffer *framebuffer, u32 color)
-{
+void FillScreen(struct Framebuffer *framebuffer, u32 color) {
     u32 *pixel = (u32 *)framebuffer->buffer;
     for (int i = 0; i < framebuffer->width * framebuffer->height; ++i)
         *pixel++ = color;
 }
 
-void DrawPixel(struct Framebuffer *framebuffer, int x, int y, u32 color)
-{
+void DrawPixel(struct Framebuffer *framebuffer, int x, int y, u32 color) {
     if (x >= 0 && x <= framebuffer->width && y >= 0 && y <= framebuffer->height) {
         u32 *pixel = (u32 *)framebuffer->buffer;
 
@@ -76,8 +70,7 @@ void DrawPixel(struct Framebuffer *framebuffer, int x, int y, u32 color)
     }
 }
 
-void DrawRectangle(struct Framebuffer *framebuffer, int x0, int y0, int width, int height, u32 color)
-{
+void DrawRectangle(struct Framebuffer *framebuffer, int x0, int y0, int width, int height, u32 color) {
 	/* clip the rectangle to the framebuffer dimensions */
 	if((x0 > framebuffer->width) || ((x0 + width) < 0) ||
 	   (y0 > framebuffer->height) || (y0 + height) < 0) {
@@ -109,8 +102,7 @@ void DrawRectangle(struct Framebuffer *framebuffer, int x0, int y0, int width, i
     }
 }
 
-void DrawLine(struct Framebuffer *framebuffer, int x0, int y0, int x1, int y1, u32 color)
-{
+void DrawLine(struct Framebuffer *framebuffer, int x0, int y0, int x1, int y1, u32 color) {
     int dx = abs(x1 - x0);
     int dy = -abs(y1 - y0);
     int sx = x0 < x1 ? 1 : -1;
@@ -138,15 +130,13 @@ void DrawLine(struct Framebuffer *framebuffer, int x0, int y0, int x1, int y1, u
     }
 }
 
-void DrawTriangle(struct Framebuffer *framebuffer, int points[6], u32 color)
-{
+void DrawTriangle(struct Framebuffer *framebuffer, int points[6], u32 color) {
     DrawLine(framebuffer, points[0], points[1], points[2], points[3], color);
     DrawLine(framebuffer, points[2], points[3], points[4], points[5], color);
     DrawLine(framebuffer, points[4], points[5], points[0], points[1], color);
 }
 
-void *ReadFileContent(char *filename)
-{
+void *ReadFileContent(char *filename) {
     HANDLE file_handle = CreateFileA(filename, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 
     DWORD file_size;
@@ -163,8 +153,7 @@ void *ReadFileContent(char *filename)
     return file_data;
 }
 
-struct Bitmap LoadBitmapFile(char *filename)
-{
+struct Bitmap LoadBitmapFile(char *filename) {
     struct Bitmap bitmap = {0};
 
     void *file;
@@ -190,8 +179,7 @@ struct Bitmap LoadBitmapFile(char *filename)
     return bitmap;
 }
 
-void HFlipBMP24bpp(struct Bitmap *bitmap)
-{
+void HFlipBMP24bpp(struct Bitmap *bitmap) {
     size_t bitmap_size = bitmap->height * bitmap->width * bitmap->bpp;
     u8 *copy_bmp_pixel = malloc(bitmap_size);
     GetPixelFromBMP(bitmap, copy_bmp_pixel);
@@ -212,8 +200,7 @@ void HFlipBMP24bpp(struct Bitmap *bitmap)
     copy_bmp_pixel = 0;
 }
 
-void HFlipBMP32bpp(struct Bitmap *bitmap)
-{
+void HFlipBMP32bpp(struct Bitmap *bitmap) {
     size_t bitmap_size = bitmap->height * bitmap->width * bitmap->bpp;
     u8 *copy_bmp_pixel = malloc(bitmap_size);
     GetPixelFromBMP(bitmap, copy_bmp_pixel);
@@ -232,8 +219,7 @@ void HFlipBMP32bpp(struct Bitmap *bitmap)
     copy_bmp_pixel = 0;
 }
 
-void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x, int y, u32 color_mask)
-{
+void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x, int y, u32 color_mask) {
     if((x >= (int)framebuffer->width) || (y >= (int)framebuffer->height) ||
 	   ((x + (int)bitmap.width) <= 0) || ((y + (int)bitmap.height) <= 0)) {
         return;
@@ -291,8 +277,7 @@ void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x, 
     }
 }
 
-void DrawBMP32bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x_pos, int y_pos, u32 color_mask)
-{
+void DrawBMP32bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x_pos, int y_pos, u32 color_mask) {
     u32 *dst = (u32 *)framebuffer->buffer;
     u8 *src = (u8 *)bitmap.pixel;
 
@@ -318,14 +303,12 @@ void DrawBMP32bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x_p
     }
 }
 
-void GetPixelFromBMP(struct Bitmap *from, u8 *to)
-{
+void GetPixelFromBMP(struct Bitmap *from, u8 *to) {
     for(int i = 0; i < from->height * from->width * from->bpp; i++)
         *(to + i) = *(from->pixel + i);
 }
 
-void DrawGlyph(struct Framebuffer *framebuffer, struct Font font, char ch, int x_pos, int y_pos)
-{
+void DrawGlyph(struct Framebuffer *framebuffer, struct Font font, char ch, int x_pos, int y_pos) {
     u32 glyph_offsets[98];
 
     for(int i = 0; i < font.glyph_count; i++) {
@@ -386,8 +369,7 @@ void DrawGlyph(struct Framebuffer *framebuffer, struct Font font, char ch, int x
     }
 }
 
-void DrawString(struct Framebuffer *buffer, struct Font font, char *string, int x, int y)
-{
+void DrawString(struct Framebuffer *buffer, struct Font font, char *string, int x, int y) {
     int new_char_offset = 0;
     
     for(int i = 0; i < StringLen(string)-1; i++) {
@@ -400,8 +382,7 @@ void DrawString(struct Framebuffer *buffer, struct Font font, char *string, int 
     }
 }
 
-void InitSprite(struct Sprite *s, int x, int y, int frame_count, struct Bitmap *frames, int start_frame, double frame_time)
-{
+void InitSprite(struct Sprite *s, int x, int y, int frame_count, struct Bitmap *frames, int start_frame, double frame_time) {
     s->x = x;
     s->y = y;
     s->animation_frame_count = frame_count;
@@ -415,8 +396,7 @@ void InitSprite(struct Sprite *s, int x, int y, int frame_count, struct Bitmap *
     s->current_timer = 0.0f;
 }
 
-void UpdateSpriteAnimation(struct Sprite *s)
-{
+void UpdateSpriteAnimation(struct Sprite *s) {
     if(s->current_timer >= s->timer_next_frame) {
         s->current_frame++;
         s->current_timer = 0.0;

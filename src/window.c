@@ -1,7 +1,6 @@
 #include "window.h"
 
-LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
-{
+LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam) {
     LRESULT result = 0;
 
     switch (msg) {
@@ -24,8 +23,7 @@ LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
     return result;
 }
 
-struct Window OpenWindow(int w, int h, char *title)
-{
+struct Window OpenWindow(int w, int h, char *title) {
     HWND window_handle = {0};
     WNDCLASSEX wc = {0};
 
@@ -75,8 +73,7 @@ struct Window OpenWindow(int w, int h, char *title)
     return new_window;
 }
 
-bool MessageLoop(struct Input *input)
-{
+bool MessageLoop(struct Input *input) {
     bool running = true;
     MSG msg;
 
@@ -118,6 +115,4 @@ bool MessageLoop(struct Input *input)
         DispatchMessage(&msg);
     }
     return running;
-
 }
-

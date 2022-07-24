@@ -60,10 +60,9 @@ struct TextField {
 	struct Cursor cursor;
 };
 
-__declspec(dllexport) struct Button
-InitTextButton(struct Font *font, int x, int y,
-		   int width, int height,
-			   char *text, u32 color, int border_thickness, u32 border_color, float delay);
+__declspec(dllexport) struct Button InitTextButton(struct Font *font, int x, int y,
+												   int width, int height, char *text, u32 color,
+												   int border_thickness, u32 border_color, float delay);
 
 __declspec(dllexport) void UpdateButtonStatus(struct Button *btn, struct Input input, double dt);
 __declspec(dllexport) void DrawTextButton(struct Framebuffer *fb, struct Button *btn);
@@ -71,8 +70,7 @@ __declspec(dllexport) void DrawTextButton(struct Framebuffer *fb, struct Button 
 __declspec(dllexport) struct TextField
 InitTextField(struct Font *font, int x, int y, int width, int height,
 			  u32 color, int border_thickness, u32 border_color,
-			  float delay, int cursor_width,
-			  int cursor_height, float cursor_blink_rate, u32 cursor_color);
+			  float delay, int cursor_width, int cursor_height, float cursor_blink_rate, u32 cursor_color);
 
 __declspec(dllexport) void UpdateTextField(struct TextField *tf, struct Input input, double dt); 
 __declspec(dllexport) void DrawTextField(struct Framebuffer *fb, struct TextField *tf);

@@ -1,7 +1,6 @@
 #include "input.h"
 
-v2 GetMousePosition(HWND window)
-{
+v2 GetMousePosition(HWND window) {
     POINT mouse_pos = {0};
     v2 position = {0};
 
@@ -14,8 +13,7 @@ v2 GetMousePosition(HWND window)
     return position;
 }
 
-void GetKeyboardInput(struct Input *input, MSG msg)
-{
+void GetKeyboardInput(struct Input *input, MSG msg) {
 	input->keyboard[msg.wParam].down = true;
 	//printf("0x%x pressed\n", msg.wParam);
 

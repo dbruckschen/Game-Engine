@@ -1,8 +1,8 @@
 #ifndef DRAW_H
 #define DRAW_H
 
-#include "..\include\common.h"
-#include "..\include\mathlib.h"
+#include "../include/common.h"
+#include "../include/mathlib.h"
 #include <assert.h>
 #include <windows.h>
 #include <stdio.h>

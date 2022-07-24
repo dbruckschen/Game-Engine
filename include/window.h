@@ -4,7 +4,7 @@
 #include <windows.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h> // maybe already in <window.h> ?
+#include <stdlib.h>
 #include "input.h"
 
 struct Window {
