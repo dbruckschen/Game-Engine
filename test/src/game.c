@@ -13,7 +13,7 @@ void GameInit(struct GameState *gs) {
 
 	/* create framebuffer */
 	gs->fbuff = CreateFramebuffer(gs->window.wnd_h);
-
+	
 	/* init timer */
 	InitTimer(&gs->timer);
 
@@ -138,16 +138,16 @@ void GameUpdate(struct GameState *gs) {
 	UpdateTextField(&gs->tf1, gs->input, gs->timer.elapsed_time);
 
 	int debug_color = CharToInt(gs->tf1.text);
-	FillScreen(&gs->fbuff, RGB_Color(debug_color, 0, 0));
+	FillScreen(gs->fbuff, RGB_Color(debug_color, 0, 0));
 }
 
 void GameRender(struct GameState *gs) {
-	FillScreen(&gs->fbuff, RGB_Color(186, 188, 190));
-	DrawMatrix(&gs->fbuff);
+	FillScreen(gs->fbuff, RGB_Color(186, 188, 190));
+	DrawMatrix(gs->fbuff);
 
 	for(int i = 0; i < MAX_SHAPES; i++) {
 		if(gs->shapes[i].alive) {
-			DrawShape(&gs->fbuff, &gs->shapes[i]);
+			DrawShape(gs->fbuff, &gs->shapes[i]);
 		}
 	}
 
@@ -169,13 +169,13 @@ void GameRender(struct GameState *gs) {
 		}
 	}
 		
-	DrawBMP24bpp(&gs->fbuff, gs->debug, (int)gs->debug_sprite.x, (int)gs->debug_sprite.y, RGB_Color(255, 0, 255));
-	DrawTextButton(&gs->fbuff, &gs->btn1);
-	DrawTextField(&gs->fbuff, &gs->tf1);
+	DrawBMP24bpp(gs->fbuff, gs->debug, (int)gs->debug_sprite.x, (int)gs->debug_sprite.y, RGB_Color(255, 0, 255));
+	DrawTextButton(gs->fbuff, &gs->btn1);
+	DrawTextField(gs->fbuff, &gs->tf1);
 	
-	DrawRectangle(&gs->fbuff, -50, -50, 100, 100, RGB_Color(255, 0, 0));
+	DrawRectangle(gs->fbuff, -50, -50, 100, 100, RGB_Color(255, 0, 0));
 	
-	OutputFramebuffer(gs->window.wnd_h, gs->fbuff);
+	OutputFramebuffer(gs->window.wnd_h, *gs->fbuff);
 }
 
 void DrawMatrix(struct Framebuffer *fbuff) {

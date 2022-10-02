@@ -119,8 +119,24 @@ struct Triangles {
     u32 color;
 };
 
+struct ClippedRec {
+	int x1;
+	int y1;
+	
+	int x2;
+	int y2;
+
+	// drawable part of bitmap from (x, y)
+	int dx;
+	int dy;
+
+	// offsets into bitmap pixel buffer
+	int x_off;
+	int y_off;
+};
+
 // Create only one framebuffer at a time with the win32 window handle
-__declspec(dllexport) struct Framebuffer CreateFramebuffer(HWND window);
+__declspec(dllexport) struct Framebuffer *CreateFramebuffer(HWND window);
 
 /*
  * This function is mainly used when recreating the Framebuffer.
@@ -154,9 +170,9 @@ __declspec(dllexport) void FillScreen(struct Framebuffer *framebuffer, u32 color
 __declspec(dllexport) void DrawPixel(struct Framebuffer *framebuffer, int x, int y, u32 color);
 __declspec(dllexport) void DrawRectangle(struct Framebuffer *framebuffer, int x0, int y0, int width, int height, u32 color);
 
-// I copied this function from: https://en.wikipedia.org/wiki/Bresenham's_line_algorithm.
-// I should make an effort to fully understand this algorithm :P.
-// Lines get clipped through the DrawPixel function
+ /* I copied this function from: https://en.wikipedia.org/wiki/Bresenham's_line_algorithm. 
+  * I should make an effort to fully understand this algorithm :P. 
+  * Lines get clipped through the DrawPixel function */
 __declspec(dllexport) void DrawLine(struct Framebuffer *framebuffer, int x0, int y0, int x1, int y1, u32 color);
 // Triangles get clipped thorugh the DrawPixel function inside the DrawLine function.
 __declspec(dllexport) void DrawTriangle(struct Framebuffer *framebuffer, int points[6], u32 color);
@@ -166,13 +182,17 @@ __declspec(dllexport) void DrawTriangle(struct Framebuffer *framebuffer, int poi
 __declspec(dllexport) void *ReadFileContent(char *filename);
 __declspec(dllexport) struct Bitmap LoadBitmapFile(char *filename);
 
-/*
- *  The win32 ReadFile() function loads .bmp (or all formats?) file formats horizontally flipped.
+/*  The win32 ReadFile() function loads .bmp (or all formats?) file formats horizontally flipped.
  *  Flip the bmp again to draw bitmaps with right orientation.
  */
 __declspec(dllexport) void HFlipBMP24bpp(struct Bitmap *bitmap);
 __declspec(dllexport) void HFlipBMP32bpp(struct Bitmap *bitmap);
 
+/*
+ * Clip a rectangle to the window dimensions. Return the clipped rectangle. 
+ * If coordinates are invalid return a clipped rectangle with all values set to -1.
+ */
+__declspec(dllexport) struct ClippedRec ClipRectangle(int x1, int y1, int x2, int y2, int window_w, int window_h);
 
 // Bitmap drawing functions for 24 bytes per pixel and 32 bytes per pixel.
 __declspec(dllexport) void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x_pos, int y_pos, u32 color_mask);

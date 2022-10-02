@@ -4,9 +4,27 @@ LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
     LRESULT result = 0;
 
     switch (msg) {
-    case WM_SIZE:
-        break;
+	case WM_SIZE:
+		struct Framebuffer *fb = (struct Framebuffer *)GetWindowLongPtr(window, GWLP_USERDATA);
+		if(fb) {
+			DestroyFramebuffer(fb);
+			
+			struct Framebuffer *new_fbuff;
+			new_fbuff = CreateFramebuffer(window);
 
+			fb->buffer = new_fbuff->buffer;
+			fb->bpp = new_fbuff->bpp;
+			fb->width = new_fbuff->width;
+			fb->height = new_fbuff->height;
+			fb->size = new_fbuff->size;
+			fb->bitmap_handle = new_fbuff->bitmap_handle;
+			fb->info = new_fbuff->info;
+			fb->bitmap_hdc = new_fbuff->bitmap_hdc;
+			
+			VirtualFree(new_fbuff, 0, MEM_RELEASE);
+		}
+		break;
+		
     case WM_PAINT:
         PAINTSTRUCT ps = {0};
         BeginPaint(window, &ps);
@@ -49,7 +67,7 @@ struct Window OpenWindow(int w, int h, char *title) {
                                    CW_USEDEFAULT,
                                    h, w, 0, 0,
                                    wc.hInstance, 0);
-
+	
     RECT window_rect = {0};
     window_rect.left = 0;
     window_rect.top = 0;

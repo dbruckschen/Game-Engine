@@ -1,7 +1,7 @@
 #include "draw.h"
 
-struct Framebuffer CreateFramebuffer(HWND window) {
-    struct Framebuffer framebuffer;
+struct Framebuffer *CreateFramebuffer(HWND window) {
+    struct Framebuffer *framebuffer = VirtualAlloc(0, sizeof *framebuffer, MEM_COMMIT, PAGE_READWRITE);
     RECT w_rect;
 
     GetClientRect(window, &w_rect);
@@ -9,42 +9,51 @@ struct Framebuffer CreateFramebuffer(HWND window) {
     int window_width = w_rect.right - w_rect.left;
     int window_height = w_rect.bottom - w_rect.top;
 
-    framebuffer.width = window_width;
-    framebuffer.height = window_height;
-    framebuffer.bpp = 4;
+    framebuffer->width = window_width;
+    framebuffer->height = window_height;
+    framebuffer->bpp = 4;
 
-    framebuffer.size = framebuffer.height * framebuffer.width * framebuffer.bpp;
-    framebuffer.buffer = VirtualAlloc(0, framebuffer.size, MEM_COMMIT, PAGE_READWRITE);
+    framebuffer->size = framebuffer->height * framebuffer->width * framebuffer->bpp;
+    framebuffer->buffer = VirtualAlloc(0, framebuffer->size, MEM_COMMIT, PAGE_READWRITE);
 
-    framebuffer.info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    framebuffer.info.bmiHeader.biWidth = window_width;
-    framebuffer.info.bmiHeader.biHeight = -window_height;
-    framebuffer.info.bmiHeader.biPlanes = 1;
-    framebuffer.info.bmiHeader.biBitCount = 32;
-    framebuffer.info.bmiHeader.biCompression = BI_RGB;
-    framebuffer.info.bmiHeader.biSizeImage = 0;
-    framebuffer.info.bmiHeader.biXPelsPerMeter = 0;
-    framebuffer.info.bmiHeader.biYPelsPerMeter = 0;
-    framebuffer.info.bmiHeader.biClrUsed = 0;
-    framebuffer.info.bmiHeader.biClrImportant = 0;
+    framebuffer->info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    framebuffer->info.bmiHeader.biWidth = window_width;
+    framebuffer->info.bmiHeader.biHeight = -window_height;
+    framebuffer->info.bmiHeader.biPlanes = 1;
+    framebuffer->info.bmiHeader.biBitCount = 32;
+    framebuffer->info.bmiHeader.biCompression = BI_RGB;
+    framebuffer->info.bmiHeader.biSizeImage = 0;
+    framebuffer->info.bmiHeader.biXPelsPerMeter = 0;
+    framebuffer->info.bmiHeader.biYPelsPerMeter = 0;
+    framebuffer->info.bmiHeader.biClrUsed = 0;
+    framebuffer->info.bmiHeader.biClrImportant = 0;
 
-    framebuffer.bitmap_hdc = CreateCompatibleDC(0);
-    framebuffer.bitmap_handle = CreateDIBSection(framebuffer.bitmap_hdc, &framebuffer.info, DIB_RGB_COLORS, &framebuffer.buffer, 0, 0);
+    framebuffer->bitmap_hdc = CreateCompatibleDC(0);
+    framebuffer->bitmap_handle = CreateDIBSection(framebuffer->bitmap_hdc, &framebuffer->info, DIB_RGB_COLORS, &framebuffer->buffer, 0, 0);
 
-    if (framebuffer.bitmap_handle)
-        SelectObject(framebuffer.bitmap_hdc, framebuffer.bitmap_handle);
+    if (framebuffer->bitmap_handle)
+        SelectObject(framebuffer->bitmap_hdc, framebuffer->bitmap_handle);
 
-    return framebuffer;
+	static bool init = false;
+	if(!init) {
+		SetWindowLongPtr(window, GWLP_USERDATA, (LONG_PTR)framebuffer);
+		init = true;
+	}
+		
+	return framebuffer;
 }
 
 void DestroyFramebuffer(struct Framebuffer *fb) {
-    VirtualFree(&fb->buffer, 0, MEM_RELEASE);
+    VirtualFree(fb->buffer, 0, MEM_RELEASE);
     fb->buffer = 0;
 }
 
 void OutputFramebuffer(HWND window, struct Framebuffer fb) {
     HDC window_dc = GetDC(window);
-    BitBlt(window_dc, 0, 0, fb.width, fb.height, fb.bitmap_hdc, 0, 0, SRCCOPY);
+	StretchDIBits(window_dc, 0, 0, fb.width, fb.height, 0, 0, fb.width, fb.height, fb.buffer,
+				  &fb.info, DIB_RGB_COLORS, SRCCOPY);
+
+	printf("width %d, height: %d\n", fb.width, fb.height);
 }
 
 u32 RGB_Color(u8 red, u8 green, u8 blue) {
@@ -217,6 +226,62 @@ void HFlipBMP32bpp(struct Bitmap *bitmap) {
 
     free(copy_bmp_pixel);
     copy_bmp_pixel = 0;
+}
+
+struct ClippedRec ClipRectangle(int x, int y, int w, int h, int window_w, int window_h) {
+	struct ClippedRec result = {0};
+
+	if((x >= window_w) || (y >= window_h) ||
+	   ((x + w) <= 0) || (y + h <= 0)) {
+		result.x1 = -1;
+		result.y1 = -1;
+		result.x2 = -1;
+		result.y2 = -1;
+		result.dx = -1;
+		result.dy = -1;
+		result.x_off = -1;
+		result.y_off = -1;
+
+        return result;
+	}
+	
+	int x1 = x;
+	int y1 = y;
+	int x2 = x1 + w - 1;
+	int y2 = y1 + h - 1;
+
+	if(x1 < 0) {
+		x1 = 0;
+	}
+
+	if(y1 < 0) {
+		y1 = 0;
+	}
+
+	if(x2 >= window_w) {
+		x2 = window_w - 1;
+	}
+
+	if(y2 >= window_h) {
+		y2 = window_h - 1;
+	}
+
+	int x_off = x1 - x;
+	int y_off = y1 - y;
+
+	int dx = x2 - x1 + 1;
+	int dy = y2 - y1 + 1;
+
+	result.x1 = x1;
+	result.y1 = y1;
+	result.x2 = x2;
+	result.y2 = y2;
+	result.dx = dx;
+	result.dy = dy;
+	result.x_off = x_off;
+	result.y_off = y_off;
+
+	return result;
 }
 
 void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x, int y, u32 color_mask) {

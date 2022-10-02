@@ -76,7 +76,7 @@ struct GameState {
 	int num_shapes;
 
 	struct Window window;
-	struct Framebuffer fbuff;
+	struct Framebuffer *fbuff;
 	struct Input input;
 	struct Timer timer;
 	struct Font font;
