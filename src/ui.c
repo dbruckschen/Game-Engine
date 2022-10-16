@@ -145,7 +145,7 @@ void DrawTextField(struct Framebuffer *fb, struct TextField *tf) {
 		DrawString(fb, *tf->font, "placeholder", (int)rec_center.x, (int)rec_center.y);
 	}
 	else {
-		DrawString(fb, *tf->font, tf->text, tf->x + 5, rec_center.y);
+		DrawString(fb, *tf->font, tf->text, (int)tf->x + 5, (int)rec_center.y);
 	}
 }
 
@@ -175,7 +175,7 @@ void UpdateTextField(struct TextField *tf, struct Input input, double dt) {
 	// update the text field text 
 	if(tf->write_focus) {
 		for(int iChar = 0; iChar < MAX_KEYS; iChar++) {
-			if(input.keyboard[iChar].pressed_this_frame && CharBelongsToText(iChar)) {
+			if(input.keyboard[iChar].pressed_this_frame && CharBelongsToText((char)iChar)) {
 				tf->text[tf->text_current_len] = (char)iChar;
 				tf->text[tf->text_current_len+1] = '\0';
 				tf->text_current_len++;

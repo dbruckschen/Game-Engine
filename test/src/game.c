@@ -121,11 +121,14 @@ void GameUpdate(struct GameState *gs) {
 		}
 		gs->move_timer = 0.0;
 	}
+
+	gs->debug_sprite.x = (int)gs->input.mouse_cursor_pos.x - 32;
+	gs->debug_sprite.y = (int)gs->input.mouse_cursor_pos.y - 32;
 	
 	//DrawString(&gs->fbuff, gs->font, "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ", 10, 50, RGB_Color(255, 255, 255));
 	//~!@#$%^&*()-_+={}[];:'\",<.>/?
 	/* frames++; */
-
+	
 	/* UI Update */
 	UpdateButtonStatus(&gs->btn1, gs->input, gs->timer.elapsed_time);
 	if(gs->btn1.toggle) {
@@ -150,30 +153,37 @@ void GameRender(struct GameState *gs) {
 			DrawShape(gs->fbuff, &gs->shapes[i]);
 		}
 	}
-
-	if(gs->input.left_click_down) {
-		v2 mouse_pos = GetMousePosition(gs->window.wnd_h);
-		//int center_x = (int)mouse_pos.x - 32;
-		//int center_y = (int)mouse_pos.y - 32;
+	
+	/* if(gs->input.left_click_down) { */
+	/* 	v2 mouse_pos = GetMousePosition(gs->window.wnd_h); */
+	/* 	int center_x = (int)mouse_pos.x - 32; */
+	/* 	int center_y = (int)mouse_pos.y - 32; */
 			
-		v2 bmp_pos = {(float)gs->debug_sprite.x, (float)gs->debug_sprite.y};
-		if(BBAA(mouse_pos, 1, 1, bmp_pos, gs->debug_sprite.frames[0].width, gs->debug_sprite.frames[0].height)) {
-			//printf("mouse & bitmap collision\n");
-			/* gs->debug_sprite.x = mouse_pos.x; */
-			/* gs->debug_sprite.y = mouse_pos.y; */
-		}
+	/* 	v2 bmp_pos = {(float)gs->debug_sprite.x, (float)gs->debug_sprite.y}; */
+	/* 	if(BBAA(mouse_pos, 1, 1, bmp_pos, gs->debug_sprite.frames[0].width, gs->debug_sprite.frames[0].height)) { */
+	/* 		//printf("mouse & bitmap collision\n"); */
+	/* 		gs->debug_sprite.x = mouse_pos.x; */
+	/* 		gs->debug_sprite.y = mouse_pos.y; */
+	/* 	} */
 
-		v2 b1 = {(float)gs->btn1.x, (float)gs->btn1.y};
-		if(BBAA(mouse_pos, 1, 1, b1, gs->btn1.width, gs->btn1.height)) {
-			//printf("mouse & button collision\n");
-		}
-	}
-		
-	DrawBMP24bpp(gs->fbuff, gs->debug, (int)gs->debug_sprite.x, (int)gs->debug_sprite.y, RGB_Color(255, 0, 255));
+	/* 	v2 b1 = {(float)gs->btn1.x, (float)gs->btn1.y}; */
+	/* 	if(BBAA(mouse_pos, 1, 1, b1, gs->btn1.width, gs->btn1.height)) { */
+	/* 		//printf("mouse & button collision\n"); */
+	/* 	} */
+	/* } */
+
+	int region_x = 350;
+	int region_y = 50;
+	int region_w = 128;
+	int region_h = 250;
+	DrawRectangle(gs->fbuff, region_x, region_y, region_w, region_h, RGB_Color(255, 0, 0));
+	DrawBMP24bppToClipRegion(gs->fbuff, gs->debug, (int)gs->debug_sprite.x, (int)gs->debug_sprite.y, RGB_Color(255, 0, 255),							 region_x, region_y, region_w, region_h);
+	DrawBMP24bpp(gs->fbuff, gs->debug, 200, 200, RGB_Color(255, 0, 255));
+	
 	DrawTextButton(gs->fbuff, &gs->btn1);
 	DrawTextField(gs->fbuff, &gs->tf1);
 	
-	DrawRectangle(gs->fbuff, -50, -50, 100, 100, RGB_Color(255, 0, 0));
+	//DrawRectangle(gs->fbuff, -50, -50, 100, 100, RGB_Color(255, 0, 0));
 	
 	OutputFramebuffer(gs->window.wnd_h, *gs->fbuff);
 }

@@ -119,13 +119,21 @@ struct Triangles {
     u32 color;
 };
 
-struct ClippedRec {
-	int x1;
-	int y1;
-	
-	int x2;
-	int y2;
+struct ClippedBmp {
+	int x1, y1, x2 , y2;
 
+	// drawable part of bitmap from (x, y)
+	int dx;
+	int dy;
+
+	// offsets into bitmap pixel buffer
+	int x_off;
+	int y_off;
+};
+
+struct ClippedRect {
+	int x1, x2, y1, y2;
+	
 	// drawable part of bitmap from (x, y)
 	int dx;
 	int dy;
@@ -146,7 +154,7 @@ __declspec(dllexport) struct Framebuffer *CreateFramebuffer(HWND window);
 __declspec(dllexport) void DestroyFramebuffer(struct Framebuffer *fb);
 
 
-// After you rendered all stuff to the framebuffer output everything to the screen.
+ /* After everything got rendered to the framebuffer output the buffer to the the screen. */
 
 __declspec(dllexport)void OutputFramebuffer(HWND window, struct Framebuffer fb);
 
@@ -164,8 +172,7 @@ __declspec(dllexport) u32 RGB_Color(u8 red, u8 green, u8 blue);
  */
 __declspec(dllexport) u32 RGBA_Color(u8 red, u8 green, u8 blue, u8 alpha);
 
-
-// Fill the screen with a solid color. The Color format is 0RGB.
+ /* Fill the screen with a solid color. The Color format is 0RGB. */
 __declspec(dllexport) void FillScreen(struct Framebuffer *framebuffer, u32 color);
 __declspec(dllexport) void DrawPixel(struct Framebuffer *framebuffer, int x, int y, u32 color);
 __declspec(dllexport) void DrawRectangle(struct Framebuffer *framebuffer, int x0, int y0, int width, int height, u32 color);
@@ -174,11 +181,12 @@ __declspec(dllexport) void DrawRectangle(struct Framebuffer *framebuffer, int x0
   * I should make an effort to fully understand this algorithm :P. 
   * Lines get clipped through the DrawPixel function */
 __declspec(dllexport) void DrawLine(struct Framebuffer *framebuffer, int x0, int y0, int x1, int y1, u32 color);
-// Triangles get clipped thorugh the DrawPixel function inside the DrawLine function.
+
+/* Triangles get clipped thorugh the DrawPixel function inside the DrawLine function. */
 __declspec(dllexport) void DrawTriangle(struct Framebuffer *framebuffer, int points[6], u32 color);
 
 
-// This function gets only used in LoadBitmapFile().
+ /* NOTE: This function gets only used in LoadBitmapFile(). */
 __declspec(dllexport) void *ReadFileContent(char *filename);
 __declspec(dllexport) struct Bitmap LoadBitmapFile(char *filename);
 
@@ -192,11 +200,15 @@ __declspec(dllexport) void HFlipBMP32bpp(struct Bitmap *bitmap);
  * Clip a rectangle to the window dimensions. Return the clipped rectangle. 
  * If coordinates are invalid return a clipped rectangle with all values set to -1.
  */
-__declspec(dllexport) struct ClippedRec ClipRectangle(int x1, int y1, int x2, int y2, int window_w, int window_h);
+__declspec(dllexport) struct ClippedBmp ClipBmp(int x1, int y1, int x2, int y2, int clip_x, int clip_y, int clip_w, int clip_h);
 
-// Bitmap drawing functions for 24 bytes per pixel and 32 bytes per pixel.
-__declspec(dllexport) void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x_pos, int y_pos, u32 color_mask);
-__declspec(dllexport) void DrawBMP32bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x_pos, int y_pos, u32 color_mask);
+ /* Bitmap drawing functions for 24 bytes per pixel and 32 bytes per pixel. */
+__declspec(dllexport) void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x, int y, u32 color_mask);
+__declspec(dllexport) void DrawBMP32bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x, int y, u32 color_mask);
+
+
+ /* Draws a Bitmap and clips it to a specified region */
+__declspec(dllexport) void DrawBMP24bppToClipRegion(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x, int y, u32 color_mask, int clip_x, int clip_y, int clip_w, int clip_h);
 
 /*
  * Initalizes a sprite with a collection of bitmaps (animation frames).

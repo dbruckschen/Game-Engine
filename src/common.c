@@ -53,7 +53,7 @@ int CharToInt(char *s) {
 	int result = 0;
 
 	long long str_len = StringLen(s) - 1;
-	int base = pow(10, str_len - 1);
+	int base = (int)pow(10.0, (int)(str_len - 1));
 	
 	for(int i = 0; i < str_len; i++) {
 		result += (s[i] - '0') * base;

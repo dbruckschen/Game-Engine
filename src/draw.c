@@ -52,8 +52,6 @@ void OutputFramebuffer(HWND window, struct Framebuffer fb) {
     HDC window_dc = GetDC(window);
 	StretchDIBits(window_dc, 0, 0, fb.width, fb.height, 0, 0, fb.width, fb.height, fb.buffer,
 				  &fb.info, DIB_RGB_COLORS, SRCCOPY);
-
-	printf("width %d, height: %d\n", fb.width, fb.height);
 }
 
 u32 RGB_Color(u8 red, u8 green, u8 blue) {
@@ -86,19 +84,7 @@ void DrawRectangle(struct Framebuffer *framebuffer, int x0, int y0, int width, i
 		return;
 	}
 
-	int x = x0;
-	int y = y0;
 	
-	if(x0 < 0) {
-		x0 = 0;
-	}
-
-	if(y0 < 0) {
-		y0 = 0;
-	}
-
-	width += x - x0;
-	height += y - y0;
 	
     u32 *pixel = (u32 *)framebuffer->buffer;
     pixel += x0 + (y0 * framebuffer->width);
@@ -228,10 +214,11 @@ void HFlipBMP32bpp(struct Bitmap *bitmap) {
     copy_bmp_pixel = 0;
 }
 
-struct ClippedRec ClipRectangle(int x, int y, int w, int h, int window_w, int window_h) {
-	struct ClippedRec result = {0};
+struct ClippedBmp ClipBitmap(struct Framebuffer *framebuffer,
+							 int x, int y, int w, int h, int clip_x, int clip_y, int clip_w, int clip_h) {
+	struct ClippedBmp result = {0};
 
-	if((x >= window_w) || (y >= window_h) ||
+	if((x >= framebuffer->width) || (y >= framebuffer->height) ||
 	   ((x + w) <= 0) || (y + h <= 0)) {
 		result.x1 = -1;
 		result.y1 = -1;
@@ -250,20 +237,20 @@ struct ClippedRec ClipRectangle(int x, int y, int w, int h, int window_w, int wi
 	int x2 = x1 + w - 1;
 	int y2 = y1 + h - 1;
 
-	if(x1 < 0) {
-		x1 = 0;
+	if(x1 < clip_x) {
+		x1 = clip_x;
 	}
 
-	if(y1 < 0) {
-		y1 = 0;
+	if(y1 < clip_y) {
+		y1 = clip_y;
 	}
 
-	if(x2 >= window_w) {
-		x2 = window_w - 1;
+	if(x2 >= (clip_x + clip_w)) {
+		x2 = clip_x + clip_w - 1;
 	}
 
-	if(y2 >= window_h) {
-		y2 = window_h - 1;
+	if(y2 >= (clip_y + clip_h)) {
+		y2 = clip_y + clip_h - 1;
 	}
 
 	int x_off = x1 - x;
@@ -284,46 +271,36 @@ struct ClippedRec ClipRectangle(int x, int y, int w, int h, int window_w, int wi
 	return result;
 }
 
-void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x, int y, u32 color_mask) {
-    if((x >= (int)framebuffer->width) || (y >= (int)framebuffer->height) ||
-	   ((x + (int)bitmap.width) <= 0) || ((y + (int)bitmap.height) <= 0)) {
-        return;
-	}
+struct ClippedRect ClipRectangle(int x1, int y1, int x2, int y2, int clip_w, int clip_h) {
+	struct ClippedRect result = {0};
 	
-	int x1 = x;
-	int y1 = y;
-	int x2 = x1 + bitmap.width - 1;
-	int y2 = y1 + bitmap.height - 1;
+	if((x >= clip_w) || (y >= clip_h) ||
+	   ((x + w) <= 0) || (y + h <= 0)) {
+		result.x1 = -1;
+		result.y1 = -1;
+		result.x2 = -1;
+		result.y2 = -1;
+		result.dx = -1;
+		result.dy = -1;
+		result.x_off = -1;
+		result.y_off = -1;
 
-	if(x1 < 0) {
-		x1 = 0;
+        return result;
 	}
 
-	if(y1 < 0) {
-		y1 = 0;
-	}
+}
 
-	if(x2 >= (int)framebuffer->width) {
-		x2 = framebuffer->width - 1;
-	}
+void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x, int y, u32 color_mask) {
 
-	if(y2 >= (int)framebuffer->height) {
-		y2 = framebuffer->height - 1;
-	}
-
-	int x_off = x1 - x;
-	int y_off = y1 - y;
-
-	int dx = x2 - x1 + 1;
-	int dy = y2 - y1 + 1;
-
+	struct ClippedBmp clippedBmp = ClipBitmap(framebuffer, x, y, bitmap.width, bitmap.height, 0, 0, framebuffer->width, framebuffer->height);
+	
     u32 *dst = framebuffer->buffer;
-	dst += x1 + (y1 * framebuffer->width);
+	dst += clippedBmp.x1 + (clippedBmp.y1 * framebuffer->width);
     u8 *src = bitmap.pixel;
-	src += (x_off + (y_off * bitmap.width)) * bitmap.bpp;
+	src += (clippedBmp.x_off + (clippedBmp.y_off * bitmap.width)) * bitmap.bpp;
 
-    for(int yidx = 0; yidx < dy; yidx++) {
-        for(int xidx = 0; xidx < dx; xidx++) {
+    for(int yidx = 0; yidx < clippedBmp.dy; yidx++) {
+        for(int xidx = 0; xidx < clippedBmp.dx; xidx++) {
             u8 r = *src;
             u8 g = *(src + 1);
             u8 b = *(src + 2);
@@ -337,19 +314,22 @@ void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x, 
 
             src += bitmap.bpp;
         }
-		src += (bitmap.width - dx) * bitmap.bpp;
-        dst += framebuffer->width - dx;
+		src += (bitmap.width - clippedBmp.dx) * bitmap.bpp;
+        dst += framebuffer->width - clippedBmp.dx;
     }
 }
 
-void DrawBMP32bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x_pos, int y_pos, u32 color_mask) {
+void DrawBMP32bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x, int y, u32 color_mask) {
+
+	struct ClippedBmp clippedBmp = ClipBitmap(framebuffer, x, y, bitmap.width, bitmap.height, 0, 0, framebuffer->width, framebuffer->height);
+	
     u32 *dst = (u32 *)framebuffer->buffer;
-    u8 *src = (u8 *)bitmap.pixel;
-
-    dst += x_pos + (y_pos * framebuffer->width);
-
-    for(int y = 0; y < bitmap.height; ++y) {
-        for(int x = 0; x < bitmap.width; ++x) {
+	dst += clippedBmp.x1 + (clippedBmp.y1 * framebuffer->width);
+	u8 *src = (u8 *)bitmap.pixel;
+	src += (clippedBmp.x_off + (clippedBmp.y_off * bitmap.width)) * bitmap.bpp;
+	
+    for(int yidx = 0; yidx < clippedBmp.dy; ++yidx) {
+        for(int xidx = 0; xidx < clippedBmp.dx; ++xidx) {
             u8 r = *src;
             u8 g = *(src + 1);
             u8 b = *(src + 2);
@@ -364,8 +344,39 @@ void DrawBMP32bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x_p
 
             src += bitmap.bpp;
         }
-        dst += (framebuffer->width - bitmap.width);
+		src += (bitmap.width - clippedBmp.dx) * bitmap.bpp;
+        dst += framebuffer->width - clippedBmp.dx;
     }
+}
+
+void DrawBMP24bppToClipRegion(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x, int y, u32 color_mask, int clip_x, int clip_y, int clip_w, int clip_h) {
+	struct ClippedBmp clippedBmp = ClipBitmap(framebuffer, x, y, bitmap.width, bitmap.height, clip_x, clip_y, clip_w, clip_h);
+
+	printf("x: %d, y: %d, w: %d, h: %d, dx: %d, dy: %d \n", clippedBmp.x1, clippedBmp.y1, clippedBmp.x2, clippedBmp.y2, clippedBmp.dx, clippedBmp.dy);
+	
+	u32 *dst = (u32 *)framebuffer->buffer;
+	dst += clippedBmp.x1 + (clippedBmp.y1 * framebuffer->width);
+	u8 *src = (u8 *)bitmap.pixel;
+	src += (clippedBmp.x_off + (clippedBmp.y_off * bitmap.width)) * bitmap.bpp;
+	
+    for(int yidx = 0; yidx < clippedBmp.dy; ++yidx) {
+        for(int xidx = 0; xidx < clippedBmp.dx; ++xidx) {
+            u8 r = *src;
+            u8 g = *(src + 1);
+            u8 b = *(src + 2);
+
+            u32 src_pixel = (0 << 24) + (r << 16) + (g << 8) + b;
+
+            if(src_pixel != color_mask)
+                *dst++ = src_pixel;
+            else
+                dst++;
+
+            src += bitmap.bpp;
+        }
+		src += (bitmap.width - clippedBmp.dx) * bitmap.bpp;
+        dst += framebuffer->width - clippedBmp.dx;
+    }	
 }
 
 void GetPixelFromBMP(struct Bitmap *from, u8 *to) {

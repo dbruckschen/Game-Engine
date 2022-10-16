@@ -7,7 +7,7 @@
 #include "mathlib.h"
 #include "linked_list.h"
 
-#define MAX_KEYS 256
+#define MAX_KEYS 255
 
 enum key_code {
 	bs_key = 0x8,
