@@ -177,13 +177,12 @@ void GameRender(struct GameState *gs) {
 	int region_w = 128;
 	int region_h = 250;
 	DrawRectangle(gs->fbuff, region_x, region_y, region_w, region_h, RGB_Color(255, 0, 0));
-	DrawBMP24bppToClipRegion(gs->fbuff, gs->debug, (int)gs->debug_sprite.x, (int)gs->debug_sprite.y, RGB_Color(255, 0, 255),							 region_x, region_y, region_w, region_h);
+	DrawBMP24bppToClipRegion(gs->fbuff, gs->debug, (int)gs->debug_sprite.x, (int)gs->debug_sprite.y, RGB_Color(255, 0, 255), region_x, region_y, region_w, region_h);
+	
 	DrawBMP24bpp(gs->fbuff, gs->debug, 200, 200, RGB_Color(255, 0, 255));
 	
 	DrawTextButton(gs->fbuff, &gs->btn1);
 	DrawTextField(gs->fbuff, &gs->tf1);
-	
-	//DrawRectangle(gs->fbuff, -50, -50, 100, 100, RGB_Color(255, 0, 0));
 	
 	OutputFramebuffer(gs->window.wnd_h, *gs->fbuff);
 }

@@ -131,18 +131,6 @@ struct ClippedBmp {
 	int y_off;
 };
 
-struct ClippedRect {
-	int x1, x2, y1, y2;
-	
-	// drawable part of bitmap from (x, y)
-	int dx;
-	int dy;
-
-	// offsets into bitmap pixel buffer
-	int x_off;
-	int y_off;
-};
-
 // Create only one framebuffer at a time with the win32 window handle
 __declspec(dllexport) struct Framebuffer *CreateFramebuffer(HWND window);
 
@@ -200,7 +188,7 @@ __declspec(dllexport) void HFlipBMP32bpp(struct Bitmap *bitmap);
  * Clip a rectangle to the window dimensions. Return the clipped rectangle. 
  * If coordinates are invalid return a clipped rectangle with all values set to -1.
  */
-__declspec(dllexport) struct ClippedBmp ClipBmp(int x1, int y1, int x2, int y2, int clip_x, int clip_y, int clip_w, int clip_h);
+__declspec(dllexport) struct  ClippedBmp ClipBitmap(int window_w, int window_h, int x, int y, int w, int h, int clip_x, int clip_y, int clip_w, int clip_h);
 
  /* Bitmap drawing functions for 24 bytes per pixel and 32 bytes per pixel. */
 __declspec(dllexport) void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x, int y, u32 color_mask);
