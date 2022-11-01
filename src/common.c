@@ -41,12 +41,19 @@ void StringCpy(char *dst, char *src, size_t dst_len) {
 }
 
 bool CharBelongsToText(char c) {
-	if((c >= 32) && (c <= 126)) {
+	if((c >= 33) && (c <= 126)) {
 		return true;
 	}
 	else {
 		return false;
 	}
+}
+
+bool CharBelongsToAlphabet(char c) {
+	if(((c >= 97) && (c <= 122)) || ((c >= 65) && (c <= 90))) 
+		return true;
+	else
+		return false;
 }
 
 int CharToInt(char *s) {

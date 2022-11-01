@@ -7,8 +7,10 @@ REM compile dll
 cl /Zi /FC /W4 /c %dllfiles% /I ../include /Fo"..\obj\\"
 link /DEBUG /DLL /OUT:engine.dll ../obj/*.obj user32.lib gdi32.lib Ws2_32.lib
 
-REM copy the .lib to the test project so it always uses the newest file
-copy engine.lib ..\test\build
-copy engine.dll ..\test\build
 
+REM copy the .lib to the demo projects so it always uses the newest file
+copy engine.lib ..\demos\TetrisClone\build
+copy engine.dll ..\demos\TetrisClone\build
 
+copy engine.lib ..\demos\Chat\build
+copy engine.dll ..\demos\Chat\build

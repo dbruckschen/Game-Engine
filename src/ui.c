@@ -72,13 +72,14 @@ void DrawTextButton(struct Framebuffer *fb, struct Button *btn) {
 	int font_height = btn->font->glyph_height;
 			
 	v2 rec_center = GetCenteredCoordinates(btn->x, btn->y, btn->width, btn->height, string_width, font_height);
-	
-	DrawString(fb, *btn->font, btn->text, (int)rec_center.x, (int)rec_center.y);
+
+    // TODO: pass the string color to the DrawTextButton
+	DrawString(fb, *btn->font, btn->text, (int)rec_center.x, (int)rec_center.y, RGB_Color(255, 255, 255));
 }
 
 struct TextField InitTextField(struct Font *font, int x, int y, int width, int height,
 							   u32 color, int border_thickness, u32 border_color, float delay,
-							   int cursor_width, int cursor_height, float cursor_blink_rate, u32 cursor_color) {
+							   int cursor_width, int cursor_height, float cursor_blink_rate, u32 cursor_color, u32 text_color, bool draw_placeholder_string) {
 	
 	struct TextField tf = {0};
 
@@ -89,6 +90,8 @@ struct TextField InitTextField(struct Font *font, int x, int y, int width, int h
 	tf.font = font;
 	tf.text_current_len = 0;
 	tf.text[0] = '\0';
+	tf.text_color = text_color;
+	tf.draw_initial_placeholder_string = draw_placeholder_string;
 
 	tf.color = color;
 	tf.border_thickness = border_thickness;
@@ -101,10 +104,10 @@ struct TextField InitTextField(struct Font *font, int x, int y, int width, int h
 
 	v2 cursor_rec = GetCenteredCoordinates(x, y, width, height, cursor_width, cursor_height);
 
-	tf.cursor.inital_pos.x = (float)(x + font->glyph_width);
-	tf.cursor.inital_pos.y = (float)cursor_rec.y;
-	tf.cursor.pos.x = tf.cursor.inital_pos.x;
-	tf.cursor.pos.y = tf.cursor.inital_pos.y;
+	tf.cursor.initial_pos.x = (float)(x + font->glyph_width);
+	tf.cursor.initial_pos.y = (float)cursor_rec.y;
+	tf.cursor.pos.x = tf.cursor.initial_pos.x;
+	tf.cursor.pos.y = tf.cursor.initial_pos.y;
 	tf.cursor.width = cursor_width;
 	tf.cursor.height = cursor_height;
 	tf.cursor.blink_rate = cursor_blink_rate;
@@ -141,11 +144,12 @@ void DrawTextField(struct Framebuffer *fb, struct TextField *tf) {
 	}
 	
     // draw filler text
-	if(!tf->write_focus && tf->inital_state) {
-		DrawString(fb, *tf->font, "placeholder", (int)rec_center.x, (int)rec_center.y);
+	if(!tf->write_focus && tf->inital_state && tf->draw_initial_placeholder_string) {
+		// TODO: pass the string color to the DrawTextButton
+		DrawString(fb, *tf->font, "placeholder", (int)rec_center.x, (int)rec_center.y, tf->text_color);
 	}
 	else {
-		DrawString(fb, *tf->font, tf->text, (int)tf->x + 5, (int)rec_center.y);
+		DrawString(fb, *tf->font, tf->text, (int)tf->x + 5, (int)rec_center.y, tf->text_color);
 	}
 }
 
@@ -175,16 +179,18 @@ void UpdateTextField(struct TextField *tf, struct Input input, double dt) {
 	// update the text field text 
 	if(tf->write_focus) {
 		for(int iChar = 0; iChar < MAX_KEYS; iChar++) {
-			if(input.keyboard[iChar].pressed_this_frame && CharBelongsToText((char)iChar)) {
-				tf->text[tf->text_current_len] = (char)iChar;
-				tf->text[tf->text_current_len+1] = '\0';
-				tf->text_current_len++;
-
-				// TODO: don't move cursor out of text field to the right
-				if(tf->cursor.pos.x + tf->cursor.width + tf->width > tf->cursor.pos.x) {
+			// move cursor with arrow keys
+			if(input.keyboard[iChar].pressed_this_frame && (iChar == (char)arrow_left)) {
+				if(tf->cursor.pos.x > tf->cursor.initial_pos.x) {
+					tf->cursor.pos.x -= tf->font->glyph_width + tf->font->glyph_spacing;
+				}
+			}
+			else if(input.keyboard[iChar].pressed_this_frame && (iChar == (char)arrow_right)) {
+				if(tf->cursor.pos.x <= tf->width) {
 					tf->cursor.pos.x += tf->font->glyph_width + tf->font->glyph_spacing;
 				}
 			}
+			
 			// delete last character if backspace is pressed
 			else if(input.keyboard[iChar].pressed_this_frame && (iChar == bs_key)) {
 				if(tf->text_current_len > 0) {
@@ -192,15 +198,47 @@ void UpdateTextField(struct TextField *tf, struct Input input, double dt) {
 					tf->text_current_len--;
 
 					// don't move the cursor back out of the text field
-					if(tf->cursor.pos.x > tf->cursor.inital_pos.x) {
+					if(tf->cursor.pos.x > tf->cursor.initial_pos.x) {
 						tf->cursor.pos.x -= tf->font->glyph_width + tf->font->glyph_spacing;
 					}
 				}
 			}
-			// move cursor with arrow keys
-			else if(input.keyboard[iChar].pressed_this_frame && (iChar == arrow_left)) {
-				if(tf->cursor.pos.x > tf->cursor.inital_pos.x) {
-					tf->cursor.pos.x -= tf->font->glyph_width + tf->font->glyph_spacing;
+
+			else if(input.keyboard[iChar].pressed_this_frame && (iChar == space_key)) {
+				tf->text[tf->text_current_len] = ' ';
+				tf->text[tf->text_current_len+1] = '\0';
+				tf->text_current_len++;
+
+				if(tf->cursor.pos.x + tf->cursor.width + tf->width > tf->cursor.pos.x) {
+					tf->cursor.pos.x += tf->font->glyph_width + tf->font->glyph_spacing;
+				}
+
+			}
+
+			// add character to text field
+			else if(input.keyboard[iChar].pressed_this_frame && CharBelongsToText((char)iChar)) {
+				int lowercase_offset = 0;
+				if(!input.keyboard[left_shift_key].down && CharBelongsToAlphabet((char)iChar)) {
+					lowercase_offset = 32;
+				}
+
+				// calculate cursor position in relationship to char buffer
+				int cursor_dx = tf->cursor.pos.x - tf->cursor.initial_pos.x;
+				int char_buff_index = cursor_dx / (tf->font->glyph_width + tf->font->glyph_spacing);
+				int len_from_cursor_to_end = tf->text_current_len - char_buff_index;
+
+				// move all chars from position char_buff_index to the right one position
+				char tmp[MAX_TEXTFIELD_LEN] = {0};
+				
+				// put iChar + lowercase_offset into buff[char_buff_index]
+
+				tf->text[tf->text_current_len] = (char)iChar + lowercase_offset;
+				tf->text[tf->text_current_len+1] = '\0';
+				tf->text_current_len++;
+
+				// TODO: don't move cursor out of text field to the right
+				if(tf->cursor.pos.x + tf->cursor.width + tf->width > tf->cursor.pos.x) {
+					tf->cursor.pos.x += tf->font->glyph_width + tf->font->glyph_spacing;
 				}
 			}
 		}

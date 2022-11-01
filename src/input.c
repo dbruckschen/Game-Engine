@@ -15,21 +15,26 @@ v2 GetMousePosition(HWND window) {
 
 void GetKeyboardInput(struct Input *input, MSG msg) {
 	input->keyboard[msg.wParam].down = true;
-	//printf("0x%x pressed\n", msg.wParam);
-
 	bool was_down_last_frame = (msg.lParam >> 30) & 1;
 
+	// the high order bit of a 16bit value is 1 if the button is down, otherwise zero
+	int16_t lshift_status = GetAsyncKeyState(VK_LSHIFT);
+	bool lshift_pressed = lshift_status & 0x8000;
+	input->keyboard[left_shift_key].down = lshift_pressed;
+	
 	if(was_down_last_frame) {
 		input->keyboard[msg.wParam].pressed_this_frame = false;
 		input->keyboard[msg.wParam].down_previous_frame = false;
-	} else {
+	}
+	else {
 		input->keyboard[msg.wParam].down_previous_frame = true;
 		input->keyboard[msg.wParam].pressed_this_frame = true;
 	}
 
 	if (input->keyboard[msg.wParam].toggle == false && was_down_last_frame == false) {
 		input->keyboard[msg.wParam].toggle = true;
-	} else if (input->keyboard[msg.wParam].toggle == true && was_down_last_frame == false) {
+	}
+	else if (input->keyboard[msg.wParam].toggle == true && was_down_last_frame == false) {
 		input->keyboard[msg.wParam].toggle = false;
 	}
 }

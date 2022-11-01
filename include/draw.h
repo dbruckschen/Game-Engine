@@ -208,8 +208,11 @@ __declspec(dllexport) void InitSprite(struct Sprite *s, int x, int y, int frame_
 __declspec(dllexport) void UpdateSpriteAnimation(struct Sprite *s);
 __declspec(dllexport) void GetPixelFromBMP(struct Bitmap *from, u8 *to);
 
-__declspec(dllexport) void DrawGlyph(struct Framebuffer *buffer, struct Font font, char ch, int x, int y);
+/*
+ * For the glyph_color to be drawn, the font bitmap should be a black text (rgb(0, 0, 0) on a white background (rgb(255, 255, 255).
+ */
+__declspec(dllexport) void DrawGlyph(struct Framebuffer *buffer, struct Font font, char ch, int x, int y, u32 glyph_color);
 
-__declspec(dllexport) void DrawString(struct Framebuffer *buffer, struct Font font, char *string, int x, int y);
+__declspec(dllexport) void DrawString(struct Framebuffer *buffer, struct Font font, char *string, int x, int y, u32 glyph_color);
  
 #endif // DRAW_H

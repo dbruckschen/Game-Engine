@@ -7,10 +7,13 @@
 #include "mathlib.h"
 #include "linked_list.h"
 
-#define MAX_KEYS 256
+#define MAX_KEYS 105
 
 enum key_code {
 	bs_key = 0x8,
+	
+	left_shift_key = 0x10,
+	enter_key = 0x0D,
 	
     space_key = 0x20,
 

@@ -358,7 +358,7 @@ void GetPixelFromBMP(struct Bitmap *from, u8 *to) {
         *(to + i) = *(from->pixel + i);
 }
 
-void DrawGlyph(struct Framebuffer *framebuffer, struct Font font, char ch, int x_pos, int y_pos) {
+void DrawGlyph(struct Framebuffer *framebuffer, struct Font font, char ch, int x_pos, int y_pos, u32 glyph_color) {
     u32 glyph_offsets[98];
 
     for(int i = 0; i < font.glyph_count; i++) {
@@ -367,7 +367,7 @@ void DrawGlyph(struct Framebuffer *framebuffer, struct Font font, char ch, int x
 
     // find glyph offset of the current character to be drawn
     u32 glyph_offset = 0;
-
+	
 	// calculate the offset in the font bitmap for the specific glyph
     for(int c = 0; c < 255; c ++) {
 		if(ch == (char)c) {
@@ -392,9 +392,8 @@ void DrawGlyph(struct Framebuffer *framebuffer, struct Font font, char ch, int x
 		}
     }
 
-	// clip glyph
-	
-        
+	// TODO: clip glyph (bitmap clipping function)
+	        
     u32 *dst = (u32 *)framebuffer->buffer;
     u8 *src = (u8 *)font.bmp.pixel + glyph_offset;
 
@@ -405,15 +404,22 @@ void DrawGlyph(struct Framebuffer *framebuffer, struct Font font, char ch, int x
             u8 r = *src;
             u8 g = *(src + 1);
             u8 b = *(src + 2);
-            //u8 a = *(src + 3);
 			u8 a = 0;
 
-            u32 src_pixel = (a << 24) + (r << 16) + (g << 8) + b;
+			u32 src_pixel = 0;
+			if((r == 0) && (g == 0) && (b == 0)) {
+				src_pixel = glyph_color;
+			}
+			else {
+				src_pixel = (a << 24) + (r << 16) + (g << 8) + b;
+			}
 
-            if(src_pixel != font.color_mask)
+            if(src_pixel != font.color_mask) {
                 *dst++ = src_pixel;
-            else
+			}
+            else {
                 dst++;
+			}
 
             src += font.bmp.bpp;
         }
@@ -422,14 +428,15 @@ void DrawGlyph(struct Framebuffer *framebuffer, struct Font font, char ch, int x
     }
 }
 
-void DrawString(struct Framebuffer *buffer, struct Font font, char *string, int x, int y) {
+void DrawString(struct Framebuffer *buffer, struct Font font, char *string, int x, int y, u32 glyph_color) {
     int new_char_offset = 0;
     
     for(int i = 0; i < StringLen(string)-1; i++) {
 		if(string[i] == ' ') {
 			new_char_offset += font.glyph_width + font.glyph_spacing;
-		} else {
-			DrawGlyph(buffer, font, string[i], x + new_char_offset, y);
+		}
+		else {
+			DrawGlyph(buffer, font, string[i], x + new_char_offset, y, glyph_color);
 			new_char_offset += font.glyph_width + font.glyph_spacing;
 		}
     }
