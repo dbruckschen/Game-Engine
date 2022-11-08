@@ -32,6 +32,7 @@ int main(void) {
 	struct Framebuffer *framebuffer = CreateFramebuffer(window.wnd_h);
 	struct Timer main_timer = {0};
 	InitTimer(&main_timer);
+	SYSTEMTIME system_time = {0};
 	
 	struct Font font = {0};
 	font.bmp = LoadBitmapFile("font.bmp");
@@ -41,28 +42,44 @@ int main(void) {
 	font.glyph_spacing = 2;
 	font.color_mask = RGB_Color(255, 255, 255); // i don't need a color mask, but 0 will mask off white
 		
-	u32 background_color = RGB_Color(12, 12, 12);
-	u32 input_bar_color = RGB_Color(155, 55, 55);
-	u32 text_color = RGB_Color(255, 255, 244);
-	u32 cursor_color = RGB_Color(145, 237, 145);
-	
+	u32 background_color = RGB_Color(245, 245, 245);
+	u32 input_bar_color = RGB_Color(255, 255, 255);
+	u32 text_color = RGB_Color(0, 0, 0);
+	u32 cursor_color = RGB_Color(20, 20, 20);
+	int border_thickness = 4;
+	u32 border_color = RGB_Color(204, 204, 206);
+	int input_bar_w = window_width - (border_thickness*2);
+	int input_bar_h = 25;
+	int input_bar_x = border_thickness;
+	int input_bar_y = window_height - (border_thickness+input_bar_h);
+	float input_bar_delay = .3f;
+	int input_bar_cursor_width = 4;
+	int input_bar_cursor_height = 12;
+	float input_bar_cursor_blinkrate = .5f;
+	bool draw_placeholder_string = false;
+		
 	struct TextField chat_input_field = {0};
-	chat_input_field = InitTextField(&font, 0, window_height - 25, window_width, 25, background_color, 0, input_bar_color, .3f, 5, 17, .5, cursor_color, text_color, false);
+	chat_input_field = InitTextField(&font, input_bar_x, input_bar_y, input_bar_w, input_bar_h, input_bar_color, border_thickness, border_color, input_bar_delay,
+									 input_bar_cursor_width, input_bar_cursor_height, input_bar_cursor_blinkrate, cursor_color, text_color, draw_placeholder_string);
 	chat_input_field.write_focus = true;
 
 	char chat_buff[CHAT_MAX_BUFF_ROWS][CHAT_MAX_BUFF_COLS];
 	int current_buff_line = 0;
 	int chat_text_x = 25;
 	int chat_text_y = 50;
-	
+
+	u32 user_color = RGB_Color(255, 0, 0);
+
 	bool running = true;
 	while(running) {
 		StartTimer(&main_timer);
-
+		
 		ResetInput(&input);
 		
 		input.mouse_cursor_pos = GetMousePosition(window.wnd_h);
-		
+
+		GetSystemTime(&system_time);
+			
 		if(!MessageLoop(&input)) {
 			running = false;
 		}
@@ -79,16 +96,23 @@ int main(void) {
 			current_buff_line++;
 			
 			// clear text field buff
-			printf("hello\n");
 			chat_input_field.text[0] = '\0';
 			chat_input_field.text_current_len = 0;
 			chat_input_field.cursor.pos = chat_input_field.cursor.initial_pos;
 		}
 
 		for(int i = 0; i < current_buff_line; i++) {
-			DrawString(framebuffer, font, "Admin", chat_text_x, chat_text_y+(i*12), text_color);
+			DrawString(framebuffer, font, "Admin", chat_text_x, chat_text_y+(i*12), user_color);
 			DrawString(framebuffer, font, chat_buff[i], chat_text_x + 50, chat_text_y+(i * 12), text_color);
 		}
+
+		char time[64];
+		IntToString(system_time.wHour, time, 64);
+		IntToString(system_time.wMinute, time+2, 64);
+		IntToString(system_time.wSecond, time+4, 64);
+		
+		DrawString(framebuffer, font, time, 400, 400, user_color);
+
 		
 		DrawTextField(framebuffer, &chat_input_field);
 		

@@ -55,6 +55,9 @@ enum key_code {
     y_key,
     z_key,
     arrow_left = 0x25,
+
+    colon_key = 0xBA,
+
     arrow_up,
     arrow_right,
     arrow_down,

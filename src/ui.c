@@ -119,8 +119,7 @@ struct TextField InitTextField(struct Font *font, int x, int y, int width, int h
 
 void DrawTextField(struct Framebuffer *fb, struct TextField *tf) {
 	// this is the border rectangle of the text field
-	DrawRectangle(fb,
-				  tf->x - tf->border_thickness, tf->y - tf->border_thickness,
+	DrawRectangle(fb, tf->x - tf->border_thickness, tf->y - tf->border_thickness,
 				  tf->width + (tf->border_thickness*2), tf->height + (tf->border_thickness*2),
 				  tf->border_color);
 	
@@ -185,7 +184,7 @@ void UpdateTextField(struct TextField *tf, struct Input input, double dt) {
 					tf->cursor.pos.x -= tf->font->glyph_width + tf->font->glyph_spacing;
 				}
 			}
-			else if(input.keyboard[iChar].pressed_this_frame && (iChar == (char)arrow_right)) {
+			else if(input.keyboard[iChar].pressed_this_frame && (iChar == arrow_right)) {
 				if(tf->cursor.pos.x <= tf->width) {
 					tf->cursor.pos.x += tf->font->glyph_width + tf->font->glyph_spacing;
 				}
@@ -217,22 +216,23 @@ void UpdateTextField(struct TextField *tf, struct Input input, double dt) {
 
 			// add character to text field
 			else if(input.keyboard[iChar].pressed_this_frame && CharBelongsToText((char)iChar)) {
+				printf("%d\n", input.keyboard[iChar].pressed_this_frame);
+				
 				int lowercase_offset = 0;
 				if(!input.keyboard[left_shift_key].down && CharBelongsToAlphabet((char)iChar)) {
 					lowercase_offset = 32;
 				}
 
 				// calculate cursor position in relationship to char buffer
-				int cursor_dx = tf->cursor.pos.x - tf->cursor.initial_pos.x;
+				int cursor_dx = (int)(tf->cursor.pos.x - tf->cursor.initial_pos.x);
 				int char_buff_index = cursor_dx / (tf->font->glyph_width + tf->font->glyph_spacing);
 				int len_from_cursor_to_end = tf->text_current_len - char_buff_index;
 
 				// move all chars from position char_buff_index to the right one position
-				char tmp[MAX_TEXTFIELD_LEN] = {0};
-				
+				//char tmp[MAX_TEXTFIELD_LEN] = {0};
 				// put iChar + lowercase_offset into buff[char_buff_index]
 
-				tf->text[tf->text_current_len] = (char)iChar + lowercase_offset;
+				tf->text[tf->text_current_len] = (char)(iChar + lowercase_offset);
 				tf->text[tf->text_current_len+1] = '\0';
 				tf->text_current_len++;
 

@@ -109,7 +109,6 @@ bool MessageLoop(struct Input *input) {
         case WM_SYSKEYUP:
         case WM_KEYUP:
             input->keyboard[msg.wParam].down = false;
-            //printf("0x%x released\n", msg.wParam);
             break;
 			
 		case WM_LBUTTONDOWN:

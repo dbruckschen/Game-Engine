@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <math.h>
+#include <stdlib.h>
 
 typedef uint8_t u8;
 typedef uint16_t u16;
@@ -27,5 +28,6 @@ __declspec(dllexport) void StringCpy(char *dst, char *src, size_t dst_len);
 __declspec(dllexport) bool CharBelongsToText(char c);
 __declspec(dllexport) bool CharBelongsToAlphabet(char c); 
 __declspec(dllexport) int CharToInt(char *s);
+__declspec(dllexport) void IntToString(int i, char *buff, int buff_len);
 
 #endif //COMMON_H

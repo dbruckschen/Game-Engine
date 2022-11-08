@@ -69,3 +69,36 @@ int CharToInt(char *s) {
 
 	return result;
 }
+
+void ReverseString(char *s, int len) {
+	char *tmp_string = malloc(len);
+
+	for(int i = 0; i < len; i++) {
+		tmp_string[i] = s[i];
+	}
+
+	for(int i = 0; i < len; i++) {
+		s[i] =  tmp_string[(len-1)-i];
+	}
+
+	free(tmp_string);
+}
+
+void IntToString(int i, char *buff, int buff_len) {
+	int idx = 0;
+
+	while(i != 0) {
+		if(buff_len >= idx) {
+			int n = i % 10;
+			buff[idx] = n + '0';
+		
+			i = i/10;
+
+			idx++;
+		}
+	}
+	buff[idx] = '\0';
+
+	int str_len = StringLen(buff);
+	ReverseString(buff, str_len-1);
+}
