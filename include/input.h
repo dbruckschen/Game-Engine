@@ -8,6 +8,7 @@
 #include "linked_list.h"
 
 #define MAX_KEYS 105
+#define NUM_ASCII_CHARS 128
 
 enum key_code {
 	bs_key = 0x8,
@@ -78,6 +79,7 @@ struct Input {
 	bool right_click_down;
 	
     struct KeyState keyboard[MAX_KEYS];
+	struct KeyState keyboard_ascii[NUM_ASCII_CHARS];
 };
 
 __declspec(dllexport) v2 GetMousePosition(HWND window);

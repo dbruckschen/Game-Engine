@@ -1,3 +1,4 @@
+#include "network.h"
 #include "window.h"
 #include "draw.h"
 #include "timing.h"
@@ -23,7 +24,6 @@ void copy_input_to_chat_buff(char *src, int src_len, char buff[CHAT_MAX_BUFF_ROW
 }
 
 int main(void) {
-	
 	int window_width = 800;
 	int window_height = 600;
 	
@@ -41,7 +41,13 @@ int main(void) {
 	font.glyph_count = 98;
 	font.glyph_spacing = 2;
 	font.color_mask = RGB_Color(255, 255, 255); // i don't need a color mask, but 0 will mask off white
-		
+
+	char ip[] = "127.0.0.1";
+	bool socket_init_success = InitializeWinsock(ip);
+	if(socket_init_success) {
+		printf("successfuly initalized winsock\n");
+	}
+	
 	u32 background_color = RGB_Color(245, 245, 245);
 	u32 input_bar_color = RGB_Color(255, 255, 255);
 	u32 text_color = RGB_Color(0, 0, 0);
@@ -102,17 +108,19 @@ int main(void) {
 		}
 
 		for(int i = 0; i < current_buff_line; i++) {
-			DrawString(framebuffer, font, "Admin", chat_text_x, chat_text_y+(i*12), user_color);
+			DrawString(framebuffer, font, "Admin:", chat_text_x, chat_text_y+(i*12), user_color);
 			DrawString(framebuffer, font, chat_buff[i], chat_text_x + 50, chat_text_y+(i * 12), text_color);
 		}
 
 		char time[64];
 		IntToString(system_time.wHour, time, 64);
-		IntToString(system_time.wMinute, time+2, 64);
-		IntToString(system_time.wSecond, time+4, 64);
+		time[2] = ':';
+		IntToString(system_time.wMinute, time+3, 64);
+		time[5] = ':';
+		IntToString(system_time.wSecond, time+6, 64);
 		
 		DrawString(framebuffer, font, time, 400, 400, user_color);
-
+		//DrawString(framebuffer, font, ":", 400, 400, user_color);
 		
 		DrawTextField(framebuffer, &chat_input_field);
 		

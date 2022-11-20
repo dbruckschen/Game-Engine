@@ -35,6 +35,15 @@ LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
         PostQuitMessage(0);
         break;
 
+	case WM_CHAR:
+		int ascii_code = (int)wparam;
+		int repeat_count = lparam & 0x7FFF;
+		bool is_special_key = lparam & 0x400000;
+			
+		printf("ascii: %c, repeat count: %d, is special key: %d\n", ascii_code, repeat_count, is_special_key);
+			
+		break;
+	
     default:
         result = DefWindowProc(window, msg, wparam, lparam);
     }

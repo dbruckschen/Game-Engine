@@ -90,7 +90,7 @@ void IntToString(int i, char *buff, int buff_len) {
 	while(i != 0) {
 		if(buff_len >= idx) {
 			int n = i % 10;
-			buff[idx] = n + '0';
+			buff[idx] = (char)n + '0';
 		
 			i = i/10;
 
@@ -99,6 +99,6 @@ void IntToString(int i, char *buff, int buff_len) {
 	}
 	buff[idx] = '\0';
 
-	int str_len = StringLen(buff);
+	int str_len = (int)StringLen(buff);
 	ReverseString(buff, str_len-1);
 }

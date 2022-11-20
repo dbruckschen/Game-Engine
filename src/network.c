@@ -1,12 +1,12 @@
 #include "network.h"
 
 bool InitializeWinsock(char *ip) {
-	int result = 0;
+	int error = 0;
 	WSADATA wsa_data = {0};
 	
-	result = WSAStartup(MAKEWORD(2,2), &wsa_data);
-	if(result != 0) {
-		printf("WSAStartup() failed: %d\n", result);
+	error = WSAStartup(MAKEWORD(2,2), &wsa_data);
+	if(error != 0) {
+		printf("WSAStartup() failed: %d\n", error);
 		return false;
 	}
 
@@ -19,17 +19,17 @@ bool InitializeWinsock(char *ip) {
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;
 
-	result = getaddrinfo(ip, DEFAULT_PORT, &hints, &result);
+	error = getaddrinfo(ip, DEFAULT_PORT, &hints, &result);
 
-	if(result != 0) {
-		printf("getaddrinfo failed: %d\n", result);
+	if(error != 0) {
+		printf("getaddrinfo failed: %d\n", error);
 		WSACleanup();
 		return false;
 	}
 
-	struct SOCKET connect_socket = INVALID_SOCKET;
+	SOCKET connect_socket = INVALID_SOCKET;
 
-	conncet_socket = socket(ptr->ai_familiy, ptr->ai_socktype, ptr->ai_protocol);
+	connect_socket = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
 
 	if(connect_socket == INVALID_SOCKET) {
 		printf("error at socket(): %ld\n", WSAGetLastError());
@@ -37,16 +37,16 @@ bool InitializeWinsock(char *ip) {
 		return false;
 	}
 
-	result = connect(connect_socket, ptr->ai_addr, (int)ptr->ai_addrlen);
+	error = connect(connect_socket, ptr->ai_addr, (int)ptr->ai_addrlen);
 
 	// Should really try the next address returned by getaddrinfo
     // if the connect call failed
     // But for this simple example we just free the resources
     // returned by getaddrinfo and print an error message
 	
-	if(result == SOCKET_ERROR) {
+	if(error == SOCKET_ERROR) {
 		closesocket(connect_socket);
-		connect_socket = INVLAID_SOCKET;
+		connect_socket = INVALID_SOCKET;
 	}
 
 	freeaddrinfo(result);
@@ -55,4 +55,6 @@ bool InitializeWinsock(char *ip) {
 		WSACleanup();
 		return false;
 	}
+
+	return true;
 }

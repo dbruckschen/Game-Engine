@@ -389,6 +389,9 @@ void DrawGlyph(struct Framebuffer *framebuffer, struct Font font, char ch, int x
 				start_of_char_type = 64;
 				glyph_offset = glyph_offsets[c + start_of_char_type];
 			}
+			else if(c == ':') {
+				glyph_offset = glyph_offsets[75];
+			}
 		}
     }
 
