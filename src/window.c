@@ -118,6 +118,8 @@ bool MessageLoop(struct Input *input) {
         case WM_SYSKEYUP:
         case WM_KEYUP:
             input->keyboard[msg.wParam].down = false;
+			input->keyboard[msg.wParam].pressed_this_frame = false;
+			input->keyboard[msg.wParam].down_previous_frame = false;
             break;
 			
 		case WM_LBUTTONDOWN:

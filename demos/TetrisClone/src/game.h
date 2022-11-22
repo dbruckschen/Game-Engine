@@ -40,6 +40,7 @@
 #define NUM_SHAPE_TYPES 7
 #define MAX_SHAPES 512
 #define SHAPE_BLOCK_COUNT 4
+#define NUM_QUEUE_SHAPES 7
 
 enum ShapeType {
 	O_SHAPE,
@@ -80,13 +81,9 @@ struct GameState {
 	struct Input input;
 	struct Timer timer;
 	struct Font font;
-	enum ShapeType random_shape_queue[7];
 
-	struct Bitmap debug;
-	struct Sprite debug_sprite;
-	
-	struct Button btn1;
-	struct TextField tf1;
+	enum ShapeType random_shape_queue[NUM_QUEUE_SHAPES];
+	int current_shape_queue_index;
 };
 
 static int matrix[MATRIX_HEIGHT][MATRIX_WIDTH];
@@ -100,10 +97,12 @@ static void DrawMatrix(struct Framebuffer *fbuff);
 static void FillMatrixTile(struct Framebuffer *fbuff, int x, int y, u32 color);
 static void DrawShape(struct Framebuffer *fbuff, struct Shape *shape);
 
-static void SpawnShape(struct GameState *game_state, enum ShapeType tpye);
 static struct Point InitPoint(int x, int y);
 static struct Shape InitShape(enum ShapeType type);
+static void SpawnShape(struct Shape *shapes, int *num_shapes, enum ShapeType type);
+static void GenerateShapeOrder(enum ShapeType *shape_queue);
 
-static void	GenerateShapeOrder(enum ShapeType *shape_queue);
+static struct Point MatrixStartCoords();
+static struct Point MatrixWidthHeight();
 
 #endif

@@ -163,7 +163,12 @@ __declspec(dllexport) u32 RGBA_Color(u8 red, u8 green, u8 blue, u8 alpha);
  /* Fill the screen with a solid color. The Color format is 0RGB. */
 __declspec(dllexport) void FillScreen(struct Framebuffer *framebuffer, u32 color);
 __declspec(dllexport) void DrawPixel(struct Framebuffer *framebuffer, int x, int y, u32 color);
+
+/* Draws a rectangle and clips it to the window dimensions */
 __declspec(dllexport) void DrawRectangle(struct Framebuffer *framebuffer, int x0, int y0, int width, int height, u32 color);
+
+/* Draws a rectangle and clips it to a specific region */
+__declspec(dllexport) void DrawRectangleToClipRegion(struct Framebuffer *framebuffer, int x0, int y0, int width, int height, u32 color, int clip_x, int clip_y, int clip_w, int clip_h);
 
  /* I copied this function from: https://en.wikipedia.org/wiki/Bresenham's_line_algorithm. 
   * I should make an effort to fully understand this algorithm :P. 

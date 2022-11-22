@@ -92,6 +92,21 @@ void DrawRectangle(struct Framebuffer *framebuffer, int x0, int y0, int width, i
     }
 }
 
+void DrawRectangleToClipRegion(struct Framebuffer *framebuffer, int x0, int y0, int width, int height, u32 color, int clip_x, int clip_y, int clip_w, int clip_h) {
+	struct ClippedBmp clippedBmp = ClipBitmap(framebuffer->width, framebuffer->height, x0, y0, width, height, clip_x, clip_y, clip_w, clip_h);
+
+    u32 *pixel = (u32 *)framebuffer->buffer;
+    pixel += clippedBmp.x1 + (clippedBmp.y1 * framebuffer->width);
+
+    for (int yidx = 0; yidx < clippedBmp.dy; ++yidx) {
+        for (int xidx = 0; xidx < clippedBmp.dx; ++xidx) {
+            *pixel++ = color;
+        }
+        pixel += framebuffer->width - clippedBmp.dx;
+    }
+}
+
+
 void DrawLine(struct Framebuffer *framebuffer, int x0, int y0, int x1, int y1, u32 color) {
 	// clipping lines
 	

@@ -24,10 +24,10 @@ void GetKeyboardInput(struct Input *input, MSG msg) {
 	
 	if(was_down_last_frame) {
 		input->keyboard[msg.wParam].pressed_this_frame = false;
-		input->keyboard[msg.wParam].down_previous_frame = false;
+		input->keyboard[msg.wParam].down_previous_frame = true;
 	}
 	else {
-		input->keyboard[msg.wParam].down_previous_frame = true;
+		input->keyboard[msg.wParam].down_previous_frame = false;
 		input->keyboard[msg.wParam].pressed_this_frame = true;
 	}
 
