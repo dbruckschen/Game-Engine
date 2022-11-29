@@ -20,6 +20,8 @@ typedef int64_t s64;
 typedef float f32;
 typedef double f64;
 
+#define ARRAY_LEN(a) (sizeof(a))/(sizeof(a[0]))
+
 __declspec(dllexport) long long StringLen(char *s);
 __declspec(dllexport) bool StringCmp(char *s1, char *s2);
 

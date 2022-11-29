@@ -23,7 +23,12 @@ void copy_input_to_chat_buff(char *src, int src_len, char buff[CHAT_MAX_BUFF_ROW
 	}
 }
 
-int main(void) {
+int main(int argc, char **argv) {
+	if(argc < 2) {
+		printf("Pass server or client option(server/client) as command line argument.");
+		return 0;
+	}
+	
 	int window_width = 800;
 	int window_height = 600;
 	
@@ -42,12 +47,38 @@ int main(void) {
 	font.glyph_spacing = 2;
 	font.color_mask = RGB_Color(255, 255, 255); // i don't need a color mask, but 0 will mask off white
 
-	char ip[] = "127.0.0.1";
-	bool socket_init_success = InitializeWinsock(ip);
-	if(socket_init_success) {
-		printf("successfuly initalized winsock\n");
+	WSADATA wsa_data;
+	SOCKET connect_socket = INVALID_SOCKET;
+	SOCKET listen_socket = INVALID_SOCKET;
+	
+	if(InitializeWinsock(2, 2, &wsa_data)) {
+		printf("winsock initalized\n");
+	}
+	else {
+		printf("error winsock initialisation\n");
 	}
 	
+	char *client_or_server = argv[1];
+	if(StringCmp(client_or_server, "client")) {
+		char ip[] = "127.0.0.1";
+		bool client_success = CreateClient(ip, DEFAULT_PORT, &connect_socket);
+		if(client_success) {
+			printf("successfuly created winsock client\n");
+		}
+	}
+	else if(StringCmp(client_or_server, "server")) {
+		bool server_success = CreateServer(DEFAULT_PORT, &listen_socket, &connect_socket);
+		if(server_success) {
+			printf("successfuly created winsock server\n");
+		}
+	}
+
+	WSAPOLLFD connect_socketfd = {0};
+	connect_socketfd.fd = connect_socket;
+	//connect_socketfd.events = POLLRDNORM | POLLWRNORM;
+	connect_socketfd.events = POLLRDNORM; 
+	connect_socketfd.revents = 0;
+		
 	u32 background_color = RGB_Color(245, 245, 245);
 	u32 input_bar_color = RGB_Color(255, 255, 255);
 	u32 text_color = RGB_Color(0, 0, 0);
@@ -65,8 +96,7 @@ int main(void) {
 	bool draw_placeholder_string = false;
 		
 	struct TextField chat_input_field = {0};
-	chat_input_field = InitTextField(&font, input_bar_x, input_bar_y, input_bar_w, input_bar_h, input_bar_color, border_thickness, border_color, input_bar_delay,
-									 input_bar_cursor_width, input_bar_cursor_height, input_bar_cursor_blinkrate, cursor_color, text_color, draw_placeholder_string);
+	chat_input_field = InitTextField(&font, input_bar_x, input_bar_y, input_bar_w, input_bar_h, input_bar_color, border_thickness, border_color, input_bar_delay, input_bar_cursor_width, input_bar_cursor_height, input_bar_cursor_blinkrate, cursor_color, text_color, draw_placeholder_string);
 	chat_input_field.write_focus = true;
 
 	char chat_buff[CHAT_MAX_BUFF_ROWS][CHAT_MAX_BUFF_COLS];
@@ -91,11 +121,26 @@ int main(void) {
 		}
 
 		FillScreen(framebuffer, background_color);
-
+		
 		UpdateTextField(&chat_input_field, input, main_timer.elapsed_time);
+
+		int poll_result = 0;
+		poll_result = WSAPoll(&connect_socketfd, 1, 0);
+
+		if(connect_socketfd.revents & POLLRDNORM) {
+			// receive
+			char receive_msg[256];
+			int len = 256;
+			recv(connect_socket, receive_msg, len, 0);
+
+			printf("%s\n", receive_msg);
+		}
 		
 		if(input.keyboard[enter_key].down) {
-			// copy input to chat
+			char msg[] = "Hello";
+			send(connect_socket, msg, ARRAY_LEN(msg), 0);
+			
+			// copy input to chat			
 			assert(current_buff_line <= CHAT_MAX_BUFF_ROWS);
 			copy_input_to_chat_buff(chat_input_field.text, chat_input_field.text_current_len, chat_buff, current_buff_line);
 
@@ -107,6 +152,13 @@ int main(void) {
 			chat_input_field.cursor.pos = chat_input_field.cursor.initial_pos;
 		}
 
+		/* if(StringCmp(server_or_client, "client")) { */
+		/* 	//recv(); */
+		/* } */
+		/* else { */
+		/* 	//sendto(); */
+		/* } */
+		
 		for(int i = 0; i < current_buff_line; i++) {
 			DrawString(framebuffer, font, "Admin:", chat_text_x, chat_text_y+(i*12), user_color);
 			DrawString(framebuffer, font, chat_buff[i], chat_text_x + 50, chat_text_y+(i * 12), text_color);

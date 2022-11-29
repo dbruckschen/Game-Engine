@@ -13,8 +13,12 @@
 
 #include "common.h"
 
-#define DEFAULT_PORT "27015"
+#define DEFAULT_PORT "49835"
 
-__declspec(dllexport) bool InitializeWinsock(char *ip); 
+// calls wsa startup function and writes result into *wsa_data
+__declspec(dllexport) bool InitializeWinsock(int major_version, int minor_version, WSADATA *wsa_data);
+// creates a connect socket and calls connect on a specified ip and port
+__declspec(dllexport) bool CreateClient(const char *serv_ip, const char *serv_port, SOCKET *socket);
+__declspec(dllexport) bool CreateServer(const char *serv_port, SOCKET *listen_socket, SOCKET *connect_socket);
 
 #endif 
