@@ -11,6 +11,12 @@
 
 #define CHAT_MAX_BUFF_ROWS 1000
 #define CHAT_MAX_BUFF_COLS MAX_TEXTFIELD_LEN
+#define MAX_MSG_LEN_NETWORK 256
+
+enum AppState {
+	MENU,
+	RUNNING
+};
 
 void copy_input_to_chat_buff(char *src, int src_len, char buff[CHAT_MAX_BUFF_ROWS][CHAT_MAX_BUFF_COLS], int buff_index) {
 	if(src[0] != '\0') {
@@ -23,11 +29,9 @@ void copy_input_to_chat_buff(char *src, int src_len, char buff[CHAT_MAX_BUFF_ROW
 	}
 }
 
-int main(int argc, char **argv) {
-	if(argc < 2) {
-		printf("Pass server or client option(server/client) as command line argument.");
-		return 0;
-	}
+int main(void) {
+	// inital state
+	enum AppState state = MENU;
 	
 	int window_width = 800;
 	int window_height = 600;
@@ -45,8 +49,9 @@ int main(int argc, char **argv) {
 	font.glyph_height = 7;
 	font.glyph_count = 98;
 	font.glyph_spacing = 2;
-	font.color_mask = RGB_Color(255, 255, 255); // i don't need a color mask, but 0 will mask off white
+	font.color_mask = RGB_Color(255, 255, 255); // No need for a color mask, but 0 will mask off white
 
+	// Initalize winsock and create server/client
 	WSADATA wsa_data;
 	SOCKET connect_socket = INVALID_SOCKET;
 	SOCKET listen_socket = INVALID_SOCKET;
@@ -57,25 +62,11 @@ int main(int argc, char **argv) {
 	else {
 		printf("error winsock initialisation\n");
 	}
-	
-	char *client_or_server = argv[1];
-	if(StringCmp(client_or_server, "client")) {
-		char ip[] = "127.0.0.1";
-		bool client_success = CreateClient(ip, DEFAULT_PORT, &connect_socket);
-		if(client_success) {
-			printf("successfuly created winsock client\n");
-		}
-	}
-	else if(StringCmp(client_or_server, "server")) {
-		bool server_success = CreateServer(DEFAULT_PORT, &listen_socket, &connect_socket);
-		if(server_success) {
-			printf("successfuly created winsock server\n");
-		}
-	}
 
+	char *client_or_server;
 	WSAPOLLFD connect_socketfd = {0};
-	connect_socketfd.fd = connect_socket;
-	//connect_socketfd.events = POLLRDNORM | POLLWRNORM;
+	//connect_socketfd.fd = connect_socket;
+	// connect_socketfd.events = POLLRDNORM | POLLWRNORM;
 	connect_socketfd.events = POLLRDNORM; 
 	connect_socketfd.revents = 0;
 		
@@ -122,59 +113,120 @@ int main(int argc, char **argv) {
 
 		FillScreen(framebuffer, background_color);
 		
-		UpdateTextField(&chat_input_field, input, main_timer.elapsed_time);
-
-		int poll_result = 0;
-		poll_result = WSAPoll(&connect_socketfd, 1, 0);
-
-		if(connect_socketfd.revents & POLLRDNORM) {
-			// receive
-			char receive_msg[256];
-			int len = 256;
-			recv(connect_socket, receive_msg, len, 0);
-
-			printf("%s\n", receive_msg);
-		}
-		
-		if(input.keyboard[enter_key].down) {
-			char msg[] = "Hello";
-			send(connect_socket, msg, ARRAY_LEN(msg), 0);
+		switch(state) {
+		case MENU:
+			int btn_x = 200;
+			int btn_y = 200;
+			int btn_w = 100;
+			int btn_h = 20;
+			u32 btn_color = RGB_Color(34, 244, 244);
+			u32 btn_border_color = RGB_Color(50, 58, 69);
+			u32 btn_text_color = RGB_Color(0, 0, 0);
 			
-			// copy input to chat			
-			assert(current_buff_line <= CHAT_MAX_BUFF_ROWS);
-			copy_input_to_chat_buff(chat_input_field.text, chat_input_field.text_current_len, chat_buff, current_buff_line);
-
-			current_buff_line++;
+			struct Button btn_host = InitTextButton(&font, btn_text_color, btn_x, btn_y, btn_w, btn_h, "Host", btn_color, 2, btn_border_color, 0.3f);
+			struct Button btn_join = InitTextButton(&font, btn_text_color, btn_x, btn_y+(btn_h+20), btn_w, btn_h, "Join", btn_color, 2, btn_border_color, 0.3f);
 			
-			// clear text field buff
-			chat_input_field.text[0] = '\0';
-			chat_input_field.text_current_len = 0;
-			chat_input_field.cursor.pos = chat_input_field.cursor.initial_pos;
-		}
+			bool collide_host = BBAA(V2(btn_host.x, btn_host.y), btn_host.width, btn_host.height, input.mouse_cursor_pos, 1, 1);
+			bool collide_join = BBAA(V2(btn_join.x, btn_join.y), btn_join.width, btn_join.height, input.mouse_cursor_pos, 1, 1);
 
-		/* if(StringCmp(server_or_client, "client")) { */
-		/* 	//recv(); */
-		/* } */
-		/* else { */
-		/* 	//sendto(); */
-		/* } */
-		
-		for(int i = 0; i < current_buff_line; i++) {
-			DrawString(framebuffer, font, "Admin:", chat_text_x, chat_text_y+(i*12), user_color);
-			DrawString(framebuffer, font, chat_buff[i], chat_text_x + 50, chat_text_y+(i * 12), text_color);
-		}
+			if(collide_host & input.left_click_down) {
+				bool server_success = CreateServer(DEFAULT_PORT, &listen_socket, &connect_socket);
+				connect_socketfd.fd = connect_socket;
 
-		char time[64];
-		IntToString(system_time.wHour, time, 64);
-		time[2] = ':';
-		IntToString(system_time.wMinute, time+3, 64);
-		time[5] = ':';
-		IntToString(system_time.wSecond, time+6, 64);
+				if(server_success) {
+					state = RUNNING;
+					client_or_server = "server";
+				}
+			}
+
+			if(collide_join & input.left_click_down) {
+				char ip[] = "127.0.0.1";
+				bool client_success = CreateClient(ip, DEFAULT_PORT, &connect_socket);
+				connect_socketfd.fd = connect_socket;
+
+				if(client_success) {
+					state = RUNNING;
+					client_or_server = "client";
+				}
+			}
+			
+			DrawTextButton(framebuffer, &btn_host);
+			DrawTextButton(framebuffer, &btn_join);
+			break;
+			
+		case RUNNING:
+			UpdateTextField(&chat_input_field, input, main_timer.elapsed_time);
+
+			// check if server/client sends data and only then call recv()
+			int poll_result = 0;
+			poll_result = WSAPoll(&connect_socketfd, 1, 0);
+
+			if(poll_result == SOCKET_ERROR) {
+				int error = WSAGetLastError();
+				printf("WSAPoll() returned SOCKET_ERROR; error code: %d\n", error);
+			}
+			
+			if(poll_result > 0) {
+				if(connect_socketfd.revents & POLLRDNORM) {
+					// receive
+					char receive_msg[CHAT_MAX_BUFF_COLS];
+					int received_bytes = recv(connect_socket, receive_msg, CHAT_MAX_BUFF_COLS, 0);
+					printf("received %d bytes\n", received_bytes);
+
+					assert(current_buff_line <= CHAT_MAX_BUFF_ROWS);
+					copy_input_to_chat_buff(receive_msg, received_bytes, chat_buff, current_buff_line);
+
+					current_buff_line++;
+
+					// clear text field buff
+					chat_input_field.text[0] = '\0';
+					chat_input_field.text_current_len = 0;
+					chat_input_field.cursor.pos = chat_input_field.cursor.initial_pos;
+				}
+			} 
+
+			if(input.keyboard[enter_key].down) {
+				char msg[MAX_MSG_LEN_NETWORK];
+				int msg_len = chat_input_field.text_current_len;
+			
+				if(chat_input_field.text_current_len >= MAX_MSG_LEN_NETWORK) {
+					msg_len = MAX_MSG_LEN_NETWORK-1;
+				}
+			
+				StringCpy(msg, chat_input_field.text, msg_len);
+				int bytes_send = send(connect_socket, msg, msg_len, 0);
+				printf("send %d bytes\n", bytes_send);
+			
+				// copy input to chat			
+				assert(current_buff_line <= CHAT_MAX_BUFF_ROWS);
+				copy_input_to_chat_buff(chat_input_field.text, chat_input_field.text_current_len, chat_buff, current_buff_line);
+
+				current_buff_line++;
+			
+				// clear text field buff
+				chat_input_field.text[0] = '\0';
+				chat_input_field.text_current_len = 0;
+				chat_input_field.cursor.pos = chat_input_field.cursor.initial_pos;
+			}
+
+
+			// draw stuff
+			for(int i = 0; i < current_buff_line; i++) {
+				DrawString(framebuffer, font, "Admin:", chat_text_x, chat_text_y+(i*12), user_color);
+				DrawString(framebuffer, font, chat_buff[i], chat_text_x + 50, chat_text_y+(i * 12), text_color);
+			}
+
+			/* char time[64]; */
+			/* IntToString(system_time.wHour, time, 64); */
+			/* time[2] = ':'; */
+			/* IntToString(system_time.wMinute, time+3, 64); */
+			/* time[5] = ':'; */
+			/* IntToString(system_time.wSecond, time+6, 64); */
+			/* DrawString(framebuffer, font, time, 400, 400, user_color); */
 		
-		DrawString(framebuffer, font, time, 400, 400, user_color);
-		//DrawString(framebuffer, font, ":", 400, 400, user_color);
-		
-		DrawTextField(framebuffer, &chat_input_field);
+			DrawTextField(framebuffer, &chat_input_field);
+			break;
+		}
 		
 		OutputFramebuffer(window.wnd_h, *framebuffer);
 

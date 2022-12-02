@@ -13,6 +13,11 @@ typedef struct {
     float y;
 } v2;
 
+typedef struct {
+	int x;
+	int y;
+} v2i;
+
 // returns a v2 struct with x and y values
 __declspec(dllexport) v2 V2(float x, float y);
 // returns true if v1 == v2

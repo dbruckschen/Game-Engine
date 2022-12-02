@@ -13,7 +13,17 @@
 
 #include "common.h"
 
-#define DEFAULT_PORT "49835"
+#define DEFAULT_PORT "43970"
+
+struct Server {
+	SOCKET connect_socket;
+	SOCKET listen_socket;
+	WSAPOLLFD pollfd;
+	
+	char ip4[15];
+	char port_char[6];
+	u16 port_u16;
+};
 
 // calls wsa startup function and writes result into *wsa_data
 __declspec(dllexport) bool InitializeWinsock(int major_version, int minor_version, WSADATA *wsa_data);

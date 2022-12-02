@@ -13,6 +13,7 @@ struct Button {
 	int width;
 	int height;
 	char text[128];
+	u32 text_color;
 
 	u32 color;
 	u32 border_color;
@@ -65,7 +66,7 @@ struct TextField {
 	struct Cursor cursor;
 };
 
-__declspec(dllexport) struct Button InitTextButton(struct Font *font, int x, int y, int width, int height, char *text, u32 color,
+__declspec(dllexport) struct Button InitTextButton(struct Font *font, u32 text_color, int x, int y, int width, int height, char *text, u32 color,
 												   int border_thickness, u32 border_color, float delay);
 
 __declspec(dllexport) void UpdateButtonStatus(struct Button *btn, struct Input input, double dt);

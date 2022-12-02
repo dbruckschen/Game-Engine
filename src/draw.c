@@ -426,18 +426,22 @@ void DrawGlyph(struct Framebuffer *framebuffer, struct Font font, char ch, int x
 
 			u32 src_pixel = 0;
 			if((r == 0) && (g == 0) && (b == 0)) {
-				src_pixel = glyph_color;
+				//src_pixel = glyph_color;
+				*dst++ = glyph_color;
 			}
 			else {
-				src_pixel = (a << 24) + (r << 16) + (g << 8) + b;
+				//src_pixel = (a << 24) + (r << 16) + (g << 8) + b;
+				dst++;
 			}
 
-            if(src_pixel != font.color_mask) {
-                *dst++ = src_pixel;
-			}
-            else {
-                dst++;
-			}
+			//*dst++ = src_pixel;
+			
+            /* if(src_pixel != RGB_Color(255, 255, 255)) { */
+            /*     *dst++ = src_pixel; */
+			/* } */
+            /* else { */
+            /*     dst++; */
+			/* } */
 
             src += font.bmp.bpp;
         }

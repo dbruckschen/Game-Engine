@@ -102,18 +102,20 @@ bool CreateServer(const char *serv_port, SOCKET *listen_socket, SOCKET *connect_
 	char hostbuf[256];
 	gethostname(hostbuf, 256);
 	printf("hostname server: %s\n", hostbuf);
+	char ip[128];
 	
 	struct sockaddr_in *localaddr = (struct sockaddr_in *)servinfo->ai_addr;
-	printf("server ip: %d\n", localaddr->sin_port);
+	inet_ntop(AF_INET, &localaddr->sin_addr, ip, 128);
+	printf("server ip: %s\n", ip);
 	printf("server port: %d\n", localaddr->sin_port);
 	
 	if(error != 0) {
-		printf("getaddrinfo failed: %d, function: %s\n", error, __FUNCTION__);
+		printf("getaddrinfo() failed: %d, function: %s\n", error, __FUNCTION__);
 		WSACleanup();
 		return false;
 	}
 	else {
-		printf("getaddrinfo success\n");
+		printf("getaddrinfo() success\n");
 	}
 
 	*listen_socket = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);

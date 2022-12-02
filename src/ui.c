@@ -1,6 +1,6 @@
 #include "ui.h"
 
-struct Button InitTextButton(struct Font *font, int x, int y, int width, int height, char *text, u32 color, int border_thickness, u32 border_color, float delay_time) {
+struct Button InitTextButton(struct Font *font, u32 text_color, int x, int y, int width, int height, char *text, u32 color, int border_thickness, u32 border_color, float delay_time) {
 	struct Button btn = {0};
 
 	btn.x = x;
@@ -8,6 +8,7 @@ struct Button InitTextButton(struct Font *font, int x, int y, int width, int hei
 	btn.width = width;
 	btn.height = height;
 	btn.font = font;
+	btn.text_color = text_color;
 
 	size_t str_len = StringLen(text);
 	StringCpy(btn.text, text, str_len);
@@ -74,7 +75,7 @@ void DrawTextButton(struct Framebuffer *fb, struct Button *btn) {
 	v2 rec_center = GetCenteredCoordinates(btn->x, btn->y, btn->width, btn->height, string_width, font_height);
 
     // TODO: pass the string color to the DrawTextButton
-	DrawString(fb, *btn->font, btn->text, (int)rec_center.x, (int)rec_center.y, RGB_Color(255, 255, 255));
+	DrawString(fb, *btn->font, btn->text, (int)rec_center.x, (int)rec_center.y, btn->text_color);
 }
 
 struct TextField InitTextField(struct Font *font, int x, int y, int width, int height,

@@ -33,7 +33,7 @@ bool StringCmp(char *s1, char *s2) {
 }
 
 void StringCpy(char *dst, char *src, size_t dst_len) {
-	for(int i = 0; i < dst_len - 1; i++) {
+	for(int i = 0; i < dst_len; i++) {
 		dst[i] = src[i];
 	}
 

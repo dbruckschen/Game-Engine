@@ -36,11 +36,11 @@ LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
         break;
 
 	case WM_CHAR:
-		int ascii_code = (int)wparam;
-		int repeat_count = lparam & 0x7FFF;
-		bool is_special_key = lparam & 0x400000;
+		/* int ascii_code = (int)wparam; */
+		/* int repeat_count = lparam & 0x7FFF; */
+		/* bool is_special_key = lparam & 0x400000; */
 			
-		printf("ascii: %c, repeat count: %d, is special key: %d\n", ascii_code, repeat_count, is_special_key);
+		//printf("ascii: %c, repeat count: %d, is special key: %d\n", ascii_code, repeat_count, is_special_key);
 			
 		break;
 	
