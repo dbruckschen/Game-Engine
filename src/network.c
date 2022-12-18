@@ -30,7 +30,6 @@ bool CreateClient(const char *serv_ip, const char *serv_port, SOCKET *connect_so
 
 	if(error != 0) {
 		printf("getaddrinfo failed: %d, function: %s\n", error, __FUNCTION__);
-		WSACleanup();
 		return false;
 	}
 	else {
@@ -74,22 +73,18 @@ bool CreateClient(const char *serv_ip, const char *serv_port, SOCKET *connect_so
 	freeaddrinfo(result);
 
 	if(*connect_socket == INVALID_SOCKET) {
-		WSACleanup();
 		return false;
 	}
-	
-	char buff[] = "Hello World\n";
-	send(*connect_socket, buff, 12, 0);
-
-	return true;
+	else {
+		return true;
+	}
 }
 
-bool CreateServer(const char *serv_port, SOCKET *listen_socket, SOCKET *connect_socket) {
+bool CreateServer(const char *serv_port, SOCKET *listen_socket) {
 	int error = 0;
 
 	struct addrinfo *servinfo = NULL;
 	struct addrinfo hints;
-	struct sockaddr_storage their_addr;
 
 	ZeroMemory(&hints, sizeof hints);
 	hints.ai_family = AF_INET;
@@ -111,7 +106,6 @@ bool CreateServer(const char *serv_port, SOCKET *listen_socket, SOCKET *connect_
 	
 	if(error != 0) {
 		printf("getaddrinfo() failed: %d, function: %s\n", error, __FUNCTION__);
-		WSACleanup();
 		return false;
 	}
 	else {
@@ -119,6 +113,9 @@ bool CreateServer(const char *serv_port, SOCKET *listen_socket, SOCKET *connect_
 	}
 
 	*listen_socket = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
+	// make the listen_socket not block so when we call listen() we can still render stuff etc.
+	u_long mode = 1; //non blocking
+	ioctlsocket(*listen_socket, FIONBIO, &mode);
 
 	if(*listen_socket == INVALID_SOCKET) {
 		closesocket(*listen_socket);
@@ -147,29 +144,6 @@ bool CreateServer(const char *serv_port, SOCKET *listen_socket, SOCKET *connect_
 	}
 	else {
 		printf("listen() success, function: %s\n", __FUNCTION__);
-	}
-
-	int addr_size = sizeof their_addr;
-	*connect_socket = accept(*listen_socket, (struct sockaddr*)&their_addr, &addr_size);
-	
-	if(*connect_socket == INVALID_SOCKET) {
-		printf("accept() error, function: %s\n", __FUNCTION__);
-		return false;
-	}
-	else {
-		printf("accept() success, function: %s\n", __FUNCTION__);
-	}
-
-	closesocket(*listen_socket);
-	
-    char buff[256];
-	int buff_len = ARRAY_LEN(buff);
-	if(recv(*connect_socket, buff, buff_len, 0) == SOCKET_ERROR) {
-		
-	}
-	else {
-		buff[buff_len-1] = '\0';
-		printf("%s\n", buff);
 	}
 
 	return true;

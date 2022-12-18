@@ -114,6 +114,14 @@ struct Sprite {
     double current_timer;
 };
 
+struct Rectangle {
+	int x;
+	int y;
+	int w;
+	int h;
+	u32 color;
+};
+
 struct Triangles {
     float verts[6];
     u32 color;

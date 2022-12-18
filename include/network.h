@@ -19,16 +19,13 @@ struct Server {
 	SOCKET connect_socket;
 	SOCKET listen_socket;
 	WSAPOLLFD pollfd;
-	
-	char ip4[15];
-	char port_char[6];
-	u16 port_u16;
 };
 
 // calls wsa startup function and writes result into *wsa_data
 __declspec(dllexport) bool InitializeWinsock(int major_version, int minor_version, WSADATA *wsa_data);
 // creates a connect socket and calls connect on a specified ip and port
 __declspec(dllexport) bool CreateClient(const char *serv_ip, const char *serv_port, SOCKET *socket);
-__declspec(dllexport) bool CreateServer(const char *serv_port, SOCKET *listen_socket, SOCKET *connect_socket);
+__declspec(dllexport) bool CreateServer(const char *serv_port, SOCKET *listen_socket);
+
 
 #endif 

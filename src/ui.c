@@ -16,6 +16,7 @@ struct Button InitTextButton(struct Font *font, u32 text_color, int x, int y, in
 	btn.border_thickness = border_thickness;
 	btn.border_color = border_color;
 	btn.active = true;
+	btn.clicked = false;
 	btn.hover = false;
 	btn.toggle = false;
 	btn.delay_time = delay_time;
@@ -36,20 +37,26 @@ void UpdateButtonStatus(struct Button *btn, struct Input input, double dt) {
 	}
 	
 	/* check if mouse is hovering over button */
-	if((BBAA(input.mouse_cursor_pos, mouse_ptr_w, mouse_ptr_h, b1, btn->width, btn->height)) &&
-	   btn->active) {
-		btn->hover = true;
-		
-		/* check for click event */
-		if((input.left_click_down) && (!btn->toggle) && (btn->delay_timer >= btn->delay_time)) {
-			btn->toggle = true;
-			btn->delay_timer = 0;
-			btn->color = RGB_Color(0, 255, 0);
-		}
-		else if(input.left_click_down && btn->toggle && (btn->delay_timer >= btn->delay_time)) {
-			btn->toggle = false;
-			btn->color = RGB_Color(255, 0, 0);
-			btn->delay_timer = 0;
+	if(btn->active) {
+		if(BBAA(input.mouse_cursor_pos, mouse_ptr_w, mouse_ptr_h, b1, btn->width, btn->height)) {
+			btn->hover = true;
+
+			if(input.left_click_down && (btn->delay_timer >= btn->delay_time)) {
+				btn->clicked = true;
+			}
+			else {
+				btn->clicked = false;
+			}
+						
+			// button toggle & clicked event
+			if((input.left_click_down) && (!btn->toggle) && (btn->delay_timer >= btn->delay_time)) {
+				btn->toggle = true;
+				btn->delay_timer = 0.0;
+			}
+			else if(input.left_click_down && btn->toggle && (btn->delay_timer >= btn->delay_time)) {
+				btn->toggle = false;
+				btn->delay_timer = 0.0;
+			}
 		}
 	}
 	else {

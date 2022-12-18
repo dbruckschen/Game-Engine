@@ -7,26 +7,28 @@
 
 #define MAX_TEXTFIELD_LEN 128
 
-struct Button {
+struct Button { // Button attributes are set by calling UpdateButtonStatus() function
 	int x;
 	int y;
 	int width;
 	int height;
-	char text[128];
-	u32 text_color;
+	
+	char text[128];			// Text on button
+	u32 text_color;			// Color of text on button
 
-	u32 color;
-	u32 border_color;
-	u32 border_thickness;
+	u32 color;				// Background color
+	u32 border_thickness;	// Thickness of the border around the button
+	u32 border_color;		// Border color around button
 
-	struct Font *font;
+	struct Font *font;		// Bitmap font used for text on buttons
 
-	bool active;
-	bool hover;
-	bool toggle;
+	bool active;  			// If false the button won't register any hover, toggle ... events
+	bool clicked;			// Button clicked?
+	bool hover; 			// Mouse pointer hovers button
+	bool toggle; 			// Button toggled when clicked
 
-	double delay_time;
-	double delay_timer;
+	double delay_time;		// Time between clicks to trigger an event
+	double delay_timer; 	// Counts up to delay_time and resets 
 };
 
 struct Cursor {

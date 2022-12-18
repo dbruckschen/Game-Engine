@@ -15,6 +15,7 @@
 
 enum AppState {
 	MENU,
+	WAIT_FOR_CONNECTION,
 	RUNNING
 };
 
@@ -38,6 +39,7 @@ int main(void) {
 	
 	struct Window window = OpenWindow(window_width, window_height, "Chat Demo");
 	struct Input input = {0};
+	
 	struct Framebuffer *framebuffer = CreateFramebuffer(window.wnd_h);
 	struct Timer main_timer = {0};
 	InitTimer(&main_timer);
@@ -96,15 +98,28 @@ int main(void) {
 	int chat_text_y = 50;
 
 	u32 user_color = RGB_Color(255, 0, 0);
+	
+	// menu buttons
+	int btn_x = 200;
+	int btn_y = 200;
+	int btn_w = 100;
+	int btn_h = 20;
+	u32 btn_color = RGB_Color(34, 244, 244);
+	u32 btn_border_color = RGB_Color(50, 58, 69);
+	u32 btn_text_color = RGB_Color(0, 0, 0);
 
+	struct Button btn_host = InitTextButton(&font, btn_text_color, btn_x, btn_y, btn_w, btn_h, "Host", btn_color, 2, btn_border_color, 0.3f);
+	struct Button btn_join = InitTextButton(&font, btn_text_color, btn_x, btn_y+(btn_h+20), btn_w, btn_h, "Join", btn_color, 2, btn_border_color, 0.3f);
+	//struct TextField tf_host_port = ;
+	//struct TextField tf_client_ip = ;
+	
 	bool running = true;
 	while(running) {
 		StartTimer(&main_timer);
-		
-		ResetInput(&input);
-		
-		input.mouse_cursor_pos = GetMousePosition(window.wnd_h);
 
+		ResetInput(&input);
+		input.mouse_cursor_pos = GetMousePosition(window.wnd_h);
+		
 		GetSystemTime(&system_time);
 			
 		if(!MessageLoop(&input)) {
@@ -115,43 +130,47 @@ int main(void) {
 		
 		switch(state) {
 		case MENU:
-			int btn_x = 200;
-			int btn_y = 200;
-			int btn_w = 100;
-			int btn_h = 20;
-			u32 btn_color = RGB_Color(34, 244, 244);
-			u32 btn_border_color = RGB_Color(50, 58, 69);
-			u32 btn_text_color = RGB_Color(0, 0, 0);
-			
-			struct Button btn_host = InitTextButton(&font, btn_text_color, btn_x, btn_y, btn_w, btn_h, "Host", btn_color, 2, btn_border_color, 0.3f);
-			struct Button btn_join = InitTextButton(&font, btn_text_color, btn_x, btn_y+(btn_h+20), btn_w, btn_h, "Join", btn_color, 2, btn_border_color, 0.3f);
-			
-			bool collide_host = BBAA(V2(btn_host.x, btn_host.y), btn_host.width, btn_host.height, input.mouse_cursor_pos, 1, 1);
-			bool collide_join = BBAA(V2(btn_join.x, btn_join.y), btn_join.width, btn_join.height, input.mouse_cursor_pos, 1, 1);
-
-			if(collide_host & input.left_click_down) {
+			if(btn_host.clicked) {
 				bool server_success = CreateServer(DEFAULT_PORT, &listen_socket, &connect_socket);
-				connect_socketfd.fd = connect_socket;
 
 				if(server_success) {
-					state = RUNNING;
+					state = WAIT_FOR_CONNECTION;
 					client_or_server = "server";
 				}
 			}
 
-			if(collide_join & input.left_click_down) {
+			if(btn_join.clicked) {
 				char ip[] = "127.0.0.1";
 				bool client_success = CreateClient(ip, DEFAULT_PORT, &connect_socket);
-				connect_socketfd.fd = connect_socket;
 
 				if(client_success) {
 					state = RUNNING;
+					connect_socketfd.fd = connect_socket;
 					client_or_server = "client";
+				}
+				else {
+				    connect_socket = 0;
 				}
 			}
 			
+			UpdateButtonStatus(&btn_host, input, main_timer.elapsed_time);
+			UpdateButtonStatus(&btn_join, input, main_timer.elapsed_time);
+			
 			DrawTextButton(framebuffer, &btn_host);
 			DrawTextButton(framebuffer, &btn_join);
+			break;
+
+		case WAIT_FOR_CONNECTION:
+			struct sockaddr_storage their_addr;
+			int addr_size = sizeof their_addr;
+			connect_socket = accept(listen_socket, (struct sockaddr*)&their_addr, &addr_size);
+
+			if(connect_socket != INVALID_SOCKET) {
+				connect_socketfd.fd = connect_socket;
+				//closesocket(listen_socket);
+				printf("accept() success\n");
+				state = RUNNING;
+			}
 			break;
 			
 		case RUNNING:
@@ -230,6 +249,7 @@ int main(void) {
 		
 		OutputFramebuffer(window.wnd_h, *framebuffer);
 
+		//ResetInput(&input);
 		EndTimer(&main_timer);
 	}
 	

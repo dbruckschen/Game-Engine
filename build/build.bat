@@ -13,3 +13,6 @@ copy engine.dll ..\demos\TetrisClone\build
 
 copy engine.lib ..\demos\Chat\build
 copy engine.dll ..\demos\Chat\build
+
+copy engine.lib ..\demos\UI\build
+copy engine.dll ..\demos\UI\build
