@@ -1,4 +1,7 @@
 #include "mathlib.h"
+#include <stdlib.h>
+#include <time.h>
+#include <math.h>
 
 v2 V2(float x, float y) {
     v2 tmp = {0};

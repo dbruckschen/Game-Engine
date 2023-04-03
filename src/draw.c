@@ -1,4 +1,9 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
 #include "draw.h"
+#include "mathlib.h"
 
 struct Framebuffer *CreateFramebuffer(HWND window) {
     struct Framebuffer *framebuffer = VirtualAlloc(0, sizeof *framebuffer, MEM_COMMIT, PAGE_READWRITE);
@@ -16,7 +21,11 @@ struct Framebuffer *CreateFramebuffer(HWND window) {
     framebuffer->size = framebuffer->height * framebuffer->width * framebuffer->bpp;
     framebuffer->buffer = VirtualAlloc(0, framebuffer->size, MEM_COMMIT, PAGE_READWRITE);
 
-    framebuffer->info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	if(!framebuffer->buffer) {
+		return NULL;
+	}
+	
+	framebuffer->info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
     framebuffer->info.bmiHeader.biWidth = window_width;
     framebuffer->info.bmiHeader.biHeight = -window_height;
     framebuffer->info.bmiHeader.biPlanes = 1;
@@ -151,9 +160,16 @@ void *ReadFileContent(char *filename) {
 
     void *file_data;
     file_data = malloc(file_size);
+	
+	if(!file_data) {
+		return NULL;
+	}
+	
     DWORD bytes_read;
 
-    ReadFile(file_handle, file_data, file_size, &bytes_read, 0);
+    if(ReadFile(file_handle, file_data, file_size, &bytes_read, 0) == 0) {
+		return NULL;
+	}
 
     CloseHandle(file_handle);
 
@@ -184,6 +200,18 @@ struct Bitmap LoadBitmapFile(char *filename) {
             HFlipBMP32bpp(&bitmap);
     }
     return bitmap;
+}
+
+struct Font LoadBitmapFont(char *filename) {
+	struct Font font = {0};
+	font.bmp = LoadBitmapFile(filename);
+	font.glyph_width = 5;
+	font.glyph_height = 7;
+	font.glyph_count = 98;
+	font.glyph_spacing = 2;
+	font.color_mask = RGB_Color(255, 255, 255); // No need for a color mask, but 0 will mask off white
+
+	return font;
 }
 
 void HFlipBMP24bpp(struct Bitmap *bitmap) {
@@ -296,7 +324,7 @@ void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x, 
             u8 g = *(src + 1);
             u8 b = *(src + 2);
 
-            u32 src_pixel = (0 << 24) + (b << 16) + (g << 8) + r;
+            u32 src_pixel = (0 << 24) + (r << 16) + (g << 8) + b;
 
             if(src_pixel != color_mask)
                 *dst++ = src_pixel;
@@ -324,7 +352,8 @@ void DrawBMP32bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x, 
             u8 r = *src;
             u8 g = *(src + 1);
             u8 b = *(src + 2);
-            u8 a = *(src + 3);
+            //u8 a = *(src + 3);
+			u8 a = 0;
 
             u32 src_pixel = (a << 24) + (r << 16) + (g << 8) + b;
 
@@ -373,7 +402,7 @@ void GetPixelFromBMP(struct Bitmap *from, u8 *to) {
         *(to + i) = *(from->pixel + i);
 }
 
-void DrawGlyph(struct Framebuffer *framebuffer, struct Font font, char ch, int x_pos, int y_pos, u32 glyph_color) {
+void DrawGlyph(struct Framebuffer *framebuffer, struct Font font, char ch, int x_pos, int y_pos, u32 glyph_color, int clip_x, int clip_y, int clip_w, int clip_h) {
     u32 glyph_offsets[98];
 
     for(int i = 0; i < font.glyph_count; i++) {
@@ -411,14 +440,16 @@ void DrawGlyph(struct Framebuffer *framebuffer, struct Font font, char ch, int x
     }
 
 	// TODO: clip glyph (bitmap clipping function)
+	struct ClippedBmp clippedBmp = ClipBitmap(framebuffer->width, framebuffer->height, x_pos, y_pos, font.glyph_width, font.glyph_height, clip_x, clip_y, clip_w, clip_h);
 	        
     u32 *dst = (u32 *)framebuffer->buffer;
+	//dst += x_pos + (y_pos * framebuffer->width);
+	dst += clippedBmp.x1 + (clippedBmp.y1 * framebuffer->width);
     u8 *src = (u8 *)font.bmp.pixel + glyph_offset;
+	src += (clippedBmp.x_off + (clippedBmp.y_off * font.glyph_width)) * font.bmp.bpp;
 
-    dst += x_pos + (y_pos * framebuffer->width);
-
-    for(int y = 0; y < (int)font.bmp.height; ++y) {
-        for(int x = 0; x < font.glyph_width; ++x) {
+    for(int y = 0; y < clippedBmp.dy; ++y) {
+        for(int x = 0; x < clippedBmp.dx; ++x) {
             u8 r = *src;
             u8 g = *(src + 1);
             u8 b = *(src + 2);
@@ -432,12 +463,14 @@ void DrawGlyph(struct Framebuffer *framebuffer, struct Font font, char ch, int x
 			
             src += font.bmp.bpp;
         }
-		src += (font.bmp.width - font.glyph_width) * font.bmp.bpp;
-        dst += framebuffer->width - font.glyph_width;
+		/* src += (font.bmp.width - font.glyph_width - clippedBmp.dx) * font.bmp.bpp; */
+        /* dst += framebuffer->width - font.glyph_width - clipped.dx; */
+		src += (font.bmp.width - clippedBmp.dx) * font.bmp.bpp;
+		dst += framebuffer->width - clippedBmp.dx; 
     }
 }
 
-void DrawString(struct Framebuffer *buffer, struct Font font, char *string, int x, int y, u32 glyph_color) {
+void DrawString(struct Framebuffer *buffer, struct Font font, char *string, int x, int y, u32 glyph_color, int clip_x, int clip_y, int clip_w, int clip_h) {
     int new_char_offset = 0;
     
     for(int i = 0; i < StringLen(string)-1; i++) {
@@ -445,7 +478,7 @@ void DrawString(struct Framebuffer *buffer, struct Font font, char *string, int 
 			new_char_offset += font.glyph_width + font.glyph_spacing;
 		}
 		else {
-			DrawGlyph(buffer, font, string[i], x + new_char_offset, y, glyph_color);
+			DrawGlyph(buffer, font, string[i], x + new_char_offset, y, glyph_color, clip_x, clip_y, clip_w, clip_h);
 			new_char_offset += font.glyph_width + font.glyph_spacing;
 		}
     }

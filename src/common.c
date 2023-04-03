@@ -1,4 +1,7 @@
 #include "common.h"
+#include <math.h>
+#include <assert.h>
+#include <stdlib.h>
 
 // returns the length of a string s
 // \n is part of the length

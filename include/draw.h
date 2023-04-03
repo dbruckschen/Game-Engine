@@ -1,12 +1,8 @@
 #ifndef DRAW_H
 #define DRAW_H
 
-#include "../include/common.h"
-#include "../include/mathlib.h"
-#include <assert.h>
 #include <windows.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "common.h"
 
 enum glyph_idx {
     A,
@@ -190,6 +186,7 @@ __declspec(dllexport) void DrawTriangle(struct Framebuffer *framebuffer, int poi
  /* NOTE: This function gets only used in LoadBitmapFile(). */
 __declspec(dllexport) void *ReadFileContent(char *filename);
 __declspec(dllexport) struct Bitmap LoadBitmapFile(char *filename);
+__declspec(dllexport) struct Font LoadBitmapFont(char *filename);
 
 /*  The win32 ReadFile() function loads .bmp (or all formats?) file formats horizontally flipped.
  *  Flip the bmp again to draw bitmaps with right orientation.
@@ -203,7 +200,7 @@ __declspec(dllexport) void HFlipBMP32bpp(struct Bitmap *bitmap);
  */
 __declspec(dllexport) struct  ClippedBmp ClipBitmap(int window_w, int window_h, int x, int y, int w, int h, int clip_x, int clip_y, int clip_w, int clip_h);
 
- /* Bitmap drawing functions for 24 bytes per pixel and 32 bytes per pixel. */
+// DrawBMP24bpp doesn't work properly at the moment
 __declspec(dllexport) void DrawBMP24bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x, int y, u32 color_mask);
 __declspec(dllexport) void DrawBMP32bpp(struct Framebuffer *framebuffer, struct Bitmap bitmap, int x, int y, u32 color_mask);
 
@@ -224,8 +221,8 @@ __declspec(dllexport) void GetPixelFromBMP(struct Bitmap *from, u8 *to);
 /*
  * For the glyph_color to be drawn, the font bitmap should be a black text (rgb(0, 0, 0) on a white background (rgb(255, 255, 255).
  */
-__declspec(dllexport) void DrawGlyph(struct Framebuffer *buffer, struct Font font, char ch, int x, int y, u32 glyph_color);
+__declspec(dllexport) void DrawGlyph(struct Framebuffer *buffer, struct Font font, char ch, int x, int y, u32 glyph_color, int clip_x, int clip_y, int clip_w, int clip_h);
 
-__declspec(dllexport) void DrawString(struct Framebuffer *buffer, struct Font font, char *string, int x, int y, u32 glyph_color);
+__declspec(dllexport) void DrawString(struct Framebuffer *buffer, struct Font font, char *string, int x, int y, u32 glyph_color, int clip_x, int clip_y, int clip_w, int clip_h);
  
 #endif // DRAW_H

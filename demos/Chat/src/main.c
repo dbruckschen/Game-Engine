@@ -1,12 +1,4 @@
-#include "network.h"
-#include "window.h"
-#include "draw.h"
-#include "timing.h"
-#include "input.h"
-#include "ui.h"
-#include "common.h"
-#include "mathlib.h"
-
+#include "GameEngine.h"
 #include <assert.h>
 
 #define CHAT_MAX_BUFF_ROWS 1000
@@ -46,12 +38,7 @@ int main(void) {
 	SYSTEMTIME system_time = {0};
 	
 	struct Font font = {0};
-	font.bmp = LoadBitmapFile("font.bmp");
-	font.glyph_width = 5;
-	font.glyph_height = 7;
-	font.glyph_count = 98;
-	font.glyph_spacing = 2;
-	font.color_mask = RGB_Color(255, 255, 255); // No need for a color mask, but 0 will mask off white
+	font = LoadBitmapFont("font.bmp");
 
 	// Initalize winsock and create server/client
 	WSADATA wsa_data;
@@ -131,7 +118,7 @@ int main(void) {
 		switch(state) {
 		case MENU:
 			if(btn_host.clicked) {
-				bool server_success = CreateServer(DEFAULT_PORT, &listen_socket, &connect_socket);
+				bool server_success = CreateServer(DEFAULT_PORT, &listen_socket);
 
 				if(server_success) {
 					state = WAIT_FOR_CONNECTION;
@@ -181,7 +168,7 @@ int main(void) {
 			poll_result = WSAPoll(&connect_socketfd, 1, 0);
 
 			if(poll_result == SOCKET_ERROR) {
-				int error = WSAGetLastError();
+ 				int error = WSAGetLastError();
 				printf("WSAPoll() returned SOCKET_ERROR; error code: %d\n", error);
 			}
 			
@@ -231,8 +218,8 @@ int main(void) {
 
 			// draw stuff
 			for(int i = 0; i < current_buff_line; i++) {
-				DrawString(framebuffer, font, "Admin:", chat_text_x, chat_text_y+(i*12), user_color);
-				DrawString(framebuffer, font, chat_buff[i], chat_text_x + 50, chat_text_y+(i * 12), text_color);
+				DrawString(framebuffer, font, "Admin:", chat_text_x, chat_text_y+(i*12), user_color, 0, 0, framebuffer->width, framebuffer->height);
+				DrawString(framebuffer, font, chat_buff[i], chat_text_x + 50, chat_text_y+(i * 12), text_color, 0, 0, framebuffer->width, framebuffer->height);
 			}
 
 			/* char time[64]; */

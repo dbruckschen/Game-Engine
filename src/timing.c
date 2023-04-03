@@ -1,4 +1,5 @@
 #include "timing.h"
+#include <windows.h>
 
 void InitTimer(struct Timer *t) {
     LARGE_INTEGER freq = {0};

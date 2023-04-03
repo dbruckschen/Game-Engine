@@ -7,13 +7,13 @@
 
 #define MAX_TEXTFIELD_LEN 128
 
-struct Button { // Button attributes are set by calling UpdateButtonStatus() function
+struct Button {
 	int x;
 	int y;
 	int width;
 	int height;
 	
-	char text[128];			// Text on button
+	char text[128];			// Text displayed on button
 	u32 text_color;			// Color of text on button
 
 	u32 color;				// Background color
@@ -23,7 +23,7 @@ struct Button { // Button attributes are set by calling UpdateButtonStatus() fun
 	struct Font *font;		// Bitmap font used for text on buttons
 
 	bool active;  			// If false the button won't register any hover, toggle ... events
-	bool clicked;			// Button clicked?
+	bool clicked;			// Is Button clicked this frame?
 	bool hover; 			// Mouse pointer hovers button
 	bool toggle; 			// Button toggled when clicked
 
@@ -68,9 +68,9 @@ struct TextField {
 	struct Cursor cursor;
 };
 
-__declspec(dllexport) struct Button InitTextButton(struct Font *font, u32 text_color, int x, int y, int width, int height, char *text, u32 color,
-												   int border_thickness, u32 border_color, float delay);
+__declspec(dllexport) struct Button InitTextButton(struct Font *font, u32 text_color, int x, int y, int width, int height, char *text, u32 color, int border_thickness, u32 border_color, float delay);
 
+// TODO: add arguments for clipping region
 __declspec(dllexport) void UpdateButtonStatus(struct Button *btn, struct Input input, double dt);
 
 // TODO: pass the string color to the DrawTextButton

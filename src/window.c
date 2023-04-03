@@ -1,4 +1,5 @@
 #include "window.h"
+#include "draw.h"
 
 LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam) {
     LRESULT result = 0;
@@ -103,11 +104,9 @@ bool MessageLoop(struct Input *input) {
 
 					
 		case WM_CHAR:
-			int ascii_code = (int)msg.wParam;
-			int repeat_count = msg.lParam & 0x7FFF;
-			bool is_special_key = msg.lParam & 0x400000;
-			
-			printf("ascii: %c, repeat count: %d, is special key: %d\n", ascii_code, repeat_count, is_special_key);
+			/* int ascii_code = (int)msg.wParam; */
+			/* int repeat_count = msg.lParam & 0x7FFF; */
+			/* bool is_special_key = msg.lParam & 0x400000; */
 			break;
 
         case WM_SYSKEYDOWN:

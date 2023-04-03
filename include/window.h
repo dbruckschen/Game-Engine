@@ -3,10 +3,7 @@
 
 #include <windows.h>
 #include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "input.h"
-#include "draw.h"
 
 struct Window {
     HWND wnd_h;

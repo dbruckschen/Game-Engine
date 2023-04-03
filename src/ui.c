@@ -82,7 +82,7 @@ void DrawTextButton(struct Framebuffer *fb, struct Button *btn) {
 	v2 rec_center = GetCenteredCoordinates(btn->x, btn->y, btn->width, btn->height, string_width, font_height);
 
     // TODO: pass the string color to the DrawTextButton
-	DrawString(fb, *btn->font, btn->text, (int)rec_center.x, (int)rec_center.y, btn->text_color);
+	DrawString(fb, *btn->font, btn->text, (int)rec_center.x, (int)rec_center.y, btn->text_color, 0, 0, fb->width, fb->height);
 }
 
 struct TextField InitTextField(struct Font *font, int x, int y, int width, int height,
@@ -153,10 +153,10 @@ void DrawTextField(struct Framebuffer *fb, struct TextField *tf) {
     // draw filler text
 	if(!tf->write_focus && tf->inital_state && tf->draw_initial_placeholder_string) {
 		// TODO: pass the string color to the DrawTextButton
-		DrawString(fb, *tf->font, "placeholder", (int)rec_center.x, (int)rec_center.y, tf->text_color);
+		DrawString(fb, *tf->font, "placeholder", (int)rec_center.x, (int)rec_center.y, tf->text_color, 0, 0, fb->width, fb->height);
 	}
 	else {
-		DrawString(fb, *tf->font, tf->text, (int)tf->x + 5, (int)rec_center.y, tf->text_color);
+		DrawString(fb, *tf->font, tf->text, (int)tf->x + 5, (int)rec_center.y, tf->text_color, 0, 0, fb->width, fb->height);
 	}
 }
 

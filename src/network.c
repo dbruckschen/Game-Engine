@@ -1,5 +1,6 @@
 #include "network.h"
 
+
 bool InitializeWinsock(int major_version, int minor_version, WSADATA *wsa_data) {
 	int error = 0;
 	

@@ -1,10 +1,7 @@
 #ifndef MATH_H
 #define MATH_H
 
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
-#include "..\include\common.h"
+#include "common.h"
 
 #define PI 3.14159265359L
 

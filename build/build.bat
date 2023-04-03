@@ -16,3 +16,6 @@ copy engine.dll ..\demos\Chat\build
 
 copy engine.lib ..\demos\UI\build
 copy engine.dll ..\demos\UI\build
+
+copy engine.lib ..\demos\DemoParser\build
+copy engine.dll ..\demos\DemoParser\build

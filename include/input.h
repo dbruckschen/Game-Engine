@@ -1,11 +1,8 @@
-
 #ifndef INPUT_H
 #define INPUT_H
 
-#include <windows.h>
-#include <stdio.h>
 #include "mathlib.h"
-#include "linked_list.h"
+#include <windows.h>
 
 #define MAX_KEYS 105
 #define NUM_ASCII_CHARS 128
