@@ -7,6 +7,12 @@
 
 struct Framebuffer *CreateFramebuffer(HWND window) {
     struct Framebuffer *framebuffer = VirtualAlloc(0, sizeof *framebuffer, MEM_COMMIT, PAGE_READWRITE);
+
+	if(!framebuffer) {
+		printf("VirtualAlloc() failed in %s on line %d\n", __FUNCTION__, __LINE__);
+		exit(0);
+	}
+	
     RECT w_rect;
 
     GetClientRect(window, &w_rect);

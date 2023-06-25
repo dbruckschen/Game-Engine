@@ -3,12 +3,24 @@
 
 #define CHAT_MAX_BUFF_ROWS 1000
 #define CHAT_MAX_BUFF_COLS MAX_TEXTFIELD_LEN
-#define MAX_MSG_LEN_NETWORK 256
+#define MAX_USER_NAME_LENGTH 64
+#define MAX_MSG_LEN_TO_SEND 1024
+
+struct Message {
+	char send_name[MAX_USER_NAME_LENGTH];
+	char msg[MAX_MSG_LEN_TO_SEND];
+};
 
 enum AppState {
 	MENU,
 	WAIT_FOR_CONNECTION,
 	RUNNING
+};
+
+enum LAST_ACTION {
+	NO_ACTION, //init state
+	RECEIVE,
+	SEND,
 };
 
 void copy_input_to_chat_buff(char *src, int src_len, char buff[CHAT_MAX_BUFF_ROWS][CHAT_MAX_BUFF_COLS], int buff_index) {
@@ -76,7 +88,10 @@ int main(void) {
 	bool draw_placeholder_string = false;
 		
 	struct TextField chat_input_field = {0};
-	chat_input_field = InitTextField(&font, input_bar_x, input_bar_y, input_bar_w, input_bar_h, input_bar_color, border_thickness, border_color, input_bar_delay, input_bar_cursor_width, input_bar_cursor_height, input_bar_cursor_blinkrate, cursor_color, text_color, draw_placeholder_string);
+	chat_input_field = InitTextField(&font, input_bar_x, input_bar_y, input_bar_w, input_bar_h,
+									 input_bar_color, border_thickness, border_color, input_bar_delay,
+									 input_bar_cursor_width, input_bar_cursor_height, input_bar_cursor_blinkrate,
+									 cursor_color, text_color, draw_placeholder_string);
 	chat_input_field.write_focus = true;
 
 	char chat_buff[CHAT_MAX_BUFF_ROWS][CHAT_MAX_BUFF_COLS];
@@ -87,10 +102,10 @@ int main(void) {
 	u32 user_color = RGB_Color(255, 0, 0);
 	
 	// menu buttons
-	int btn_x = 200;
-	int btn_y = 200;
 	int btn_w = 100;
 	int btn_h = 20;
+	int btn_y = 200;
+	int btn_x = window_width/2 - (btn_w/2);
 	u32 btn_color = RGB_Color(34, 244, 244);
 	u32 btn_border_color = RGB_Color(50, 58, 69);
 	u32 btn_text_color = RGB_Color(0, 0, 0);
@@ -99,7 +114,13 @@ int main(void) {
 	struct Button btn_join = InitTextButton(&font, btn_text_color, btn_x, btn_y+(btn_h+20), btn_w, btn_h, "Join", btn_color, 2, btn_border_color, 0.3f);
 	//struct TextField tf_host_port = ;
 	//struct TextField tf_client_ip = ;
-	
+
+	char my_name[256] = {0};
+	char receive_name[256] = {0};
+	DWORD nSize = 256;
+	GetComputerNameA(my_name, &nSize);
+	enum LAST_ACTION last_action = NO_ACTION;
+		
 	bool running = true;
 	while(running) {
 		StartTimer(&main_timer);
@@ -139,6 +160,10 @@ int main(void) {
 				    connect_socket = 0;
 				}
 			}
+			// Update buttons.
+			// Keep the buttons in the center of the window.
+			btn_host.x = framebuffer->width/2 - (btn_host.width/2);
+			btn_join.x = btn_host.x;
 			
 			UpdateButtonStatus(&btn_host, input, main_timer.elapsed_time);
 			UpdateButtonStatus(&btn_join, input, main_timer.elapsed_time);
@@ -175,12 +200,17 @@ int main(void) {
 			if(poll_result > 0) {
 				if(connect_socketfd.revents & POLLRDNORM) {
 					// receive
-					char receive_msg[CHAT_MAX_BUFF_COLS];
-					int received_bytes = recv(connect_socket, receive_msg, CHAT_MAX_BUFF_COLS, 0);
+					char receive_msg_buffer[CHAT_MAX_BUFF_COLS];
+					int received_bytes = recv(connect_socket, receive_msg_buffer, CHAT_MAX_BUFF_COLS, 0);
 					printf("received %d bytes\n", received_bytes);
 
 					assert(current_buff_line <= CHAT_MAX_BUFF_ROWS);
-					copy_input_to_chat_buff(receive_msg, received_bytes, chat_buff, current_buff_line);
+
+					struct Message *receive_msg = {0};
+					receive_msg = (struct Message *)receive_msg_buffer;
+					StringCpy(receive_name, receive_msg->send_name, ARRAY_LEN(receive_msg->send_name));
+					
+					copy_input_to_chat_buff(receive_msg_buffer, received_bytes, chat_buff, current_buff_line);
 
 					current_buff_line++;
 
@@ -188,18 +218,24 @@ int main(void) {
 					chat_input_field.text[0] = '\0';
 					chat_input_field.text_current_len = 0;
 					chat_input_field.cursor.pos = chat_input_field.cursor.initial_pos;
+
+					last_action = SEND;
 				}
 			} 
 
 			if(input.keyboard[enter_key].down) {
-				char msg[MAX_MSG_LEN_NETWORK];
-				int msg_len = chat_input_field.text_current_len;
-			
-				if(chat_input_field.text_current_len >= MAX_MSG_LEN_NETWORK) {
-					msg_len = MAX_MSG_LEN_NETWORK-1;
+				char msg[MAX_MSG_LEN_TO_SEND];
+
+				// send user name + message
+				StringCpy(msg, my_name, ARRAY_LEN(my_name));
+
+				int msg_len = chat_input_field.text_current_len + ARRAY_LEN(my_name);
+				StringCpy(msg + ARRAY_LEN(my_name), chat_input_field.text, msg_len);
+				
+				if(chat_input_field.text_current_len >= MAX_MSG_LEN_TO_SEND) {
+					msg_len = MAX_MSG_LEN_TO_SEND-1;
 				}
 			
-				StringCpy(msg, chat_input_field.text, msg_len);
 				int bytes_send = send(connect_socket, msg, msg_len, 0);
 				printf("send %d bytes\n", bytes_send);
 			
@@ -213,12 +249,21 @@ int main(void) {
 				chat_input_field.text[0] = '\0';
 				chat_input_field.text_current_len = 0;
 				chat_input_field.cursor.pos = chat_input_field.cursor.initial_pos;
-			}
 
+				last_action = SEND;
+			}
 
 			// draw stuff
 			for(int i = 0; i < current_buff_line; i++) {
-				DrawString(framebuffer, font, "Admin:", chat_text_x, chat_text_y+(i*12), user_color, 0, 0, framebuffer->width, framebuffer->height);
+				switch(last_action) {
+				case SEND:
+					DrawString(framebuffer, font, my_name, chat_text_x, chat_text_y+(i*12), user_color, 0, 0, framebuffer->width, framebuffer->height);	
+					break;
+					
+				case RECEIVE:
+					DrawString(framebuffer, font, receive_name, chat_text_x, chat_text_y+(i*12), user_color, 0, 0, framebuffer->width, framebuffer->height);
+					break;
+				}
 				DrawString(framebuffer, font, chat_buff[i], chat_text_x + 50, chat_text_y+(i * 12), text_color, 0, 0, framebuffer->width, framebuffer->height);
 			}
 
