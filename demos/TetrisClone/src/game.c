@@ -2,9 +2,8 @@
 
 void GameInit(struct GameState *gs) {
 	InitRandomNumberGen();
-	GenerateShapeOrder(gs->random_shape_queue);
-	gs->current_shape_queue_index = 0;
-
+	GenerateShapeOrder(&gs->shape_queue);
+	
 	gs->running = true;
 	gs->previous_lock_down = true;
 
@@ -76,8 +75,8 @@ void GameUpdate(struct GameState *gs) {
 	gs->move_timer += gs->timer.elapsed_time;
 
 	/* If shape queue is empty generate new  */
-	if(gs->num_shapes == NUM_QUEUE_SHAPES) {
-		GenerateShapeOrder(gs->random_shape_queue);
+	if(gs->shape_queue.current_index == gs->shape_queue.length) {
+		GenerateShapeOrder(&gs->shape_queue);
 	}
 	
 	/* spawn shape after certain time, timer starts only if previous shape locked */
@@ -89,7 +88,7 @@ void GameUpdate(struct GameState *gs) {
 			/* find unused shape */
 			if(!gs->shapes[i].alive) {
 				/* get next shape out of shape queue */
-				enum ShapeType next_type = gs->random_shape_queue[gs->current_shape_queue_index++];
+				enum ShapeType next_type = GetNextShapeFromQueue(&gs->shape_queue);
 				SpawnShape(gs->shapes, &gs->num_shapes, next_type);
 				break;
 			}
@@ -110,7 +109,63 @@ void GameUpdate(struct GameState *gs) {
 		printf("right\n");
 	}
 
-	/* lock shape if it reached the ground or had collision with other shapes*/
+	// every shape consists of exactly 4 blocks/ rectangles.
+	int block_count_of_shapes = SHAPE_BLOCK_COUNT;
+	struct Shape current_shape = {0};
+	struct Block block[SHAPE_BLOCK_COUNT] = {0};
+	int current_shape_index = 0;
+	
+	for(int i_shape = 0; i_shape < gs->num_shapes; i_shape++) {
+		// There can only be one locked shape at a time.
+		// So we need to find this shape and check for collision with
+		// every other shape.
+		if(!gs->shapes[i_shape].locked) {
+			current_shape = gs->shapes[i_shape];
+			current_shape_index = i_shape;
+			
+			for(int i_block = 0; i_block < block_count_of_shapes; i_block++) {
+				int current_shape_block_x = current_shape.p[i_block].x;
+				int current_shape_block_y = current_shape.p[i_block].y;
+			
+				block[i_block] = GetShapeBlockDimensions(current_shape_block_x, current_shape_block_y);
+			}
+		}          
+	}
+	// Now we have all blocks of the current shape which is locked
+	// (The current moving one which the player controls).
+	// The next step is to check for collision of the current shape block (4 total)
+	// with all other block of shapes.
+	for(int i_shape = 0; i_shape < gs->num_shapes - 1; i_shape++) {
+		if(i_shape == current_shape_index) {
+			continue;
+		}
+			
+		for(int i_current_shape_block = 0;
+			i_current_shape_block < block_count_of_shapes;
+			i_current_shape_block++) {
+
+			v2i current_block_vec = V2I(block[i_current_shape_block].x, block[i_current_shape_block].y+TILE_SIZE);
+			int current_block_w = TILE_SIZE;
+			int current_block_h = TILE_SIZE;
+			
+			for(int i_block = 0; i_block < block_count_of_shapes; i_block++) {
+				int current_locked_shape_x = gs->shapes[i_shape].p[i_block].x;
+				int current_locked_shape_y = gs->shapes[i_shape].p[i_block].y;
+
+				struct Block locked_block = GetShapeBlockDimensions(current_locked_shape_x,
+																  current_locked_shape_y);
+				v2i locked_block_vec = V2I(locked_block.x, locked_block.y);
+										   
+				if(BBAAI(current_block_vec, current_block_w, current_block_h,
+						 locked_block_vec, locked_block.w, locked_block.h)) {
+					gs->shapes[current_shape_index].locked = true;
+					gs->previous_lock_down = true;
+				}
+			}
+		}
+	}
+	
+	/* lock shape if it reached the ground */
 	for(int i_shape = 0; i_shape < gs->num_shapes; i_shape++) {
 		for(int i_block = 0; i_block < SHAPE_BLOCK_COUNT; i_block++) {
 			if(gs->shapes[i_shape].p[i_block].y == MATRIX_HEIGHT-1 &&
@@ -123,7 +178,7 @@ void GameUpdate(struct GameState *gs) {
 	}
 
 	/* move shape every .5 sec for now */
-	if(gs->move_timer >= FALL_SPEED) {
+	if(gs->move_timer >= FALL_RATE) {
 		for(int i = 0; i < MAX_SHAPES; i++) {
 			if(gs->shapes[i].alive && !gs->shapes[i].locked) {
 				/* check if matrix square is already occupied before moving shape */
@@ -352,22 +407,41 @@ static struct Shape InitShape(enum ShapeType type) {
 }
 
 static void SpawnShape(struct Shape *shapes, int *num_shapes, enum ShapeType type) {
+	bool valid_shape = false;
+	for(int i = 0; i < NUM_SHAPE_TYPES; i++) {
+		if(type == i) {
+			valid_shape = true;
+		}
+	}
+	assert(valid_shape);
+	
 	struct Shape s = InitShape(type);
 
 	shapes[*num_shapes] = s;
 	(*num_shapes)++;
 }
 
-static void	GenerateShapeOrder(enum ShapeType *shape_queue) {
+static void GenerateShapeOrder(struct ShapeQueue *queue) {
 	int lower = 0;
 	int upper = NUM_SHAPE_TYPES-1;
-	bool shapes_drawn[7] = {0};
-
-	for(int i = 0; i < NUM_SHAPE_TYPES; i++) {
+	
+   	queue->length = NUM_SHAPE_TYPES;
+		
+	for(int i = 0; i < queue->length; i++) {
 		int next_type = GenRandomInt(lower, upper);
-		shape_queue[i] = next_type;
-		shapes_drawn[next_type] = true;
+		queue->queue[i] = next_type;
 	}
+
+	queue->current_index = 0;
+}
+
+static enum ShapeType GetNextShapeFromQueue(struct ShapeQueue *queue) {
+	assert(queue->current_index < queue->length);
+	
+	enum ShapeType type = queue->queue[queue->current_index];
+	queue->current_index++;
+
+	return type;
 }
 
 static struct Point MatrixStartCoords() {
@@ -385,4 +459,31 @@ static struct Point MatrixWidthHeight() {
 	result.y = MATRIX_HEIGHT * TILE_SIZE;
 
 	return result;
+}
+
+static struct Point GridCoordsToScreenCoords(int x, int y) {
+	int offset_matrix_x = WINDOW_WIDTH/2 - (MATRIX_WIDTH*TILE_SIZE)/2;
+	int offset_matrix_y = WINDOW_HEIGHT/2 - (MATRIX_HEIGHT*TILE_SIZE)/2;
+
+	int x_rec = (x * TILE_SIZE) + offset_matrix_x + 1;
+	int y_rec = (y * TILE_SIZE) + offset_matrix_y + 1;
+	
+	struct Point p = {0};
+	p.x = x_rec;
+	p.y = y_rec;
+
+	return p;
+}
+
+static struct Block GetShapeBlockDimensions(int x, int y) {
+	struct Block b;
+
+	struct Point p = GridCoordsToScreenCoords(x, y);
+	
+	b.x = p.x;
+	b.y = p.y;
+	b.w = x + TILE_SIZE;
+	b.h = y + TILE_SIZE;
+
+	return b;
 }

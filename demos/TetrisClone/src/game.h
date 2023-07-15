@@ -11,6 +11,10 @@
 #include "linked_list.h"
 //#include "allocator.h"
 
+#include <stdio.h>
+#include <assert.h>
+
+
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 800
 
@@ -30,10 +34,10 @@
 #define GREEN 0x8EC85A
 #define RED 0xE11A21
 
-#define FALL_SPEED .5
+#define FALL_RATE .05
 #define GENERATION_TIME .2
 #define LOCK_DOWN_TIMER .5
-#define SOFT_DROP_SPEED (FALL_SPEED/20.0)
+#define SOFT_DROP_SPEED (FALL_RATE/20.0)
 #define HARD_DROP_SPEED 0.0001
 #define AUTO_REPEAD_TIME 0.3
 
@@ -57,12 +61,26 @@ struct Point {
 	int y;
 };
 
+struct Block {
+	int x;
+	int y;
+	int w;
+	int h;
+};
+
 struct Shape {
 	bool alive;
+	// Grid/Matrixs position not screen coordinates
 	struct Point p[SHAPE_BLOCK_COUNT];
 	enum ShapeType type;
 	u32 color;
 	bool locked;
+};
+
+struct ShapeQueue {
+	enum ShapeType queue[NUM_QUEUE_SHAPES];
+	int length;
+	int current_index;
 };
 
 struct GameState {
@@ -76,14 +94,13 @@ struct GameState {
 	struct Shape shapes[MAX_SHAPES];
 	int num_shapes;
 
+	struct ShapeQueue shape_queue;
+
 	struct Window window;
 	struct Framebuffer *fbuff;
 	struct Input input;
 	struct Timer timer;
 	struct Font font;
-
-	enum ShapeType random_shape_queue[NUM_QUEUE_SHAPES];
-	int current_shape_queue_index;
 };
 
 static int matrix[MATRIX_HEIGHT][MATRIX_WIDTH];
@@ -100,9 +117,12 @@ static void DrawShape(struct Framebuffer *fbuff, struct Shape *shape);
 static struct Point InitPoint(int x, int y);
 static struct Shape InitShape(enum ShapeType type);
 static void SpawnShape(struct Shape *shapes, int *num_shapes, enum ShapeType type);
-static void GenerateShapeOrder(enum ShapeType *shape_queue);
+static void GenerateShapeOrder(struct ShapeQueue *queue);
 
 static struct Point MatrixStartCoords();
 static struct Point MatrixWidthHeight();
+static struct Point GridCoordsToScreenCoords(int x, int y);
+static struct Block GetShapeBlockDimensions(int x, int y);
+static enum ShapeType GetNextShapeFromQueue(struct ShapeQueue *queue);
 
 #endif
